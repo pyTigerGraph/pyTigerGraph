@@ -15,6 +15,8 @@ preInstalledResult = graph.runInstalledQuery("getKeywords", {"vid":"Jazz", "vid.
 
 print(preInstalledResult["results"])
 
+print(graph.getSchema())
+
 
 """ Interpreted Queries - Work in Progress
 query = "INTERPRET QUERY getArticle () FOR GRAPH MyGraph {start = {Article.*}; result = SELECT all FROM start-()->Article:all; PRINT result;}"
