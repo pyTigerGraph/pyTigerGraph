@@ -27,6 +27,6 @@ Returns the JSON of all possible endpoints on the server
 #### getToken(secret, lifetime)
 Returns a API token given a secret key and lifetime of the token, which are both strings.
 
-### TODO:
+## TODO:
 #### runInterpretedQuery(query) 
 Currently does not work, due to what appears to be an internal server issue.
