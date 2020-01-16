@@ -1,0 +1,1 @@
+from pyTigerGraph.pyTigerGraph import TigerGraphConnection
