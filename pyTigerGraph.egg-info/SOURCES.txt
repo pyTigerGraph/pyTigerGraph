@@ -1,0 +1,10 @@
+README.rst
+setup.cfg
+setup.py
+pyTigerGraph/__init__.py
+pyTigerGraph/pyTigerGraph.py
+pyTigerGraph.egg-info/PKG-INFO
+pyTigerGraph.egg-info/SOURCES.txt
+pyTigerGraph.egg-info/dependency_links.txt
+pyTigerGraph.egg-info/requires.txt
+pyTigerGraph.egg-info/top_level.txt
