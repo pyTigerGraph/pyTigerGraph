@@ -3,7 +3,7 @@ import json
 
 class TigerGraphConnection:
     def __init__(self, ipAddress="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", apiPort = "9000", interpreterPort = "14240", apiToken="", serverAccessPort = "8123"):
-        self.url = ipAddress
+        self.url = ipAddress`
         self.username = username
         self.password = password
         self.graphname = graphname
@@ -12,9 +12,9 @@ class TigerGraphConnection:
         self.apiToken = "Bearer "+apiToken
         self.serverAccessPort = serverAccessPort
     
-    def runInstalledQuery(self, queryName, params):
+    def runInstalledQuery(self, queryName, params, timeout=16, sizeLimit=32000000):
         queryUrl = self.url+":"+self.apiPort+"/query/"+self.graphname+"/"+queryName
-        response = requests.request("GET", queryUrl,  params=params, headers={'Authorization':self.apiToken})
+        response = requests.request("GET", queryUrl,  params=params, headers={'Authorization':self.apiToken, "RESPONSE-LIMIT":str(sizeLimit), "GSQL-TIMEOUT":str(timeout)})
         return json.loads(response.text)
 
     def runInterpretedQuery(self, query):
