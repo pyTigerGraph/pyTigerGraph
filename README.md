@@ -25,7 +25,7 @@ conn = tg.TigerGraphConnection(ipAddress="YOUR_URL_HERE", graphname="YOUR_GRAPH_
 print(conn.getToken("YOUR_SECRET_HERE", "1000000")) #uses a lifetime of 1,000,000 seconds
 ```
 
-## runInstalledQuery("queryName", {params})
+## runInstalledQuery("queryName", {params}, timeout, sizeLimit)
 This method runs a query installed on the database and returns the JSON response. The query name is a string and then a dictionary of parameters. Once you instantiate a connection, the code looks something like this:
 ```py
 params = {"vid":"Jazz", "vid.type":"Article"} #query's arguments
@@ -35,6 +35,7 @@ preInstalledResult = conn.runInstalledQuery(queryName, params)
 
 print(preInstalledResult)
 ```
+The timeout and sizeLimit parameters are optional, and should be passed in as integers. The default timeout is 16 seconds and the default sizeLimit is 320000 bytes.
 
 ## getEndpoints()
 This method returns a JSON response of all possible endpoints on the server. To run, simply:
