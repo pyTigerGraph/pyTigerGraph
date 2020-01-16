@@ -1,4 +1,4 @@
-README.rst
+README.md
 setup.cfg
 setup.py
 pyTigerGraph/__init__.py
