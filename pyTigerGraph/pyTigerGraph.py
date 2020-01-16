@@ -3,7 +3,7 @@ import json
 
 class TigerGraphConnection:
     def __init__(self, ipAddress="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", apiPort = "9000", interpreterPort = "14240", apiToken="", serverAccessPort = "8123"):
-        self.url = ipAddress`
+        self.url = ipAddress
         self.username = username
         self.password = password
         self.graphname = graphname
