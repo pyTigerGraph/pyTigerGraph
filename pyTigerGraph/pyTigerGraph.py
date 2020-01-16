@@ -12,9 +12,9 @@ class TigerGraphConnection:
         self.apiToken = "Bearer "+apiToken
         self.serverAccessPort = serverAccessPort
     
-    def runInstalledQuery(self, queryName, params):
+    def runInstalledQuery(self, queryName, params, timeout=16, sizeLimit=32000000):
         queryUrl = self.url+":"+self.apiPort+"/query/"+self.graphname+"/"+queryName
-        response = requests.request("GET", queryUrl,  params=params, headers={'Authorization':self.apiToken})
+        response = requests.request("GET", queryUrl,  params=params, headers={'Authorization':self.apiToken, "RESPONSE-LIMIT":str(sizeLimit), "GSQL-TIMEOUT":str(timeout)})
         return json.loads(response.text)
 
     def runInterpretedQuery(self, query):
