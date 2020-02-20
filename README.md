@@ -5,7 +5,7 @@ Once the package installs, we can import it and instantiate a connection to your
 ```py
 import pyTigerGraph as tg
 
-conn = tg.TigerGraphConnection(ipAddress="YOUR_URL_HERE", graphname="YOUR_GRAPH_NAME", username="YOUR_USERNAME", password"YOUR_PASSWORD", apiToken="YOUR_API_TOKEN_HERE")
+conn = tg.TigerGraphConnection(ipAddress="YOUR_URL_HERE", graphname="YOUR_GRAPH_NAME", username="YOUR_USERNAME", password="YOUR_PASSWORD", apiToken="YOUR_API_TOKEN_HERE")
 ```
 There are a few more options when instantiating the connection that aren't in the example above. They are:
 * apiPort (default 9000): This should be changed if your server has been configured to use a different port for the REST++ endpoint service that TigerGraph provides
