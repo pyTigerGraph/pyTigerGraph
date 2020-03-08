@@ -23,6 +23,11 @@ class TigerGraphConnection:
         response = requests.request("POST", queryUrl, data=query, auth=(self.username, self.password), headers={'Authorization':self.apiToken})
         return response.text
 
+    def runEcho(self):
+        queryUrl = self.url+":"+self.apiPort+"/echo"
+        response = requests.request("GET", queryUrl, headers={'Authorization':self.apiToken})
+        return json.loads(response.text)
+
     def getEndpoints(self):
         queryUrl = self.url+":"+self.apiPort+"/endpoints"
         response = requests.request("GET", queryUrl, headers={'Authorization':self.apiToken})
