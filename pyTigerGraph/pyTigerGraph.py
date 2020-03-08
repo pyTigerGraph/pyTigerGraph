@@ -37,6 +37,11 @@ class TigerGraphConnection:
         queryUrl = self.url+":"+self.apiPort+"/requesttoken?secret="+secret+"&lifetime="+lifetime      
         response = requests.request("GET", queryUrl, auth=(self.username, self.password))
         return json.loads(response.text)
+    
+    def deleteToken(self, secret):
+        queryUrl = self.url+":"+self.apiPort+"/requesttoken?secret="+secret      
+        response = requests.request("DELETE", queryUrl, auth=(self.username, self.password))
+        return json.loads(response.text)
 '''
     def getSchema(self):
          queryUrl = self.url+":"+self.serverAccessPort+"/gsql/schema?graph="+self.graphname
