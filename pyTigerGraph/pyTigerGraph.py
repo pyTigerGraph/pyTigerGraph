@@ -17,11 +17,21 @@ class TigerGraphConnection:
         response = requests.request("GET", queryUrl,  params=params, headers={'Authorization':self.apiToken, "RESPONSE-LIMIT":str(sizeLimit), "GSQL-TIMEOUT":str(timeout)})
         return json.loads(response.text)
 
+    def getVertices(self, vertexType, count="true"):
+        queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/vertices/"+vertexType
+        response = requests.request("GET", queryUrl, count=count, headers={'Authorization':self.apiToken})
+        return json.loads(response.text)
+
     def runInterpretedQuery(self, query):
         queryUrl = self.url+":"+self.interpreterPort+"/gsqlserver/interpreted_query"
         print(queryUrl)
         response = requests.request("POST", queryUrl, data=query, auth=(self.username, self.password), headers={'Authorization':self.apiToken})
         return response.text
+
+    def runEcho(self):
+        queryUrl = self.url+":"+self.apiPort+"/echo"
+        response = requests.request("GET", queryUrl, headers={'Authorization':self.apiToken})
+        return json.loads(response.text)
 
     def getEndpoints(self):
         queryUrl = self.url+":"+self.apiPort+"/endpoints"
@@ -31,6 +41,16 @@ class TigerGraphConnection:
     def getToken(self, secret, lifetime):
         queryUrl = self.url+":"+self.apiPort+"/requesttoken?secret="+secret+"&lifetime="+lifetime      
         response = requests.request("GET", queryUrl, auth=(self.username, self.password))
+        return json.loads(response.text)
+    
+    def deleteToken(self, secret):
+        queryUrl = self.url+":"+self.apiPort+"/requesttoken?secret="+secret      
+        response = requests.request("DELETE", queryUrl, auth=(self.username, self.password))
+        return json.loads(response.text)
+
+    def refreshToken(self, secret, token, lifetime):
+        queryUrl = self.url+":"+self.apiPort+"/requesttoken?secret="+secret+"&token="+token+"&lifetime="+lifetime
+        response = requests.request("PUT", queryUrl, auth=(self.username, self.password))
         return json.loads(response.text)
 '''
     def getSchema(self):
