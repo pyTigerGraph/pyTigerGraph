@@ -26,7 +26,7 @@ class TigerGraphConnection:
         queryUrl = self.url+":"+self.interpreterPort+"/gsqlserver/interpreted_query"
         print(queryUrl)
         response = requests.request("POST", queryUrl, data=query, auth=(self.username, self.password), headers={'Authorization':self.apiToken})
-        return response.text
+        return json.loads(response.text)
 
     def runEcho(self):
         queryUrl = self.url+":"+self.apiPort+"/echo"
