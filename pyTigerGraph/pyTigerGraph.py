@@ -17,9 +17,12 @@ class TigerGraphConnection:
         response = requests.request("GET", queryUrl,  params=params, headers={'Authorization':self.apiToken, "RESPONSE-LIMIT":str(sizeLimit), "GSQL-TIMEOUT":str(timeout)})
         return json.loads(response.text)
 
-    def getVertices(self, vertexType, count="true"):
-        queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/vertices/"+vertexType
-        response = requests.request("GET", queryUrl, count=count, headers={'Authorization':self.apiToken})
+    def getVertices(self, vertexType, limit="false"):
+        if limit != "false":
+            queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/vertices/"+vertexType+"?limit="+limit
+        else:
+            queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/vertices/"+vertexType
+        response = requests.request("GET", queryUrl, headers={'Authorization':self.apiToken})
         return json.loads(response.text)
 
     def runInterpretedQuery(self, query):
