@@ -29,6 +29,32 @@ class TigerGraphConnection:
         response = requests.request("GET", queryUrl, headers={'Authorization':self.apiToken})
         return json.loads(response.text)
 
+    def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, limit=None):
+        if edgeType == None and targetVertexType == None and targetVertexId == None:
+            if limit != None:
+                queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/"+sourceVertexType+"/"+sourceVertexId
+            else:
+                queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/"+sourceVertexType+"/"+sourceVertexId+"?limit="+limit
+        elif edgeType == None and (targetVertexId != None or targetVertexType != None):
+            raise "Must specify edgeType if using targetVertex"
+        elif edgeType != None and targetVertexType == None and targetVertexId == None:
+            if limit != None:
+                queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/"+sourceVertexType+"/"+sourceVertexId+"/"+edgeType
+            else:
+                queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/"+sourceVertexType+"/"+sourceVertexId+"/"+edgeType+"?limit="+limit
+        elif edgeType != None and targetVertexType != None and targetVertexId == None:
+            if limit != None:
+                queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/"+sourceVertexType+"/"+sourceVertexId+"/"+edgeType+"/"+targetVertexType
+            else:
+                queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/"+sourceVertexType+"/"+sourceVertexId+"/"+edgeType+"/"+targetVertexType+"?limit="+limit
+        else:
+            if limit != None:
+                queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/"+sourceVertexType+"/"+sourceVertexId+"/"+edgeType+"/"+targetVertexType+"/"+targetVertexId
+            else:
+                queryUrl = self.url+":"+self.apiPort+"/graph/"+self.graphname+"/"+sourceVertexType+"/"+sourceVertexId+"/"+edgeType+"/"+targetVertexType+"/"+targetVertexId+"?limit="+limit
+        response = requests.request("GET", queryUrl, headers={'Authorization':self.apiToken})
+        return json.loads(response.text)
+        
     def runInterpretedQuery(self, query):
         queryUrl = self.url+":"+self.interpreterPort+"/gsqlserver/interpreted_query"
         print(queryUrl)
