@@ -1,9 +1,9 @@
 Metadata-Version: 2.1
 Name: pyTigerGraph
-Version: 0.0.4.7.6
+Version: 0.0.5
 Summary: Library to connect to TigerGraph databases
 Home-page: https://github.com/parkererickson/pyTigerGraph
-Author: Parker Erickson
+Author: Parker Erickson / TigerGraph
 Author-email: parker.erickson30@gmail.com
 License: MIT
 Download-URL: https://github.com/parkererickson/pyTigerGraph/archive/v_01.tar.gz
@@ -56,7 +56,7 @@ Description: # Getting Started
         
 Keywords: TigerGraph,Graph Database
 Platform: UNKNOWN
-Classifier: Development Status :: 3 - Alpha
+Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Developers
 Classifier: Topic :: Software Development :: Build Tools
 Classifier: License :: OSI Approved :: MIT License
