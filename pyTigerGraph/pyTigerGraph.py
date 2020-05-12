@@ -184,7 +184,7 @@ class TigerGraphConnection:
         """Returns the details of vertex type."""
         for vt in self.getSchema()["VertexTypes"]:
             if vt["Name"] == vertexType:
-                return vt;
+                return vt
         return {} # Vertex type was not found
 
     def getVertexCount(self, vertexType, where=""):
@@ -449,7 +449,7 @@ class TigerGraphConnection:
         ets = self.getSchema()["EdgeTypes"]
         for et in ets:
             if et["Name"] == typeName:
-                return et;
+                return et
         return {}
 
     def getEdgeCount(self, sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where=""):
