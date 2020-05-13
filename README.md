@@ -152,13 +152,13 @@ Data is upserted:
 
 The `attributes` argument is expected to be a dictionary in this format:
 
-```json
+```python
 {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}
 ```
 
 Example:
 
-```json
+```python
 {"name": "Thorin", "points": (10, "+"), "bestScore": (67, "max")}
 ```
 
@@ -172,7 +172,7 @@ Upserts multiple vertices (of the same type).
 See the description of `upsertVertex` for generic information.
 
 The `vertices` argument is expected to be a list of tuples in this format:
-```json
+```python
 [
   (<vertex_id>, {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}),
   ⋮
@@ -180,7 +180,7 @@ The `vertices` argument is expected to be a list of tuples in this format:
 ```
 
 Example:
-```json
+```python
 [
    (2, {"name": "Balin", "points": (10, "+"), "bestScore": (67, "max")}),
    (3, {"name": "Dwalin", "points": (7, "+"), "bestScore": (35, "max")}),
@@ -306,12 +306,12 @@ Data is upserted:
 - If it's already in the graph, it is updated with the values specified in the request. An optional [operator](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data) controls how the attributes are updated.
 
 The `attributes` argument is expected to be a dictionary in this format:
-```json
+```python
 {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}
 ```
 
 Example:
-```json
+```python
 {"visits": (1482, "+"), "max_duration": (371, "max")}
 ```
 
@@ -328,7 +328,7 @@ Upserts multiple edges (of the same type).
 See the description of `upsertEdge` for generic information.
 
 The `edges` argument is expected to be a list in of tuples in this format:
-```json
+```python
 [
   (<source_vertex_id>, <target_vertex_id>, {<attribute_name>: <attribute_value>|(<attribute_name>, <operator>), …})
   ⋮
@@ -336,7 +336,7 @@ The `edges` argument is expected to be a list in of tuples in this format:
 ```
 
 Example:
-```json
+```python
 [
   (17, "home_page", {"visits": (35, "+"), "max_duration": (93, "max")}),
   (42, "search", {"visits": (17, "+"), "max_duration": (41, "max")}),
