@@ -4,25 +4,25 @@ import re
 
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
-    
+
     Where possible, error message and code returned by TigerGraph will be used.
     """
-    
+
     def __init__(self, message, code=None):
         self.message = message
         self.code = code
 
 class TigerGraphConnection:
     """Python wrapper for TigerGraph's REST++ API.
-    
+
     Common arguments used in methods:
-    vertexType, sourceVertexType, targetVertexType -- The name of a vertex type in the graph
-                                                      Use `getVertexTypes()` to fetch the list of vertex types currently in the graph
-    vertexId, sourceVertexId, targetVertexId       -- The PRIMARY_ID of a vertex instance (of the appropriate data type)
-    edgeType                                       -- The name of the edge type in the graph
-                                                      Use `getEdgeTypes()` to fetch the list of edge types currently in the graph
+    vertexType, sourceVertexType, targetVertexType -- The name of a vertex type in the graph.
+                                                      Use `getVertexTypes()` to fetch the list of vertex types currently in the graph.
+    vertexId, sourceVertexId, targetVertexId       -- The PRIMARY_ID of a vertex instance (of the appropriate data type).
+    edgeType                                       -- The name of the edge type in the graph.
+                                                      Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
-    
+
     def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort = "9000", studioPort = "14240", gsqlPort = "8123", apiToken=""):
         self.host = host
         self.username = username
@@ -46,15 +46,15 @@ class TigerGraphConnection:
 
     def _req(self, method, url, authMode="pwd", headers=None, data=None, resKey="results", skipCheck=False, params=None):
         """Generic REST++ API request
-        
+
         Arguments:
-        method    -- HTTP method, currently one of GET, POST, DELETE or PUT
-        url       -- complete RESP++ API URL including path and parameters
-        authMode  -- authentication mode, one of 'pwd' (default) or 'token'
-        headers   -- standard HTTP request headers (dict)
-        data      -- request payload, typically a JSON document
-        resKey    -- the JSON subdocument to be returned, default is 'result'
-        skipCheck -- skip error checking? Some endpoints return error to indicate that the requested action is not applicable; a problem, but not really an error.
+        - `method`:    HTTP method, currently one of GET, POST, DELETE or PUT
+        - `url`:       Complete RESP++ API URL including path and parameters
+        - `authMode`:  Authentication mode, one of 'pwd' (default) or 'token'
+        - `headers`:   Standard HTTP request headers (dict)
+        - `data`:      Request payload, typically a JSON document
+        - `resKey`:    the JSON subdocument to be returned, default is 'result'
+        - `skipCheck`: Skip error checking? Some endpoints return error to indicate that the requested action is not applicable; a problem, but not really an error.
         """
         if self.debug:
             print(method + " " + url + (" => " + data if data else ""))
@@ -71,9 +71,9 @@ class TigerGraphConnection:
         if method == "POST":
             _data = data
         else:
-            _data = None    
+            _data = None
         res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params)
-        
+
         if self.debug:
             print(res.url)
         if res.status_code != 200:
@@ -91,25 +91,25 @@ class TigerGraphConnection:
 
     def _get(self, url, authMode="pwd", headers=None, resKey="results", skipCheck=False, params=None):
         """Generic GET method
-        
+
         For argument details, see `_req`.
         """
         return self._req("GET", url, authMode, headers, None, resKey, skipCheck, params)
-    
+
     def _post(self, url, authMode="pwd", headers=None, data=None, resKey="results", skipCheck=False, params=None):
         """Generic GET method
-        
+
         For argument details, see `_req`.
         """
         return self._req("POST", url, authMode, headers, data, resKey, skipCheck, params)
-    
+
     def _delete(self, url):
         """Generic GET method
-        
+
         For argument details, see `_req`.
         """
         return self._req("DELETE", url)
-    
+
     def _upsertAttrs(self, attributes):
         """Transforms attributes (provided as a table) into a hierarchy as expect by the upsert functions"""
         if not isinstance(attributes, dict):
@@ -122,12 +122,12 @@ class TigerGraphConnection:
             else:
                 vals[attr] = {"value": val}
         return vals
-    
+
     # Schema related functions =================================================
 
     def _getUDTs(self):
         """Retrieves all User Defined Types (UDTs) of the graph.
-        
+
         Endpoint:      GET /gsqlserver/gsql/udtlist
         Documentation: Not documented publicly
         """
@@ -135,9 +135,9 @@ class TigerGraphConnection:
 
     def getSchema(self, udts=True):
         """Retrieves the schema (all vertex and edge type and - if not disabled - the User Defined Type details) of the graph.
-        
+
         Calls `_getUDTs()` if udts=True (default).
-        
+
         Endpoint:      GET /gsqlserver/gsql/schema
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema
         """
@@ -163,7 +163,7 @@ class TigerGraphConnection:
 
     def upsertData(self, data):
         """Upserts data (vertices and edges) from a JSON document or equivalent object structure.
-        
+
         Endpoint:      POST /gsqlserver/gsql/schema
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema
         """
@@ -181,7 +181,7 @@ class TigerGraphConnection:
         return ret
 
     def getVertexType(self, vertexType):
-        """Returns the details of vertex type."""
+        """Returns the details of the specified vertex type."""
         for vt in self.getSchema()["VertexTypes"]:
             if vt["Name"] == vertexType:
                 return vt
@@ -189,12 +189,12 @@ class TigerGraphConnection:
 
     def getVertexCount(self, vertexType, where=""):
         """Return the number of vertices.
-        
+
         Uses:
-        - `vertexType` = "*", (`where` cannot be specified): vertex count of all vertex types
-        - `vertexType` is specified only: vertex count of the given type
-        - `vertexType` and `where` are specified: vertex count of the given type after filtered by `where` condition
-        
+        - If `vertexType` = "*": vertex count of all vertex types (`where` cannot be specified in this case)
+        - If `vertexType` is specified only: vertex count of the given type
+        - If `vertexType` and `where` are specified: vertex count of the given type after filtered by `where` condition(s)
+
         For valid values of `where` condition, see https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
 
         Endpoint:      GET /graph/{graph_name}/vertices
@@ -219,40 +219,49 @@ class TigerGraphConnection:
 
     def upsertVertex(self, vertexType, vertexId, attributes=None):
         """Upserts a vertex.
-        
+
         Data is upserted:
         - If vertex is not yet present in graph, it will be created.
-        - If it's already in the graph, it is updated with the values specified in the request.
-        
+        - If it's already in the graph, its attributes are updated with the values specified in the request. An optional operator controls how the attributes are updated.
+
         The `attributes` argument is expected to be a dictionary in this format:
-        {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}
+            {<attribute_name>: <attribute_value>|(<attribute_name>, <operator>), …}
+
+        Example:
+            {"name": "Thorin", points: (10, "+"), "bestScore": (67, "max")}
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
-        
+
         Endpoint:      POST /graph
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
         """
         if not isinstance(attributes, dict):
             return None
         vals = self._upsertAttrs(attributes)
         data = json.dumps({"vertices": {vertexType: {vertexId: vals}}})
         return self._post(self.restppUrl +  "/graph/" + self.graphname, data=data)[0]["accepted_vertices"]
-    
+
     def upsertVertices(self, vertexType, vertices):
         """Upserts multiple vertices (of the same type).
-        
+
         See the description of `upsertVertex` for generic information.
-        
-        The `vertices` argument is expected to be a list in of tuples in this format:
-        [
-          {<vertex_id>, {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}
-          ⋮
-        ]
+
+        The `vertices` argument is expected to be a list of tuples in this format:
+            [
+                (<vertex_id>, {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}),
+                ⋮
+            ]
+
+        Example:
+            [
+               (2, {"name": "Balin", "points": (10, "+"), "bestScore": (67, "max")}),
+               (3, {"name": "Dwalin", "points": (7, "+"), "bestScore": (35, "max")})
+            ]
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
-        
+
         Endpoint:      POST /graph
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
         """
         if not isinstance(vertices, list):
             return None
@@ -265,20 +274,20 @@ class TigerGraphConnection:
 
     def getVertices(self, vertexType, select="", where="", limit="", sort="", timeout=0):
         """Retrieves vertices of the given vertex type.
-        
+
         Arguments:
-        select -- Comma separated list of vertex attributes to be retrieved or omitted
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-        where  -- Comma separated list of conditions that are all applied on each vertex attributes
-                  The conditions are in logical conjunction (i.e. they are "AND'ed" together) 
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        limit  -- Maximum number of vertex instances to be returned (after sorting)
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        sort   -- Comma separated list of attributes the results should be sorted by
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-                  
-        NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments
-              Use `getVerticesById` if you need to retrieve by vertex ID
+        - `select`: Comma separated list of vertex attributes to be retrieved or omitted.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+        - `where`:  Comma separated list of conditions that are all applied on each vertex' attributes.
+                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+        - `limit`:  Maximum number of vertex instances to be returned (after sorting).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`    Comma separated list of attributes the results should be sorted by.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+
+        NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
+              Use `getVerticesById` if you need to retrieve by vertex ID.
 
         Endpoint:      GET /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
@@ -303,10 +312,10 @@ class TigerGraphConnection:
 
     def getVerticesById(self, vertexType, vertexIds):
         """Retrieves vertices of the given vertex type, identified by their ID.
-        
+
         Arguments
-        vertexIds -- a single vertex ID or a list of vertex IDs
- 
+        - `vertexIds`: A single vertex ID or a list of vertex IDs.
+
         Endpoint:      GET /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
         """
@@ -329,8 +338,8 @@ class TigerGraphConnection:
         """Returns vertex attribute statistics.
 
         Arguments:
-        vertexTypes -- A single vertex type name or a list of vertex types names or '*' for all vertex types
-        skipNA      -- Skip those vertices that do not have attributes or none of their attributes have statistics gathered
+        vertexTypes -- A single vertex type name or a list of vertex types names or '*' for all vertex types.
+        skipNA      -- Skip those non-applicable vertices that do not have attributes or none of their attributes have statistics gathered.
 
         Endpoint:      POST /builtins
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_vertex_attr
@@ -357,30 +366,30 @@ class TigerGraphConnection:
             else:
                 res = res["results"]
                 for r in res:
-                    ret[r["v_type"]] = r["attributes"] 
+                    ret[r["v_type"]] = r["attributes"]
         return ret
 
     def delVertices(self, vertexType, where="", limit="", sort="", permanent=False, timeout=0):
         """Deletes vertices from graph.
-        
-        Arguments:
-        where     -- Comma separated list of conditions that are all applied on each vertex attributes
-                     The conditions are in logical conjunction (i.e. they are "AND'ed" togerther)
-                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        limit     -- Maximum number of vertex instances to be returned (after sorting)
-                     Must be used with `sort`
-                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        sort      -- Comma separated list of attributes the results should be sorted by
-                     Must be used with `limit`
-                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-        permanent -- If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared
-        timeout   -- Time allowed for successful execution (0 = no limit, default)
 
-        NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments
-              Use `delVerticesById` if you need to delete by vertex ID
+        Arguments:
+        - `where`:     Comma separated list of conditions that are all applied on each vertex' attributes.
+                       The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                       See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+        - `limit`:     Maximum number of vertex instances to be returned (after sorting).
+                       See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+                       Must be used with `sort`.
+        - `sort`       Comma separated list of attributes the results should be sorted by.
+                       See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+                       Must be used with `limit`.
+        - `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared.
+        - `timeout`:   Time allowed for successful execution (0 = no limit, default).
+
+        NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
+              Use `delVerticesById` if you need to delete by vertex ID.
 
         Returns: The actual number of vertices deleted
-        
+
         Endpoint:      DELETE /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices
         """
@@ -401,17 +410,17 @@ class TigerGraphConnection:
 
     def delVerticesById(self, vertexType, vertexIds, permanent=False, timeout=0):
         """Deletes vertices from graph identified by their ID.
-        
+
         Arguments:
-        vertexIds -- a single vertex ID or a list of vertex IDs
-        permanent -- If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared
-        timeout   -- Time allowed for successful execution (0 = no limit, default)
-        
+        - `vertexIds`: A single vertex ID or a list of vertex IDs.
+        - `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared.
+        - `timeout`:   Time allowed for successful execution (0 = no limit, default).
+
         Returns: The actual number of vertices deleted
-        
+
         Endpoint:      DELETE /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices
-        """ 
+        """
         if not vertexIds:
             raise TigerGraphException("No vertex ID was not specified.", None)
         vids = []
@@ -434,7 +443,6 @@ class TigerGraphConnection:
 
     # Edge related functions ===================================================
 
-    # Get a list of all edge types (names only, no details)
     def getEdgeTypes(self):
         """Returns the list of edge type names of the graph."""
         ret = []
@@ -443,7 +451,6 @@ class TigerGraphConnection:
             ret.append(et["Name"])
         return ret
 
-    # Get edge type details
     def getEdgeType(self, typeName):
         """Returns the details of vertex type."""
         ets = self.getSchema()["EdgeTypes"]
@@ -454,15 +461,19 @@ class TigerGraphConnection:
 
     def getEdgeCount(self, sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where=""):
         """Return the number of edges.
-        
+
+        Arguments
+        - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
+                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
         Uses:
-        - `edgeType` = "*" (no other arguments can be specified): edge count of all edge types
-        - `edgeType` is specified only: edge count of the given edge type
-        - `sourceVertexType`, `edgeType`, `targetVertexType` are specified: edge count of the given edge type between source and target vertex types
-        - `sourceVertexType`, `sourceVertexId` are specified: edge count of all edge types from the given vertex instance
-        - `sourceVertexType`, `sourceVertexId`, `edgeType` are specified: edge count of all edge types from the given vertex instance
-        - `sourceVertexType`, `sourceVertexId`, `edgeType`, `where` are specified: the edge count of the given edge type after filtered by `where` condition
-        
+        - If `edgeType` = "*": edge count of all edge types (no other arguments can be specified in this case).
+        - If `edgeType` is specified only: edge count of the given edge type.
+        - If `sourceVertexType`, `edgeType`, `targetVertexType` are specified: edge count of the given edge type between source and target vertex types.
+        - If `sourceVertexType`, `sourceVertexId` are specified: edge count of all edge types from the given vertex instance.
+        - If `sourceVertexType`, `sourceVertexId`, `edgeType` are specified: edge count of all edge types from the given vertex instance.
+        - If `sourceVertexType`, `sourceVertexId`, `edgeType`, `where` are specified: the edge count of the given edge type after filtered by `where` condition.
+
         If `targetVertexId` is specified, then `targetVertexType` must also be specified.
         If `targetVertexType` is specified, then `edgeType` must also be specified.
 
@@ -497,7 +508,7 @@ class TigerGraphConnection:
                 + '}'
             res = self._post(self.restppUrl + "/builtins/" + self.graphname, "token", data=data)
         if len(res) == 1 and res[0]["e_type"] == edgeType:
-            return res[0]["count"]        
+            return res[0]["count"]
         ret = {}
         for r in res:
             ret[r["e_type"]] = r["count"]
@@ -505,21 +516,24 @@ class TigerGraphConnection:
 
     def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes={}):
         """Upserts an edge.
-        
+
         Data is upserted:
         - If edge is not yet present in graph, it will be created (see special case below).
         - If it's already in the graph, it is updated with the values specified in the request.
-        
+
         The `attributes` argument is expected to be a dictionary in this format:
-        {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}
+            {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}
+
+        Example:
+            {"visits": (1482, "+"), "max_duration": (371, "max")}
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
 
         Note: If operator is "vertex_must_exist" then edge will only be created if both vertex exists in graph.
               Otherwise missing vertices are created with the new edge.
-        
+
         Endpoint:      POST /graph
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
         """
         if not isinstance(attributes, dict):
             return None
@@ -529,19 +543,25 @@ class TigerGraphConnection:
 
     def upsertEdges(self, sourceVertexType, edgeType, targetVertexType, edges):
         """Upserts multiple edges (of the same type).
-        
+
         See the description of `upsertEdge` for generic information.
-        
+
         The `edges` argument is expected to be a list in of tuples in this format:
         [
-          {<source_vertex_id>, ,target_vertex_id>, {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}
+          (<source_vertex_id>, <target_vertex_id>, {<attribute_name>: <attribute_value>|(<attribute_name>, <operator>), …})
           ⋮
         ]
 
+        Example:
+            [
+              (17, "home_page", {"visits": (35, "+"), "max_duration": (93, "max")}),
+              (42, "search", {"visits": (17, "+"), "max_duration": (41, "max")}),
+            ]
+
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
-        
+
         Endpoint:      POST /graph
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
         """
         if not isinstance(edges, list):
             return None
@@ -551,7 +571,7 @@ class TigerGraphConnection:
         for e in edges:
             vals = self._upsertAttrs(e[2])
             # fromVertexId
-            if e[0] not in l1: 
+            if e[0] not in l1:
                 l1[e[0]] = {}
             l2 = l1[e[0]]
             # edgeType
@@ -569,22 +589,22 @@ class TigerGraphConnection:
 
     def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
         """Retrieves edges of the given edge type.
-        
+
         Only `sourceVertexType` and `sourceVertexId` are required.
         If `targetVertexId` is specified, then `targetVertexType` must also be specified.
         If `targetVertexType` is specified, then `edgeType` must also be specified.
-        
+
         Arguments:
-        select -- Comma separated list of edge attributes to be retrieved or omitted
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-        where  -- Comma separated list of conditions that are all applied on each edge attributes
-                  The conditions are in logical conjunction (i.e. they are "AND'ed" together) 
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        limit  -- Maximum number of edge instances to be returned (after sorting)
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        sort   -- Comma separated list of attributes the results should be sorted by
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-                  
+        - `select`: Comma separated list of edge attributes to be retrieved or omitted.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+        - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
+                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+        - `limit`:  Maximum number of edge instances to be returned (after sorting).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`    Comma separated list of attributes the results should be sorted by.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+
         Endpoint:      GET /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
         """
@@ -646,25 +666,26 @@ class TigerGraphConnection:
             else:
                 res = res["results"]
                 for r in res:
-                    ret[r["e_type"]] = r["attributes"] 
+                    ret[r["e_type"]] = r["attributes"]
         return ret
 
     def delEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, where="", limit="", sort="", timeout=0):
         """Deletes edges from the graph.
-        
+
         Only `sourceVertexType` and `sourceVertexId` are required.
         If `targetVertexId` is specified, then `targetVertexType` must also be specified.
         If `targetVertexType` is specified, then `edgeType` must also be specified.
-        
+
         Arguments:
-        where  -- Comma separated list of conditions that are all applied on each edge attributes
-                  The conditions are in logical conjunction (i.e. they are "AND'ed" together) 
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        limit  -- Maximum number of edge instances to be returned (after sorting)
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        sort   -- Comma separated list of attributes the results should be sorted by
-                  See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-                  
+        - `where`:   Comma separated list of conditions that are all applied on each edge's attributes.
+                     The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+        - `limit`:   Maximum number of edge instances to be returned (after sorting).
+                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`     Comma separated list of attributes the results should be sorted by.
+                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+        - `timeout`: Time allowed for successful execution (0 = no limit, default).
+
         Endpoint:      DELETE /graph/{/graph_name}/edges
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-edges
         """
@@ -695,16 +716,16 @@ class TigerGraphConnection:
     # Query related functions ==================================================
 
     def runInstalledQuery(self, queryName, params=None, timeout=16000, sizeLimit=32000000):
-        """Runs a installed query.
-        
+        """Runs an installed query.
+
         The query must be already created and installed in the graph.
         Use `getEndpoints(dynamic=True)` or GraphStudio to find out the generated endpoint URL of the query, but only the query name needs to be specified here.
-        
+
         Arguments:
-        params    -- A string of param1=value1&param2=value2 format or a dictionary
-        timeout   -- Maximum duration for successful query execution
-        sizeLimit -- Maximum size of response (in bytes)
-        
+        - `params`:    A string of param1=value1&param2=value2 format or a dictionary.
+        - `timeout`:   Maximum duration for successful query execution.
+        - `sizeLimit`: Maximum size of response (in bytes).
+
         Endpoint:      POST /query/{graph_name}/<query_name>
         Documentation: https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query
         """
@@ -712,14 +733,14 @@ class TigerGraphConnection:
 
     def runInterpretedQuery(self, queryText, params=None):
         """Runs an interpreted query.
-        
+
         You must provide the query text in this format:
             INTERPRET QUERY (<params>) FOR GRAPH <graph_name> {
                <statements>
             }'
 
         Arguments:
-        params    -- A string of param1=value1&param2=value2 format or a dictionary
+        - `params`:    A string of param1=value1&param2=value2 format or a dictionary.
 
         Endpoint:      POST /gsqlserver/interpreted_query
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query
@@ -730,12 +751,12 @@ class TigerGraphConnection:
 
     def getToken(self, secret, lifetime=None):
         """Requests an authorisation token.
-        
+
         Arguments:
-        secret   -- Generated in gsql using `CREATE SECRET`
-                    See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
-        lifetime -- Duration of token validity (in secs, default 30 days = 2,592,000 secs)
-        
+        - `secret`:   Generated in GSQL using `CREATE SECRET`.
+                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
+        - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
+
         Endpoint:      GET /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken
         """
@@ -745,9 +766,13 @@ class TigerGraphConnection:
 
     def refreshToken(self, secret, token, lifetime):
         """Extends a tokens lifetime.
-        
-        See `getToken` for details
-        
+
+        Arguments:
+        - `secret`:   Generated in GSQL using `CREATE SECRET`.
+                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
+        - `token`:    The token requested earlier.
+        - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
+
         Endpoint:      PUT /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#refreshing-tokens
         """
@@ -757,9 +782,12 @@ class TigerGraphConnection:
 
     def deleteToken(self, secret, token):
         """Deletes a token.
-        
-        See `getToken` for details
-        
+
+        Arguments:
+        - `secret`:   Generated in GSQL using `CREATE SECRET`.
+                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
+        - `token`:    The token requested earlier.
+
         Endpoint:      DELETE /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#deleting-tokens
         """
@@ -771,7 +799,7 @@ class TigerGraphConnection:
 
     def echo(self):
         """Pings the database.
-        
+
         Expected return value is "Hello GSQL"
 
         Endpoint:      GET /echo  and  POST /echo
@@ -783,10 +811,10 @@ class TigerGraphConnection:
         """Lists the RESP++ endpoints and their parameters.
 
         Arguments:
-        builtin -- TigerGraph provided REST++ endpoints
-        dymamic -- Endpoints for user installed queries
-        static  -- Static endpoints
-        
+        - `builtin -- TigerGraph provided REST++ endpoints.
+        - `dymamic -- Endpoints for user installed queries.
+        - `static  -- Static endpoints.
+
         If none of the above arguments are specified, all endpoints are listed
 
         Endpoint:      GET /endpoints
@@ -817,8 +845,6 @@ class TigerGraphConnection:
         if sta:
             ret.update(self._get(url + "static=true", resKey=None))
         return ret
-
-    # 
 
     def getStatistics(self, seconds=10, segment=10):
         """Retrieves real-time query performance statistics over the given time period.
@@ -854,7 +880,7 @@ class TigerGraphConnection:
 
     def getVer(self, component="product", full=False):
         """Gets the version information of specific component
-        
+
         Get the full list of components using `getVersion`.
         """
         ret = ""
