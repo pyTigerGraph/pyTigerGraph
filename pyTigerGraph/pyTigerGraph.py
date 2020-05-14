@@ -24,18 +24,18 @@ class TigerGraphConnection:
     """
 
     def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort = "9000", studioPort = "14240", gsqlPort = "8123", apiToken=""):
-        self.host = host
-        self.username = username
-        self.password = password
-        self.graphname = graphname
+        self.host       = host
+        self.username   = username
+        self.password   = password
+        self.graphname  = graphname
         self.restppPort = restppPort
-        self.restppUrl = self.host + ":" + self.restppPort
-        self.gsqlPort = gsqlPort
-        self.gsqlUrl = self.host + ":" + self.gsqlPort
+        self.restppUrl  = self.host + ":" + self.restppPort
+        self.gsqlPort   = gsqlPort
+        self.gsqlUrl    = self.host + ":" + self.gsqlPort
         self.studioPort = studioPort
-        self.apiToken = "Bearer " + apiToken
+        self.apiToken   = "Bearer " + apiToken
         self.authHeader = {'Authorization':self.apiToken}
-        self.debug = True
+        self.debug      = False
 
     # Private functions ========================================================
 
@@ -849,6 +849,12 @@ class TigerGraphConnection:
     def getStatistics(self, seconds=10, segment=10):
         """Retrieves real-time query performance statistics over the given time period.
 
+        Arguments:
+        - `seconds`:  The duration of statistic collection period (the last n seconds before the function call).
+        - `segments`: The number of segments of the latency distribution (shown in results as LatencyPercentile).
+                      By default, segments is 10, meaning the percentile range 0-100% will be divided into ten equal segments: 0%-10%, 11%-20%, etc.
+                      Segments must be [1, 100].
+
         Endpoint:      GET /statistics
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-statistics
         """
@@ -881,6 +887,9 @@ class TigerGraphConnection:
     def getVer(self, component="product", full=False):
         """Gets the version information of specific component
 
+        Arguments:
+        - `component`: One of TigerGraph's components (e.g. product, gpe, gse).
+
         Get the full list of components using `getVersion`.
         """
         ret = ""
@@ -894,6 +903,24 @@ class TigerGraphConnection:
             return ret.group().strip("_")
         else:
             raise TigerGraphException("\"" + component + "\" is not a valid component.", None)
+
+    def getLicenseInfo(self):
+        """Returns the expiration date and remaining days of the license.
+
+        In case of evaluation/trial deployment, an information message and -1 remaining days are returned.
+        """
+        res = self._get(self.restppUrl + "/showlicenseinfo", resKey=None, skipCheck=True)
+        ret = {}
+        if not res["error"]:
+            ret["message"]        = res["message"]
+            ret["expirationDate"] = res["results"][0]["Expiration date"]
+            ret["daysRemaining"]  = res["results"][0]["Days remaining"]
+        elif "code" in res and res["code"] == "REST-5000":
+            ret["message"]        = "This instance does not have a valid enterprise license. Is this a trial version?"
+            ret["daysRemaining"]  = -1
+        else:
+            raise TigerGraphException(res["message"], res["code]"])
+        return ret
 
     # A tale from the Loop
 
