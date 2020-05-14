@@ -108,7 +108,7 @@ Returns the details of a specific User Defined Type.
 
 Upserts data (vertices and edges) from a JSON document or equivalent object structure.
 
-Documentation: [POST /gsqlserver/gsql/schema](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema)
+Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data)
 
 ## Vertex related functions
 
@@ -136,7 +136,9 @@ Uses:
 - If `vertexType` is specified only: vertex count of the given type
 - If `vertexType` and `where` are specified: vertex count of the given type after filtered by `where` condition(s)
 
-See [documentation](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter) for valid values of `where` condition. 
+See [documentation](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter) for valid values of `where` condition.
+
+Returns: A dictionary of `<vertex_type>: <vertex_count>` pairs.
 
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices) and
 [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_vertex_number)
@@ -161,6 +163,8 @@ Example:
 ```python
 {"name": "Thorin", "points": (10, "+"), "bestScore": (67, "max")}
 ```
+
+Returns: a single number of accepted (successfully upserted) vertices (0 or 1).
 
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
@@ -187,6 +191,8 @@ Example:
 ]
 ```
 
+Returns: a single number of accepted (successfully upserted) vertices (0 or positive integer).
+
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
 ### getVertices
@@ -195,12 +201,12 @@ Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in
 Retrieves vertices of the given vertex type.
 
 Arguments:
-- [`select`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select): Comma separated list of vertex attributes to be retrieved or omitted. 
+- [`select`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select): Comma separated list of vertex attributes to be retrieved or omitted.
 - [`where`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter): Comma separated list of conditions that are all applied on each vertex' attributes.
     The conditions are in [logical conjunction](https://en.wikipedia.org/wiki/Logical_conjunction) (i.e. they are "AND'ed" together).
 - [`limit`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit): Maximum number of vertex instances to be returned (after sorting).
 - [`sort`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort): Comma separated list of attributes the results should be sorted by.
-          
+
 NOTE: The primary ID of a vertex instance is **NOT** an attribute, thus cannot be used in above arguments.
       Use [`getVerticesById`](#getVerticesById) if you need to retrieve by vertex ID.
 
@@ -213,7 +219,7 @@ Retrieves vertices of the given vertex type, identified by their ID.
 
 Arguments
 - `vertexIds`: A single vertex ID or a list of vertex IDs.
- 
+
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices)
 
 ### getVertexStats
@@ -243,7 +249,7 @@ Arguments:
 NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
       Use [`delVerticesById`](#delVerticesById) if you need to delete by vertex ID.
 
-Returns: The actual number of vertices deleted
+Returns: A single number of vertices deleted.
 
 Documentation: [DELETE /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices)
 
@@ -257,7 +263,7 @@ Arguments:
 - `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared.
 - `timeout`: Time allowed for successful execution (0 = no limit, default).
 
-Returns: The actual number of vertices deleted.
+Returns: A single number of vertices deleted.
 
 Documentation: [DELETE /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices)
 
@@ -276,7 +282,7 @@ Returns the details of vertex type.
 ### getEdgeCount
 `getEdgeCount(sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where="")`
 
-Return the number of edges.
+Returns the number of edges.
 
 Arguments:
 - [`where`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter): Comma separated list of conditions that are all applied on each edge's attributes.
@@ -292,6 +298,8 @@ Uses:
 
 If `targetVertexId` is specified, then `targetVertexType` must also be specified.
 If `targetVertexType` is specified, then `edgeType` must also be specified.
+
+Returns: A dictionary of `<edge_type>: <edge_count>` pairs.
 
 Documentation: [GET /graph/{graph_name}/edges](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges) and
                [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_number)
@@ -314,6 +322,8 @@ Example:
 ```python
 {"visits": (1482, "+"), "max_duration": (371, "max")}
 ```
+
+Returns: a single number of accepted (successfully upserted) edges (0 or 1).
 
 Note: If operator is "vertex_must_exist" then edge will only be created if both vertex exists in graph.
       Otherwise missing vertices are created with the new edge.
@@ -343,6 +353,8 @@ Example:
 ]
 ```
 
+Returns: a single number of accepted (successfully upserted) edges (0 or positive integer).
+
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
 ### getEdges
@@ -355,12 +367,12 @@ If `targetVertexId` is specified, then `targetVertexType` must also be specified
 If `targetVertexType` is specified, then `edgeType` must also be specified.
 
 Arguments:
-- [`select`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select): Comma separated list of edge attributes to be retrieved or omitted. 
+- [`select`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select): Comma separated list of edge attributes to be retrieved or omitted.
 - [`where`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter): Comma separated list of conditions that are all applied on each edge's attributes.
     The conditions are in [logical conjunction](https://en.wikipedia.org/wiki/Logical_conjunction) (i.e. they are "AND'ed" together).
 - [`limit`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit): Maximum number of edge instances to be returned (after sorting).
 - [`sort`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort): Comma separated list of attributes the results should be sorted by.
-          
+
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices)
 
 ### getEdgeStats
@@ -389,7 +401,9 @@ Arguments:
 - [`limit`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit): Maximum number of edge instances to be returned (after sorting).
 - [`sort`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort): Comma separated list of attributes the results should be sorted by.
 - `timeout`: Time allowed for successful execution (0 = no limit, default).
-          
+
+Returns: A dictionary of `<edge_type>: <deleted_edge_count>` pairs.
+
 Documentation: [DELETE /graph/{/graph_name}/edges](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-edges)
 
 ## Query related functions
@@ -429,13 +443,18 @@ Documentation: [POST /gsqlserver/interpreted_query](https://docs.tigergraph.com/
 ## Token management
 
 ### getToken
-`getToken(secret, lifetime=None)`
+`getToken(secret, setToken=True, lifetime=None)`
 
 Requests an authorisation token.
 
+This function returns a token only if [RESP++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
+
 Arguments:
-- `secret`: Generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
+- `secret`: The secret (string) generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
+- `setToken`: Set the connection's API token to the new value (default: true).
 - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
+
+Returns: a tuple of `(<new_token>, <exporation_timestamp_unixtime>, <expiration_timestamp_ISO8601>)`. Return value can be ignored.
 
 Documentation: [GET /requesttoken](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken)
 
@@ -445,7 +464,7 @@ Documentation: [GET /requesttoken](https://docs.tigergraph.com/dev/restpp-api/re
 Extends a tokens lifetime.
 
 Arguments:
-- `secret`: Generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
+- `secret`: The secret (string) generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
 - `token`: The token requested earlier.
 - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
 
@@ -457,7 +476,7 @@ Documentation: [PUT /requesttoken](https://docs.tigergraph.com/dev/restpp-api/re
 Deletes a token.
 
 Arguments:
-- `secret`: Generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
+- `secret`: The secret (string) generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
 - `token`: The token requested earlier.
 
 Documentation: [DELETE /requesttoken](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#deleting-tokens)
@@ -518,7 +537,7 @@ Get the full list of components using [`getVersion`](#getVersion).
 `getLicenseInfo()`
 
 Returns the expiration date and remaining days of the license.
-        
+
 In case of evaluation/trial deployment, an information message and -1 remaining days are returned.
 
 ## Compatibility

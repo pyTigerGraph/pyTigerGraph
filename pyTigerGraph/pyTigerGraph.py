@@ -1,6 +1,7 @@
 import requests
 import json
 import re
+from datetime import datetime
 
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
@@ -34,7 +35,7 @@ class TigerGraphConnection:
         self.gsUrl      = self.host + ":" + self.gsPort
         self.apiToken   = "Bearer " + apiToken
         self.authHeader = {'Authorization':self.apiToken}
-        self.debug      = False
+        self.debug      = True
 
     # Private functions ========================================================
 
@@ -43,13 +44,13 @@ class TigerGraphConnection:
         if "error" in res and res["error"]:
             raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
 
-    def _req(self, method, url, authMode="pwd", headers=None, data=None, resKey="results", skipCheck=False, params=None):
+    def _req(self, method, url, authMode="token", headers=None, data=None, resKey="results", skipCheck=False, params=None):
         """Generic REST++ API request
 
         Arguments:
         - `method`:    HTTP method, currently one of GET, POST, DELETE or PUT
         - `url`:       Complete RESP++ API URL including path and parameters
-        - `authMode`:  Authentication mode, one of 'pwd' (default) or 'token'
+        - `authMode`:  Authentication mode, one of 'token' (default) or 'pwd'
         - `headers`:   Standard HTTP request headers (dict)
         - `data`:      Request payload, typically a JSON document
         - `resKey`:    the JSON subdocument to be returned, default is 'result'
@@ -88,21 +89,21 @@ class TigerGraphConnection:
             print(res[resKey])
         return res[resKey]
 
-    def _get(self, url, authMode="pwd", headers=None, resKey="results", skipCheck=False, params=None):
+    def _get(self, url, authMode="token", headers=None, resKey="results", skipCheck=False, params=None):
         """Generic GET method
 
         For argument details, see `_req`.
         """
         return self._req("GET", url, authMode, headers, None, resKey, skipCheck, params)
 
-    def _post(self, url, authMode="pwd", headers=None, data=None, resKey="results", skipCheck=False, params=None):
+    def _post(self, url, authMode="token", headers=None, data=None, resKey="results", skipCheck=False, params=None):
         """Generic GET method
 
         For argument details, see `_req`.
         """
         return self._req("POST", url, authMode, headers, data, resKey, skipCheck, params)
 
-    def _delete(self, url):
+    def _delete(self, url, authMode="token"):
         """Generic GET method
 
         For argument details, see `_req`.
@@ -130,7 +131,7 @@ class TigerGraphConnection:
         Endpoint:      GET /gsqlserver/gsql/udtlist
         Documentation: Not documented publicly
         """
-        return self._get(self.gsUrl + "/gsqlserver/gsql/udtlist?graph=" + self.graphname)
+        return self._get(self.gsUrl + "/gsqlserver/gsql/udtlist?graph=" + self.graphname, authMode="pwd")
 
     def getSchema(self, udts=True):
         """Retrieves the schema (all vertex and edge type and - if not disabled - the User Defined Type details) of the graph.
@@ -140,7 +141,7 @@ class TigerGraphConnection:
         Endpoint:      GET /gsqlserver/gsql/schema
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema
         """
-        res = self._get(self.gsUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname)
+        res = self._get(self.gsUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname, authMode="pwd")
         if not udts:
             return res
         res["UDTs"] = self._getUDTs()
@@ -163,7 +164,7 @@ class TigerGraphConnection:
     def upsertData(self, data):
         """Upserts data (vertices and edges) from a JSON document or equivalent object structure.
 
-        Endpoint:      POST /gsqlserver/gsql/schema
+        Endpoint:      POST /graph
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema
         """
         if not isinstance(data, str):
@@ -187,7 +188,7 @@ class TigerGraphConnection:
         return {} # Vertex type was not found
 
     def getVertexCount(self, vertexType, where=""):
-        """Return the number of vertices.
+        """Returns the number of vertices.
 
         Uses:
         - If `vertexType` = "*": vertex count of all vertex types (`where` cannot be specified in this case)
@@ -195,6 +196,8 @@ class TigerGraphConnection:
         - If `vertexType` and `where` are specified: vertex count of the given type after filtered by `where` condition(s)
 
         For valid values of `where` condition, see https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+
+        Returns: A dictionary of <vertex_type>: <vertex_count> pairs.
 
         Endpoint:      GET /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
@@ -205,10 +208,10 @@ class TigerGraphConnection:
         if where:
             if vertexType == "*":
                 raise TigerGraphException("VertexType cannot be \"*\" if where condition is specified.", None)
-            res = self._get(self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType + "?count_only=true&filter=" + where, "token")
+            res = self._get(self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType + "?count_only=true&filter=" + where)
         else:
             data = '{"function":"stat_vertex_number","type":"' + vertexType + '"}'
-            res = self._post(self.restppUrl + "/builtins/" + self.graphname, "token", data=data)
+            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data)
         if len(res) == 1 and res[0]["v_type"] == vertexType:
             return res[0]["count"]
         ret = {}
@@ -230,6 +233,8 @@ class TigerGraphConnection:
             {"name": "Thorin", points: (10, "+"), "bestScore": (67, "max")}
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
+
+        Returns: a single number of accepted (successfully upserted) vertices (0 or 1).
 
         Endpoint:      POST /graph
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
@@ -258,6 +263,8 @@ class TigerGraphConnection:
             ]
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
+
+        Returns: a single number of accepted (successfully upserted) vertices (0 or positive integer).
 
         Endpoint:      POST /graph
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
@@ -355,7 +362,7 @@ class TigerGraphConnection:
         ret = {}
         for vt in vts:
             data = '{"function":"stat_vertex_attr","type":"' + vt + '"}'
-            res = self._post(self.restppUrl + "/builtins/" + self.graphname, "token", data=data, resKey=None, skipCheck=True)
+            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data, resKey=None, skipCheck=True)
             if res["error"]:
                 if "stat_vertex_attr is skipped" in res["message"]:
                     if not skipNA:
@@ -387,7 +394,7 @@ class TigerGraphConnection:
         NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
               Use `delVerticesById` if you need to delete by vertex ID.
 
-        Returns: The actual number of vertices deleted
+        Returns: A single number of vertices deleted.
 
         Endpoint:      DELETE /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices
@@ -415,7 +422,7 @@ class TigerGraphConnection:
         - `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared.
         - `timeout`:   Time allowed for successful execution (0 = no limit, default).
 
-        Returns: The actual number of vertices deleted
+        Returns: A single number of vertices deleted.
 
         Endpoint:      DELETE /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices
@@ -478,6 +485,8 @@ class TigerGraphConnection:
 
         For valid values of `where` condition, see https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
 
+        Returns: A dictionary of <edge_type>: <edge_count> pairs.
+ 
         Endpoint:      GET /graph/{graph_name}/edges
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges
         Endpoint:      POST /builtins
@@ -505,7 +514,7 @@ class TigerGraphConnection:
                 + (',"from_type":"' + sourceVertexType + '"' if sourceVertexType else '')  \
                 + (',"to_type":"' + targetVertexType + '"' if targetVertexType else '')  \
                 + '}'
-            res = self._post(self.restppUrl + "/builtins/" + self.graphname, "token", data=data)
+            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data)
         if len(res) == 1 and res[0]["e_type"] == edgeType:
             return res[0]["count"]
         ret = {}
@@ -527,6 +536,8 @@ class TigerGraphConnection:
             {"visits": (1482, "+"), "max_duration": (371, "max")}
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
+
+        Returns: a single number of accepted (successfully upserted) edges (0 or 1).
 
         Note: If operator is "vertex_must_exist" then edge will only be created if both vertex exists in graph.
               Otherwise missing vertices are created with the new edge.
@@ -558,6 +569,8 @@ class TigerGraphConnection:
             ]
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
+
+        Returns: a single number of accepted (successfully upserted) edges (0 or positive integer).
 
         Endpoint:      POST /graph
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
@@ -637,8 +650,8 @@ class TigerGraphConnection:
         """Returns edge attribute statistics.
 
         Arguments:
-        edgeTypes -- A single edge type name or a list of edges types names or '*' for all edges types
-        skipNA    -- Skip those edges that do not have attributes or none of their attributes have statistics gathered
+        - `edgeTypes`: A single edge type name or a list of edges types names or '*' for all edges types
+        - `skipNA`:    Skip those edges that do not have attributes or none of their attributes have statistics gathered
 
         Endpoint:      POST /builtins
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_attr
@@ -655,7 +668,7 @@ class TigerGraphConnection:
         ret = {}
         for et in ets:
             data = '{"function":"stat_edge_attr","type":"' + et + '","from_type":"*","to_type":"*"}'
-            res = self._post(self.restppUrl + "/builtins/" + self.graphname, "token", data=data, resKey=None, skipCheck=True)
+            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data, resKey=None, skipCheck=True)
             if res["error"]:
                 if "stat_edge_attr is skiped" in res["message"]:
                     if not skipNA:
@@ -684,6 +697,8 @@ class TigerGraphConnection:
         - `sort`     Comma separated list of attributes the results should be sorted by.
                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
         - `timeout`: Time allowed for successful execution (0 = no limit, default).
+
+        Returns: A dictionary of <edge_type>: <deleted_edge_count> pairs.
 
         Endpoint:      DELETE /graph/{/graph_name}/edges
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-edges
@@ -728,7 +743,7 @@ class TigerGraphConnection:
         Endpoint:      POST /query/{graph_name}/<query_name>
         Documentation: https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query
         """
-        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, authMode="token", headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
+        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
 
     def runInterpretedQuery(self, queryText, params=None):
         """Runs an interpreted query.
@@ -744,30 +759,42 @@ class TigerGraphConnection:
         Endpoint:      POST /gsqlserver/interpreted_query
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query
         """
-        return self._post(self.gsUrl +"/gsqlserver/interpreted_query", data=queryText, params=params)
+        return self._post(self.gsUrl +"/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
 
     # Token management =========================================================
 
-    def getToken(self, secret, lifetime=None):
+    def getToken(self, secret, setToken=True, lifetime=None):
         """Requests an authorisation token.
 
+        This function returns a token only if RESP++ authentication is enabled.
+        See: https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication
+
         Arguments:
-        - `secret`:   Generated in GSQL using `CREATE SECRET`.
+        - `secret`:   The secret (string) generated in GSQL using `CREATE SECRET`.
                       See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
+        - `setToken`: Set the connection's API token to the new value (default: true).
         - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
+
+        Returns: a tuple of (<new_token>, <exporation_timestamp_unixtime>, <expiration_timestamp_ISO8601>).
+                 Return value can be ignored.
 
         Endpoint:      GET /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken
         """
-        queryUrl = self.restppUrl + "/requesttoken?secret=" + secret + ("&lifetime=" + lifetime if lifetime else "")
-        response = requests.request("GET", queryUrl, auth=(self.username, self.password))
-        return json.loads(response.text)
+        res = self._get(self.restppUrl + "/requesttoken?secret=" + secret + ("&lifetime=" + lifetime if lifetime else ""), resKey=None)
+        if not res["error"]:
+            if setToken:
+                self.apiToken = res["token"]
+            return (res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime('%Y-%m-%d %H:%M:%S'))
+        if "Endpoint is not found from url = /requesttoken" in res["message"]:
+            raise TigerGraphException("REST++ authentication is not enabled, can't generate token.", None)
+        raise TigerGraphException(res["message"],(res["code"] if "code" in res else None))
 
     def refreshToken(self, secret, token, lifetime):
         """Extends a tokens lifetime.
 
         Arguments:
-        - `secret`:   Generated in GSQL using `CREATE SECRET`.
+        - `secret`:   The secret (string) generated in GSQL using `CREATE SECRET`.
                       See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
         - `token`:    The token requested earlier.
         - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
@@ -783,7 +810,7 @@ class TigerGraphConnection:
         """Deletes a token.
 
         Arguments:
-        - `secret`:   Generated in GSQL using `CREATE SECRET`.
+        - `secret`:   The secret (string) generated in GSQL using `CREATE SECRET`.
                       See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
         - `token`:    The token requested earlier.
 
