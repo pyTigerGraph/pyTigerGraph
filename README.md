@@ -9,10 +9,9 @@ conn = tg.TigerGraphConnection(host="<hostname>", graphname="<garap_name>", user
 ```
 If your database is not using the standard ports (or they are mapped), you can use the followign arguments to specify those:
 - restppPort (default 9000): [REST++ API port](https://docs.tigergraph.com/dev/restpp-api/restpp-requests)
-- gsqlPort (default: 8123): [GSQL Server](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#gsql-server-endpoints) port
-- studioPort (default: 14240): [GraphStudio port](https://docs.tigergraph.com/ui/graphstudio/overview#TigerGraphGraphStudioUIGuide-GraphStudioOn-Premises)
+- gsPort (default: 14240): [GraphStudio port](https://docs.tigergraph.com/ui/graphstudio/overview#TigerGraphGraphStudioUIGuide-GraphStudioOn-Premises)
 
-The username and password default to the TigerGraph default username and password, which is _tigergraph_.
+The username and password default to the TigerGraph default username and password, which are _tigergraph_.
 
 The [API token](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#rest-authentication) can be obtained via the method described below.
 
@@ -491,7 +490,7 @@ Documentation: [GET /endpoints](https://docs.tigergraph.com/dev/restpp-api/built
 `getStatistics(seconds=10, segment=10)`
 
 Arguments:
-- `seconds`: The duration of statistic collection period (the last n seconds before the function call).
+- `seconds`: The duration of statistic collection period (the last _n_ seconds before the function call).
 - `segments`: The number of segments of the latency distribution (shown in results as LatencyPercentile). By default, segments is 10, meaning the percentile range 0-100% will be divided into ten equal segments: 0%-10%, 11%-20%, etc. Segments must be [1, 100].
 
 Retrieves real-time query performance statistics over the given time period.
@@ -521,3 +520,7 @@ Get the full list of components using [`getVersion`](#getVersion).
 Returns the expiration date and remaining days of the license.
         
 In case of evaluation/trial deployment, an information message and -1 remaining days are returned.
+
+## Compatibility
+
+This package has been tested with TigerGraph 2.5.2 and 2.6

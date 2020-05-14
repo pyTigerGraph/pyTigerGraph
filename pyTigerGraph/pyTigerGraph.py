@@ -23,16 +23,15 @@ class TigerGraphConnection:
                                                       Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort = "9000", studioPort = "14240", gsqlPort = "8123", apiToken=""):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort = "9000", gsPort = "14240", apiToken=""):
         self.host       = host
         self.username   = username
         self.password   = password
         self.graphname  = graphname
         self.restppPort = restppPort
         self.restppUrl  = self.host + ":" + self.restppPort
-        self.gsqlPort   = gsqlPort
-        self.gsqlUrl    = self.host + ":" + self.gsqlPort
-        self.studioPort = studioPort
+        self.gsPort     = gsPort
+        self.gsUrl      = self.host + ":" + self.gsPort
         self.apiToken   = "Bearer " + apiToken
         self.authHeader = {'Authorization':self.apiToken}
         self.debug      = False
@@ -131,7 +130,7 @@ class TigerGraphConnection:
         Endpoint:      GET /gsqlserver/gsql/udtlist
         Documentation: Not documented publicly
         """
-        return self._get(self.gsqlUrl + "/gsqlserver/gsql/udtlist?graph=" + self.graphname)
+        return self._get(self.gsUrl + "/gsqlserver/gsql/udtlist?graph=" + self.graphname)
 
     def getSchema(self, udts=True):
         """Retrieves the schema (all vertex and edge type and - if not disabled - the User Defined Type details) of the graph.
@@ -141,7 +140,7 @@ class TigerGraphConnection:
         Endpoint:      GET /gsqlserver/gsql/schema
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema
         """
-        res = self._get(self.gsqlUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname)
+        res = self._get(self.gsUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname)
         if not udts:
             return res
         res["UDTs"] = self._getUDTs()
@@ -745,7 +744,7 @@ class TigerGraphConnection:
         Endpoint:      POST /gsqlserver/interpreted_query
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query
         """
-        return self._post(self.gsqlUrl +"/gsqlserver/interpreted_query", data=queryText, params=params)
+        return self._post(self.gsUrl +"/gsqlserver/interpreted_query", data=queryText, params=params)
 
     # Token management =========================================================
 
