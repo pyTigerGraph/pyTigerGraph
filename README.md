@@ -5,15 +5,28 @@ Once the package installs, you can import it and instantiate a connection to you
 ```py
 import pyTigerGraph as tg
 
-conn = tg.TigerGraphConnection(host="<hostname>", graphname="<garap_name>", username="<username>", password="<password>", apiToken="<api_token>")
+conn = tg.TigerGraphConnection(host="<hostname>", graphname="<graph_name>", username="<username>", password="<password>", apiToken="<api_token>")
 ```
-If your database is not using the standard ports (or they are mapped), you can use the followign arguments to specify those:
+If your database is not using the standard ports (or they are mapped), you can use the following arguments to specify those:
 - restppPort (default 9000): [REST++ API port](https://docs.tigergraph.com/dev/restpp-api/restpp-requests)
 - gsPort (default: 14240): [GraphStudio port](https://docs.tigergraph.com/ui/graphstudio/overview#TigerGraphGraphStudioUIGuide-GraphStudioOn-Premises)
 
-The username and password default to the TigerGraph default username and password, which are _tigergraph_.
+## Authentication
 
-The [API token](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#rest-authentication) can be obtained via the method described below.
+If [user authentication](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#enabling-and-using-user-authentication) is enabled
+in the TigerGraph database, then `username` and `password` need to be specified when the connection is established.
+If you already have an API authorisation token, specify that one as well. Alternatively, if you know a
+[secret](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret) (created previously in the database),
+you can request a token via the [getToken](#getToken) function and use it during the session.
+
+If user authentication is not anebled, then username, password and authorisation token are not used (i.e. the database is insecure). This is only acceptable in case of development
+or study environments.
+
+The username and password default to the TigerGraph default username and password, which are _tigergraph_. In case of user authentication enabled, the password can't be _tigergraph_
+thus you need to specify the correct one. Furthermore, it is recommended not to use the _tigergraph_ user for anything other than system administration.
+Instead, [create additional users](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#creating-and-managing-users) and
+grant them the [appropriate privileges through roles](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#roles-and-privileges),
+then use those users to access the database.
 
 # The functions
 
@@ -138,7 +151,7 @@ Uses:
 
 See [documentation](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter) for valid values of `where` condition.
 
-Returns: A dictionary of `<vertex_type>: <vertex_count>` pairs.
+Returns a dictionary of `<vertex_type>: <vertex_count>` pairs.
 
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices) and
 [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_vertex_number)
@@ -164,7 +177,7 @@ Example:
 {"name": "Thorin", "points": (10, "+"), "bestScore": (67, "max")}
 ```
 
-Returns: a single number of accepted (successfully upserted) vertices (0 or 1).
+Returns a single number of accepted (successfully upserted) vertices (0 or 1).
 
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
@@ -191,7 +204,7 @@ Example:
 ]
 ```
 
-Returns: a single number of accepted (successfully upserted) vertices (0 or positive integer).
+Returns a single number of accepted (successfully upserted) vertices (0 or positive integer).
 
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
@@ -249,7 +262,7 @@ Arguments:
 NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
       Use [`delVerticesById`](#delVerticesById) if you need to delete by vertex ID.
 
-Returns: A single number of vertices deleted.
+Returns a single number of vertices deleted.
 
 Documentation: [DELETE /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices)
 
@@ -263,7 +276,7 @@ Arguments:
 - `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared.
 - `timeout`: Time allowed for successful execution (0 = no limit, default).
 
-Returns: A single number of vertices deleted.
+Returns a single number of vertices deleted.
 
 Documentation: [DELETE /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices)
 
@@ -299,7 +312,7 @@ Uses:
 If `targetVertexId` is specified, then `targetVertexType` must also be specified.
 If `targetVertexType` is specified, then `edgeType` must also be specified.
 
-Returns: A dictionary of `<edge_type>: <edge_count>` pairs.
+Returns a dictionary of `<edge_type>: <edge_count>` pairs.
 
 Documentation: [GET /graph/{graph_name}/edges](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges) and
                [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_number)
@@ -323,7 +336,7 @@ Example:
 {"visits": (1482, "+"), "max_duration": (371, "max")}
 ```
 
-Returns: a single number of accepted (successfully upserted) edges (0 or 1).
+Returns a single number of accepted (successfully upserted) edges (0 or 1).
 
 Note: If operator is "vertex_must_exist" then edge will only be created if both vertex exists in graph.
       Otherwise missing vertices are created with the new edge.
@@ -353,7 +366,7 @@ Example:
 ]
 ```
 
-Returns: a single number of accepted (successfully upserted) edges (0 or positive integer).
+Returns a single number of accepted (successfully upserted) edges (0 or positive integer).
 
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
@@ -402,7 +415,7 @@ Arguments:
 - [`sort`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort): Comma separated list of attributes the results should be sorted by.
 - `timeout`: Time allowed for successful execution (0 = no limit, default).
 
-Returns: A dictionary of `<edge_type>: <deleted_edge_count>` pairs.
+Returns a dictionary of `<edge_type>: <deleted_edge_count>` pairs.
 
 Documentation: [DELETE /graph/{/graph_name}/edges](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-edges)
 
@@ -448,25 +461,38 @@ Documentation: [POST /gsqlserver/interpreted_query](https://docs.tigergraph.com/
 Requests an authorisation token.
 
 This function returns a token only if [RESP++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
+If not, an exception will be raised.
 
 Arguments:
 - `secret`: The secret (string) generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
-- `setToken`: Set the connection's API token to the new value (default: true).
+- `setToken`: Set the connection's API token to the new value (default: `True`).
 - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
 
-Returns: a tuple of `(<new_token>, <exporation_timestamp_unixtime>, <expiration_timestamp_ISO8601>)`. Return value can be ignored.
+Returns a tuple of `(<new_token>, <exporation_timestamp_unixtime>, <expiration_timestamp_ISO8601>)`. Return value can be ignored.
+
+Note: expiration timestamp's time zone might be different from your computer's local time zone.
 
 Documentation: [GET /requesttoken](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken)
 
 ### refreshToken
-`refreshToken(secret, token, lifetime)`
+`refreshToken(secret, token=None, lifetime=2592000)`
 
-Extends a tokens lifetime.
+Extends a token's lifetime.
+
+This function works only if [RESP++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
+If not, an exception will be raised.
 
 Arguments:
 - `secret`: The secret (string) generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
-- `token`: The token requested earlier.
+- `token`: The token requested earlier. If not specified, refreshes current connection's token.
 - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
+
+Returns a tuple of `(<token>, <exporation_timestamp_unixtime>, <expiration_timestamp_ISO8601>)`. Return value can be ignored.
+Raises exception if specified token does not exists.
+
+Note:
+- New expiration timestamp will be _now + lifetime seconds_, **not** _current expiration timestamp + lifetime seconds_.
+- Expiration timestamp's time zone might be different from your computer's local time zone.
 
 Documentation: [PUT /requesttoken](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#refreshing-tokens)
 
@@ -475,9 +501,15 @@ Documentation: [PUT /requesttoken](https://docs.tigergraph.com/dev/restpp-api/re
 
 Deletes a token.
 
+This function works only if [RESP++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
+If not, an exception will be raised.
+
 Arguments:
 - `secret`: The secret (string) generated in GSQL using [`CREATE SECRET`](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret).
-- `token`: The token requested earlier.
+- `token`: The token requested earlier. If not specified, deletes current connection's token, so be careful.
+- `skipNA`: Don't raise exception if specified token does not exist.
+
+Returns `True` if deletion was successful or token did not exist but `skipNA` was `True`; raises exception otherwise.
 
 Documentation: [DELETE /requesttoken](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#deleting-tokens)
 

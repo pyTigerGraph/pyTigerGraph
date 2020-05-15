@@ -2,6 +2,7 @@ import requests
 import json
 import re
 from datetime import datetime
+import time
 
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
@@ -33,8 +34,8 @@ class TigerGraphConnection:
         self.restppUrl  = self.host + ":" + self.restppPort
         self.gsPort     = gsPort
         self.gsUrl      = self.host + ":" + self.gsPort
-        self.apiToken   = "Bearer " + apiToken
-        self.authHeader = {'Authorization':self.apiToken}
+        self.apiToken   = apiToken
+        self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug      = True
 
     # Private functions ========================================================
@@ -55,6 +56,7 @@ class TigerGraphConnection:
         - `data`:      Request payload, typically a JSON document
         - `resKey`:    the JSON subdocument to be returned, default is 'result'
         - `skipCheck`: Skip error checking? Some endpoints return error to indicate that the requested action is not applicable; a problem, but not really an error.
+        - `params`:    Request URL parameters.
         """
         if self.debug:
             print(method + " " + url + (" => " + data if data else ""))
@@ -197,7 +199,7 @@ class TigerGraphConnection:
 
         For valid values of `where` condition, see https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
 
-        Returns: A dictionary of <vertex_type>: <vertex_count> pairs.
+        Returns a dictionary of <vertex_type>: <vertex_count> pairs.
 
         Endpoint:      GET /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
@@ -234,7 +236,7 @@ class TigerGraphConnection:
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
 
-        Returns: a single number of accepted (successfully upserted) vertices (0 or 1).
+        Returns a single number of accepted (successfully upserted) vertices (0 or 1).
 
         Endpoint:      POST /graph
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
@@ -264,7 +266,7 @@ class TigerGraphConnection:
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
 
-        Returns: a single number of accepted (successfully upserted) vertices (0 or positive integer).
+        Returns a single number of accepted (successfully upserted) vertices (0 or positive integer).
 
         Endpoint:      POST /graph
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
@@ -394,7 +396,7 @@ class TigerGraphConnection:
         NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
               Use `delVerticesById` if you need to delete by vertex ID.
 
-        Returns: A single number of vertices deleted.
+        Returns a single number of vertices deleted.
 
         Endpoint:      DELETE /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices
@@ -422,7 +424,7 @@ class TigerGraphConnection:
         - `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared.
         - `timeout`:   Time allowed for successful execution (0 = no limit, default).
 
-        Returns: A single number of vertices deleted.
+        Returns a single number of vertices deleted.
 
         Endpoint:      DELETE /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices
@@ -485,7 +487,7 @@ class TigerGraphConnection:
 
         For valid values of `where` condition, see https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
 
-        Returns: A dictionary of <edge_type>: <edge_count> pairs.
+        Returns a dictionary of <edge_type>: <edge_count> pairs.
  
         Endpoint:      GET /graph/{graph_name}/edges
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges
@@ -537,7 +539,7 @@ class TigerGraphConnection:
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
 
-        Returns: a single number of accepted (successfully upserted) edges (0 or 1).
+        Returns a single number of accepted (successfully upserted) edges (0 or 1).
 
         Note: If operator is "vertex_must_exist" then edge will only be created if both vertex exists in graph.
               Otherwise missing vertices are created with the new edge.
@@ -570,7 +572,7 @@ class TigerGraphConnection:
 
         For valid values of <operator> see: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
 
-        Returns: a single number of accepted (successfully upserted) edges (0 or positive integer).
+        Returns a single number of accepted (successfully upserted) edges (0 or positive integer).
 
         Endpoint:      POST /graph
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
@@ -698,7 +700,7 @@ class TigerGraphConnection:
                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
         - `timeout`: Time allowed for successful execution (0 = no limit, default).
 
-        Returns: A dictionary of <edge_type>: <deleted_edge_count> pairs.
+        Returns a dictionary of <edge_type>: <deleted_edge_count> pairs.
 
         Endpoint:      DELETE /graph/{/graph_name}/edges
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-edges
@@ -766,7 +768,7 @@ class TigerGraphConnection:
     def getToken(self, secret, setToken=True, lifetime=None):
         """Requests an authorisation token.
 
-        This function returns a token only if RESP++ authentication is enabled.
+        This function returns a token only if RESP++ authentication is enabled. If not, an exception will be raised.
         See: https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication
 
         Arguments:
@@ -775,51 +777,84 @@ class TigerGraphConnection:
         - `setToken`: Set the connection's API token to the new value (default: true).
         - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
 
-        Returns: a tuple of (<new_token>, <exporation_timestamp_unixtime>, <expiration_timestamp_ISO8601>).
+        Returns a tuple of (<new_token>, <exporation_timestamp_unixtime>, <expiration_timestamp_ISO8601>).
                  Return value can be ignored.
+
+        Note: expiration timestamp's time zone might be different from your computer's local time zone.
 
         Endpoint:      GET /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken
         """
-        res = self._get(self.restppUrl + "/requesttoken?secret=" + secret + ("&lifetime=" + lifetime if lifetime else ""), resKey=None)
+        res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + ("&lifetime=" + str(lifetime) if lifetime else "")).text)
         if not res["error"]:
             if setToken:
-                self.apiToken = res["token"]
+                self.apiToken   = res["token"]
+                self.authHeader = {'Authorization': "Bearer " + self.apiToken}
             return (res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime('%Y-%m-%d %H:%M:%S'))
         if "Endpoint is not found from url = /requesttoken" in res["message"]:
             raise TigerGraphException("REST++ authentication is not enabled, can't generate token.", None)
         raise TigerGraphException(res["message"],(res["code"] if "code" in res else None))
 
-    def refreshToken(self, secret, token, lifetime):
-        """Extends a tokens lifetime.
+    def refreshToken(self, secret, token=None, lifetime=2592000):
+        """Extends a token's lifetime.
+
+        This function works only if RESP++ authentication is enabled. If not, an exception will be raised.
+        See: https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication
 
         Arguments:
         - `secret`:   The secret (string) generated in GSQL using `CREATE SECRET`.
                       See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
-        - `token`:    The token requested earlier.
-        - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
+        - `token`:    The token requested earlier. If not specified, refreshes current connection's token.
+        - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs) from current system timestamp.
+
+        Returns a tuple of (<token>, <exporation_timestamp_unixtime>, <expiration_timestamp_ISO8601>).
+                 Return value can be ignored.
+                 Raises exception if specified token does not exists.
+
+        Note:
+        - New expiration timestamp will be now + lifetime seconds, _not_ current expiration timestamp + lifetime seconds.
+        - Expiration timestamp's time zone might be different from your computer's local time zone.
 
         Endpoint:      PUT /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#refreshing-tokens
         """
-        queryUrl = self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token + "&lifetime=" + lifetime
-        response = requests.request("PUT", queryUrl, auth=(self.username, self.password))
-        return json.loads(response.text)
+        if not token:
+            token = self.apiToken
+        res = json.loads(requests.request("PUT", self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token + ("&lifetime=" + str(lifetime) if lifetime else "")).text)
+        if not res["error"]:
+            exp = time.time() + res["expiration"]
+            return(res["token"], int(exp), datetime.utcfromtimestamp(exp).strftime('%Y-%m-%d %H:%M:%S'))
+        if "Endpoint is not found from url = /requesttoken" in res["message"]:
+            raise TigerGraphException("REST++ authentication is not enabled, can't refresh token.", None)
+        raise TigerGraphException(res["message"],(res["code"] if "code" in res else None))
 
-    def deleteToken(self, secret, token):
+    def deleteToken(self, secret, token=None, skipNA=True):
         """Deletes a token.
+
+        This function works only if RESP++ authentication is enabled. If not, an exception will be raised.
+        See: https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication
 
         Arguments:
         - `secret`:   The secret (string) generated in GSQL using `CREATE SECRET`.
                       See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
-        - `token`:    The token requested earlier.
+        - `token`:    The token requested earlier. If not specified, deletes current connection's token, so be careful.
+        - `skipNA`:   Don't raise exception if specified token does not exist.
+
+        Returns `True` if deletion was successful or token did not exist but `skipNA` was `True`; raises exception otherwise.
 
         Endpoint:      DELETE /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#deleting-tokens
         """
-        queryUrl = self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token
-        response = requests.request("DELETE", queryUrl, auth=(self.username, self.password))
-        return json.loads(response.text)
+        if not token:
+            token = self.apiToken
+        res = json.loads(requests.request("DELETE", self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token).text)
+        if not res["error"]:
+            return True
+        if res["code"] == "REST-3300" and skipNA:
+            return True
+        if "Endpoint is not found from url = /requesttoken" in res["message"]:
+            raise TigerGraphException("REST++ authentication is not enabled, can't delete token.", None)
+        raise TigerGraphException(res["message"],(res["code"] if "code" in res else None))
 
     # Other functions ==========================================================
 
