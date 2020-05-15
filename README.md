@@ -460,7 +460,7 @@ Documentation: [POST /gsqlserver/interpreted_query](https://docs.tigergraph.com/
 
 Requests an authorisation token.
 
-This function returns a token only if [RESP++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
+This function returns a token only if [REST++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
 If not, an exception will be raised.
 
 Arguments:
@@ -479,7 +479,7 @@ Documentation: [GET /requesttoken](https://docs.tigergraph.com/dev/restpp-api/re
 
 Extends a token's lifetime.
 
-This function works only if [RESP++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
+This function works only if [REST++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
 If not, an exception will be raised.
 
 Arguments:
@@ -501,7 +501,7 @@ Documentation: [PUT /requesttoken](https://docs.tigergraph.com/dev/restpp-api/re
 
 Deletes a token.
 
-This function works only if [RESP++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
+This function works only if [REST++ authentication is enabled](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication).
 If not, an exception will be raised.
 
 Arguments:
@@ -527,7 +527,7 @@ Documentation: [GET /echo](https://docs.tigergraph.com/dev/restpp-api/built-in-e
 ### getEndpoints
 `getEndpoints(builtin=False, dynamic=False, static=False)`
 
-Lists the RESP++ endpoints and their parameters.
+Lists the REST++ endpoints and their parameters.
 
 Arguments:
 - `builtin`: TigerGraph provided REST++ endpoints.

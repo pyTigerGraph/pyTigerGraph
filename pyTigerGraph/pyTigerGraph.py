@@ -50,7 +50,7 @@ class TigerGraphConnection:
 
         Arguments:
         - `method`:    HTTP method, currently one of GET, POST, DELETE or PUT
-        - `url`:       Complete RESP++ API URL including path and parameters
+        - `url`:       Complete REST++ API URL including path and parameters
         - `authMode`:  Authentication mode, one of 'token' (default) or 'pwd'
         - `headers`:   Standard HTTP request headers (dict)
         - `data`:      Request payload, typically a JSON document
@@ -768,7 +768,7 @@ class TigerGraphConnection:
     def getToken(self, secret, setToken=True, lifetime=None):
         """Requests an authorisation token.
 
-        This function returns a token only if RESP++ authentication is enabled. If not, an exception will be raised.
+        This function returns a token only if REST++ authentication is enabled. If not, an exception will be raised.
         See: https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication
 
         Arguments:
@@ -798,7 +798,7 @@ class TigerGraphConnection:
     def refreshToken(self, secret, token=None, lifetime=2592000):
         """Extends a token's lifetime.
 
-        This function works only if RESP++ authentication is enabled. If not, an exception will be raised.
+        This function works only if REST++ authentication is enabled. If not, an exception will be raised.
         See: https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication
 
         Arguments:
@@ -831,7 +831,7 @@ class TigerGraphConnection:
     def deleteToken(self, secret, token=None, skipNA=True):
         """Deletes a token.
 
-        This function works only if RESP++ authentication is enabled. If not, an exception will be raised.
+        This function works only if REST++ authentication is enabled. If not, an exception will be raised.
         See: https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication
 
         Arguments:
@@ -869,7 +869,7 @@ class TigerGraphConnection:
         return self._get(self.restppUrl + "/echo/" + self.graphname, resKey="message")
 
     def getEndpoints(self, builtin=False, dynamic=False, static=False):
-        """Lists the RESP++ endpoints and their parameters.
+        """Lists the REST++ endpoints and their parameters.
 
         Arguments:
         - `builtin -- TigerGraph provided REST++ endpoints.
