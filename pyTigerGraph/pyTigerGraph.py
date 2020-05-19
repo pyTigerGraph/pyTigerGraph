@@ -36,7 +36,7 @@ class TigerGraphConnection:
         self.gsUrl      = self.host + ":" + self.gsPort
         self.apiToken   = apiToken
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
-        self.debug      = True
+        self.debug      = False
 
     # Private functions ========================================================
 
