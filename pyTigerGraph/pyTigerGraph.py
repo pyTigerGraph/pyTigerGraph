@@ -30,9 +30,9 @@ class TigerGraphConnection:
         self.username   = username
         self.password   = password
         self.graphname  = graphname
-        self.restppPort = restppPort
+        self.restppPort = str(restppPort)
         self.restppUrl  = self.host + ":" + self.restppPort
-        self.gsPort     = gsPort
+        self.gsPort     = str(gsPort)
         self.gsUrl      = self.host + ":" + self.gsPort
         self.apiToken   = apiToken
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
@@ -766,7 +766,7 @@ class TigerGraphConnection:
     # Token management =========================================================
 
     def getToken(self, secret, setToken=True, lifetime=None):
-        """Requests an authorisation token.
+        """Requests an authorization token.
 
         This function returns a token only if REST++ authentication is enabled. If not, an exception will be raised.
         See: https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication
