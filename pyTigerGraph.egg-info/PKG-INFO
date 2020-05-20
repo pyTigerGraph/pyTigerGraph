@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pyTigerGraph
-Version: 0.0.5.4
+Version: 0.0.5.5
 Summary: Library to connect to TigerGraph databases
 Home-page: https://github.com/parkererickson/pyTigerGraph
 Author: Parker Erickson / TigerGraph
@@ -20,19 +20,25 @@ Description: # Getting Started
         - restppPort (default 9000): [REST++ API port](https://docs.tigergraph.com/dev/restpp-api/restpp-requests)
         - gsPort (default: 14240): [GraphStudio port](https://docs.tigergraph.com/ui/graphstudio/overview#TigerGraphGraphStudioUIGuide-GraphStudioOn-Premises)
         
+        For example, in case of using a local virtual machine with the ports mapped:
+        ```py
+        conn = tg.TigerGraphConnection(host="localhost", restppPort=25900, gsPort=25240, graphname="MyGraph", username="tigergraph", password="tigergraph", apiToken="2aa016d747ede9gg6da3drslm98srfoj")
+        ```
+        
         ## Authentication
         
         If [user authentication](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#enabling-and-using-user-authentication) is enabled
         in the TigerGraph database, then `username` and `password` need to be specified when the connection is established.
-        If you already have an API authorisation token, specify that one as well. Alternatively, if you know a
+        If you already have an API authorization token, specify that one as well. Alternatively, if you know a
         [secret](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret) (created previously in the database),
         you can request a token via the [getToken](#getToken) function and use it during the session.
         
-        If user authentication is not anebled, then username, password and authorisation token are not used (i.e. the database is insecure). This is only acceptable in case of development
+        If user authentication is not enabled, then username, password and authorization token are not used (i.e. the database is insecure). This is only acceptable in case of development
         or study environments.
         
-        The username and password default to the TigerGraph default username and password, which are _tigergraph_. In case of user authentication enabled, the password can't be _tigergraph_
-        thus you need to specify the correct one. Furthermore, it is recommended not to use the _tigergraph_ user for anything other than system administration.
+        The username and password default to the TigerGraph default username and password, which are _tigergraph_.
+        If user authentication is enabled, the tigergraph user's password can't be tigergraph, so a different one must be selected.
+        Furthermore, it is recommended not to use the _tigergraph_ user for anything other than system administration.
         Instead, [create additional users](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#creating-and-managing-users) and
         grant them the [appropriate privileges through roles](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#roles-and-privileges),
         then use those users to access the database.
