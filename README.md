@@ -22,7 +22,15 @@ conn = tg.TigerGraphConnection(host="localhost", restppPort=25900, gsPort=25240,
 
 ## Example Projects
 
+- [Connecting to TigerGraph Database with pyTigerGraph](https://colab.research.google.com/drive/1sYv3Jvc6KYsqC4D-Rxkvjh4iPnrp4rg7)
+
 - [Predicting IPOs using Graph Convolutional Neural Networks](https://towardsdatascience.com/predicting-initial-public-offerings-using-graph-convolutional-neural-networks-42df5ce16006?source=friends_link&sk=17501f6534a0352951d118eb8b597599)
+
+- [Using pyTigergraph With Plotly](https://colab.research.google.com/drive/1MwtdXlbxzUsVgiI2bv1U-QmV0r5ES_Q-)
+
+- [TigerGraph to Tensorflow](https://colab.research.google.com/drive/1yXg1UTJynjLKmdCvVNm_ldvurTR6szGN)
+
+- [Movie Prediction with Graph Convolutional Neural Networks](https://colab.research.google.com/drive/11tcL4KXXwY__TmUUTjOf6InFQMC-VsG6)
 
 ## Credits
 pyTigerGraph was originally created by Parker Erickson, a Computer Science student at the University of Minnesota. Special thanks to contributors Jon Herke and Szilard Barany of TigerGraph. Read [this](CONTRIBUTING.md) to learn more about how you can contribute.
