@@ -1,0 +1,19 @@
+site_name: pyTigerGraph
+nav:
+    - 'User Guide':
+        - 'Getting Started': GettingStarted.md
+        - 'Authentication': Auth.md
+        - 'The Functions': 
+            - 'Overview': Functions.md
+            - 'Schema Functions': SchemaFunctions.md
+            - 'Vertex Functions': VertexFunctions.md
+            - 'Edge Functions': EdgeFunctions.md
+            - 'Query Functions': QueryFunctions.md
+            - 'API Tokens': TokenManagement.md
+            - 'Other Functions': OtherFunctions.md
+    - Contribute: CONTRIBUTING.md
+theme:
+    name: material
+
+extra_css:
+  - stylesheets/extra.css

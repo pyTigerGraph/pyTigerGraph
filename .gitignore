@@ -2,3 +2,6 @@ tests.py
 __pycache__
 .vscode
 dist
+.project
+.pydevproject
+build/

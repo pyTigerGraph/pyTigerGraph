@@ -34,7 +34,7 @@ Instead, [create additional users](https://docs.tigergraph.com/admin/admin-guide
 grant them the [appropriate privileges through roles](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#roles-and-privileges),
 then use those users to access the database.
 
-# The functions
+## The functions
 
 Common arguments used in methods:
 - `vertexType`, `sourceVertexType`, `targetVertexType`: The name of a vertex type in the graph. Use [`getVertexTypes`](#getVertexTypes) to fetch the list of vertex types currently in the graph.
@@ -580,4 +580,4 @@ In case of evaluation/trial deployment, an information message and -1 remaining 
 
 ## Compatibility
 
-This package has been tested with TigerGraph 2.5.2 and 2.6
+This package has been tested with TigerGraph 3.5.2 and 3.6
