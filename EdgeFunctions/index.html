@@ -1,0 +1,694 @@
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.2.0">
+    
+    
+      
+        <title>Edge Functions - pyTigerGraph</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.18ac144a.min.css">
+      
+      
+    
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#getedgetypes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href=".." title="pyTigerGraph" class="md-header-nav__button md-logo" aria-label="pyTigerGraph">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            pyTigerGraph
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              Edge Functions
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+        
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="pyTigerGraph" class="md-nav__button md-logo" aria-label="pyTigerGraph">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    pyTigerGraph
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-1" type="checkbox" id="nav-1" checked>
+    
+    <label class="md-nav__link" for="nav-1">
+      User Guide
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"/></svg>
+      </span>
+    </label>
+    <nav class="md-nav" aria-label="User Guide" data-md-level="1">
+      <label class="md-nav__title" for="nav-1">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        </span>
+        User Guide
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../GettingStarted/" title="Getting Started" class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Auth/" title="Authentication" class="md-nav__link">
+      Authentication
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-1-3" type="checkbox" id="nav-1-3" checked>
+    
+    <label class="md-nav__link" for="nav-1-3">
+      The Functions
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"/></svg>
+      </span>
+    </label>
+    <nav class="md-nav" aria-label="The Functions" data-md-level="2">
+      <label class="md-nav__title" for="nav-1-3">
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+        </span>
+        The Functions
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../Functions/" title="Overview" class="md-nav__link">
+      Overview
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../SchemaFunctions/" title="Schema Functions" class="md-nav__link">
+      Schema Functions
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../VertexFunctions/" title="Vertex Functions" class="md-nav__link">
+      Vertex Functions
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Edge Functions
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"/></svg>
+        </span>
+      </label>
+    
+    <a href="./" title="Edge Functions" class="md-nav__link md-nav__link--active">
+      Edge Functions
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getedgetypes" class="md-nav__link">
+    getEdgeTypes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedgetype" class="md-nav__link">
+    getEdgeType
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedgecount" class="md-nav__link">
+    getEdgeCount
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upsertedge" class="md-nav__link">
+    upsertEdge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upsertedges" class="md-nav__link">
+    upsertEdges
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedges" class="md-nav__link">
+    getEdges
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedgestats" class="md-nav__link">
+    getEdgeStats
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deledges" class="md-nav__link">
+    delEdges
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../QueryFunctions/" title="Query Functions" class="md-nav__link">
+      Query Functions
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../TokenManagement/" title="API Tokens" class="md-nav__link">
+      API Tokens
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../OtherFunctions/" title="Other Functions" class="md-nav__link">
+      Other Functions
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../CONTRIBUTING/" title="Contribute" class="md-nav__link">
+      Contribute
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getedgetypes" class="md-nav__link">
+    getEdgeTypes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedgetype" class="md-nav__link">
+    getEdgeType
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedgecount" class="md-nav__link">
+    getEdgeCount
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upsertedge" class="md-nav__link">
+    upsertEdge
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upsertedges" class="md-nav__link">
+    upsertEdges
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedges" class="md-nav__link">
+    getEdges
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedgestats" class="md-nav__link">
+    getEdgeStats
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deledges" class="md-nav__link">
+    delEdges
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                  
+                
+                
+                  <h1>Edge Functions</h1>
+                
+                <h3 id="getedgetypes">getEdgeTypes</h3>
+<p><code>getEdgeTypes()</code></p>
+<p>Returns the list of edge type names of the graph.</p>
+<h3 id="getedgetype">getEdgeType</h3>
+<p><code>getEdgeType(typeName)</code></p>
+<p>Returns the details of vertex type.</p>
+<h3 id="getedgecount">getEdgeCount</h3>
+<p><code>getEdgeCount(sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where="")</code></p>
+<p>Returns the number of edges.</p>
+<p>Arguments:
+- <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter"><code>where</code></a>: Comma separated list of conditions that are all applied on each edge's attributes.
+    The conditions are in <a href="https://en.wikipedia.org/wiki/Logical_conjunction">logical conjunction</a> (i.e. they are "AND'ed" together).</p>
+<p>Uses:
+- If <code>edgeType</code> = "*": edge count of all edge types (no other arguments can be specified in this case).
+- If <code>edgeType</code> is specified only: edge count of the given edge type.
+- If <code>sourceVertexType</code>, <code>edgeType</code>, <code>targetVertexType</code> are specified: edge count of the given edge type between source and target vertex types.
+- If <code>sourceVertexType</code>, <code>sourceVertexId</code> are specified: edge count of all edge types from the given vertex instance.
+- If <code>sourceVertexType</code>, <code>sourceVertexId</code>, <code>edgeType</code> are specified: edge count of all edge types from the given vertex instance.
+- If <code>sourceVertexType</code>, <code>sourceVertexId</code>, <code>edgeType</code>, <code>where</code> are specified: the edge count of the given edge type after filtered by <code>where</code> condition.</p>
+<p>If <code>targetVertexId</code> is specified, then <code>targetVertexType</code> must also be specified.
+If <code>targetVertexType</code> is specified, then <code>edgeType</code> must also be specified.</p>
+<p>Returns a dictionary of <code>&lt;edge_type&gt;: &lt;edge_count&gt;</code> pairs.</p>
+<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges">GET /graph/{graph_name}/edges</a> and
+               <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_number">POST /builtins</a></p>
+<h3 id="upsertedge">upsertEdge</h3>
+<p><code>upsertEdge(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes={})</code></p>
+<p>Upserts an edge.</p>
+<p>Data is upserted:
+- If edge is not yet present in graph, it will be created (see special case below).
+- If it's already in the graph, it is updated with the values specified in the request. An optional <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">operator</a> controls how the attributes are updated.</p>
+<p>The <code>attributes</code> argument is expected to be a dictionary in this format:</p>
+<pre><code class="python">{&lt;attribute_name&gt;, &lt;attribute_value&gt;|(&lt;attribute_name&gt;, &lt;operator&gt;), …}
+</code></pre>
+
+<p>Example:</p>
+<pre><code class="python">{&quot;visits&quot;: (1482, &quot;+&quot;), &quot;max_duration&quot;: (371, &quot;max&quot;)}
+</code></pre>
+
+<p>Returns a single number of accepted (successfully upserted) edges (0 or 1).</p>
+<p>Note: If operator is "vertex_must_exist" then edge will only be created if both vertex exists in graph.
+      Otherwise missing vertices are created with the new edge.</p>
+<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">POST /graph</a></p>
+<h3 id="upsertedges">upsertEdges</h3>
+<p><code>upsertEdges(sourceVertexType, edgeType, targetVertexType, edges)</code></p>
+<p>Upserts multiple edges (of the same type).</p>
+<p>See the description of <code>upsertEdge</code> for generic information.</p>
+<p>The <code>edges</code> argument is expected to be a list in of tuples in this format:</p>
+<pre><code class="python">[
+  (&lt;source_vertex_id&gt;, &lt;target_vertex_id&gt;, {&lt;attribute_name&gt;: &lt;attribute_value&gt;|(&lt;attribute_name&gt;, &lt;operator&gt;), …})
+  ⋮
+]
+</code></pre>
+
+<p>Example:</p>
+<pre><code class="python">[
+  (17, &quot;home_page&quot;, {&quot;visits&quot;: (35, &quot;+&quot;), &quot;max_duration&quot;: (93, &quot;max&quot;)}),
+  (42, &quot;search&quot;, {&quot;visits&quot;: (17, &quot;+&quot;), &quot;max_duration&quot;: (41, &quot;max&quot;)}),
+]
+</code></pre>
+
+<p>Returns a single number of accepted (successfully upserted) edges (0 or positive integer).</p>
+<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">POST /graph</a></p>
+<h3 id="getedges">getEdges</h3>
+<p><code>getEdges(sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0)</code></p>
+<p>Retrieves edges of the given edge type.</p>
+<p>Only <code>sourceVertexType</code> and <code>sourceVertexId</code> are required.
+If <code>targetVertexId</code> is specified, then <code>targetVertexType</code> must also be specified.
+If <code>targetVertexType</code> is specified, then <code>edgeType</code> must also be specified.</p>
+<p>Arguments:
+- <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select"><code>select</code></a>: Comma separated list of edge attributes to be retrieved or omitted.
+- <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter"><code>where</code></a>: Comma separated list of conditions that are all applied on each edge's attributes.
+    The conditions are in <a href="https://en.wikipedia.org/wiki/Logical_conjunction">logical conjunction</a> (i.e. they are "AND'ed" together).
+- <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit"><code>limit</code></a>: Maximum number of edge instances to be returned (after sorting).
+- <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort"><code>sort</code></a>: Comma separated list of attributes the results should be sorted by.</p>
+<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices">GET /graph/{graph_name}/vertices</a></p>
+<h3 id="getedgestats">getEdgeStats</h3>
+<p><code>getEdgeStats(edgeTypes, skipNA=False)</code></p>
+<p>Returns edge attribute statistics.</p>
+<p>Arguments:
+- <code>edgeTypes</code>: A single edge type name or a list of edges types names or '*' for all edges types.
+- <code>skipNA</code>:    Skip those <u>n</u>on-<u>a</u>pplicable edges that do not have attributes or none of their attributes have statistics gathered.</p>
+<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_attr">POST /builtins</a></p>
+<h3 id="deledges">delEdges</h3>
+<p><code>delEdges(sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, where="", limit="", sort="", timeout=0)</code></p>
+<p>Deletes edges from the graph.</p>
+<p>Only <code>sourceVertexType</code> and <code>sourceVertexId</code> are required.
+If <code>targetVertexId</code> is specified, then <code>targetVertexType</code> must also be specified.
+If <code>targetVertexType</code> is specified, then <code>edgeType</code> must also be specified.</p>
+<p>Arguments:
+- <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter"><code>where</code></a>: Comma separated list of conditions that are all applied on each edge's attributes.
+    The conditions are in <a href="https://en.wikipedia.org/wiki/Logical_conjunction">logical conjunction</a> (i.e. they are "AND'ed" together).
+- <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit"><code>limit</code></a>: Maximum number of edge instances to be returned (after sorting).
+- <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort"><code>sort</code></a>: Comma separated list of attributes the results should be sorted by.
+- <code>timeout</code>: Time allowed for successful execution (0 = no limit, default).</p>
+<p>Returns a dictionary of <code>&lt;edge_type&gt;: &lt;deleted_edge_count&gt;</code> pairs.</p>
+<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-edges">DELETE /graph/{/graph_name}/edges</a></p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../VertexFunctions/" title="Vertex Functions" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Vertex Functions
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../QueryFunctions/" title="Query Functions" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Query Functions
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/vendor.d710d30a.min.js"></script>
+      <script src="../assets/javascripts/bundle.5f27aba8.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      
+      <script>
+        app = initialize({
+          base: "..",
+          features: [],
+          search: Object.assign({
+            worker: "../assets/javascripts/worker/search.27c6a5e6.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+    
+  </body>
+</html>
