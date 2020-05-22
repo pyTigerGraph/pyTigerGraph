@@ -1,4 +1,4 @@
-### runInstalledQuery
+## runInstalledQuery
 `runInstalledQuery(queryName, params=None, timeout=16000, sizeLimit=32000000)`
 
 Runs an installed query.
@@ -13,7 +13,7 @@ Arguments:
 
 Documentation: [POST /query/{graph_name}/<query_name>](https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query)
 
-### runInterpretedQuery
+## runInterpretedQuery
 `runInterpretedQuery(queryText, params=None)`
 
 Runs an interpreted query.

@@ -1,14 +1,14 @@
-### getVertexTypes
+## getVertexTypes
 `getVertexTypes()`
 
 Returns the list of vertex type names of the graph.
 
-### getVertexType
+## getVertexType
 `getVertexType(vertexType)`
 
 Returns the details of the specified vertex type.
 
-### getVertexCount
+## getVertexCount
 `getVertexCount(vertexType, where="")`
 
 Return the number of vertices.
@@ -29,7 +29,7 @@ Returns a dictionary of `<vertex_type>: <vertex_count>` pairs.
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices) and
 [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_vertex_number)
 
-### upsertVertex
+## upsertVertex
 `upsertVertex(vertexType, vertexId, attributes=None)`
 
 Upserts a vertex.
@@ -54,7 +54,7 @@ Returns a single number of accepted (successfully upserted) vertices (0 or 1).
 
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
-### upsertVertices
+## upsertVertices
 `upsertVertices(vertexType, vertices)`
 
 Upserts multiple vertices (of the same type).
@@ -81,7 +81,7 @@ Returns a single number of accepted (successfully upserted) vertices (0 or posit
 
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
-### getVertices
+## getVertices
 `getVertices(vertexType, select="", where="", limit="", sort="", timeout=0)`
 
 Retrieves vertices of the given vertex type.
@@ -98,7 +98,7 @@ NOTE: The primary ID of a vertex instance is **NOT** an attribute, thus cannot b
 
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices)
 
-### getVerticesById
+## getVerticesById
 `getVerticesById(vertexType, vertexIds)`
 
 Retrieves vertices of the given vertex type, identified by their ID.
@@ -108,7 +108,7 @@ Arguments
 
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices)
 
-### getVertexStats
+## getVertexStats
 `getVertexStats(vertexTypes, skipNA=False)`
 
 Returns vertex attribute statistics.
@@ -119,7 +119,7 @@ Arguments:
 
 Documentation: [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_vertex_attr)
 
-### delVertices
+## delVertices
 `delVertices(vertexType, where="", limit="", sort="", permanent=False, timeout=0)`
 
 Deletes vertices from graph.
@@ -139,7 +139,7 @@ Returns a single number of vertices deleted.
 
 Documentation: [DELETE /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-graph-graph_name-vertices)
 
-### delVerticesById
+## delVerticesById
 `delVerticesById(vertexType, vertexIds, permanent=False, timeout=0)`
 
 Deletes vertices from graph identified by their ID.

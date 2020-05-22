@@ -13,3 +13,20 @@ Furthermore, it is recommended not to use the _tigergraph_ user for anything oth
 Instead, [create additional users](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#creating-and-managing-users) and
 grant them the [appropriate privileges through roles](https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#roles-and-privileges),
 then use those users to access the database.
+
+It is recommended to not push any form of authentication information to version control software. Because of this, we recommend to create a ```cfg.py``` file that looks like this:
+```python
+secret = "YOUR_SECRET_HERE"
+token = ""
+password = "YOUR_PASSWORD_HERE"
+```
+You can then import this config file into your Python applications, and add ```cfg.py``` to your ```.gitignore```. To create a connection to your database, simply:
+```python
+import pyTigerGraph as tg 
+import cfg
+
+cfg.token = tg.TigerGraphConnection(host="<hostname>", graphname="<graph_name>").getToken(cfg.secret, "<token_lifetime>")[0]
+
+conn = tg.TigerGraphConnection(host="<hostname>", graphname="<graph_name>", password=cfg.password, apiToken=cfg.token)
+```
+Substitute the hostname and graph name with the correct credentials, as well as the desired lifetime of the API token fetched.

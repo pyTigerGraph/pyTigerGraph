@@ -1,4 +1,4 @@
-### getToken
+## getToken
 `getToken(secret, setToken=True, lifetime=None)`
 
 Requests an authorisation token.
@@ -17,7 +17,7 @@ Note: expiration timestamp's time zone might be different from your computer's l
 
 Documentation: [GET /requesttoken](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken)
 
-### refreshToken
+## refreshToken
 `refreshToken(secret, token=None, lifetime=2592000)`
 
 Extends a token's lifetime.
@@ -39,7 +39,7 @@ Note:
 
 Documentation: [PUT /requesttoken](https://docs.tigergraph.com/dev/restpp-api/restpp-requests#refreshing-tokens)
 
-### deleteToken
+## deleteToken
 `deleteToken(secret, token)`
 
 Deletes a token.

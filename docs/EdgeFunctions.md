@@ -1,14 +1,14 @@
-### getEdgeTypes
+## getEdgeTypes
 `getEdgeTypes()`
 
 Returns the list of edge type names of the graph.
 
-### getEdgeType
+## getEdgeType
 `getEdgeType(typeName)`
 
 Returns the details of vertex type.
 
-### getEdgeCount
+## getEdgeCount
 `getEdgeCount(sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where="")`
 
 Returns the number of edges.
@@ -33,7 +33,7 @@ Returns a dictionary of `<edge_type>: <edge_count>` pairs.
 Documentation: [GET /graph/{graph_name}/edges](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges) and
                [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_number)
 
-### upsertEdge
+## upsertEdge
 `upsertEdge(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes={})`
 
 Upserts an edge.
@@ -59,7 +59,7 @@ Note: If operator is "vertex_must_exist" then edge will only be created if both 
 
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
-### upsertEdges
+## upsertEdges
 `upsertEdges(sourceVertexType, edgeType, targetVertexType, edges)`
 
 Upserts multiple edges (of the same type).
@@ -86,7 +86,7 @@ Returns a single number of accepted (successfully upserted) edges (0 or positive
 
 Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data        )
 
-### getEdges
+## getEdges
 `getEdges(sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0)`
 
 Retrieves edges of the given edge type.
@@ -104,7 +104,7 @@ Arguments:
 
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices)
 
-### getEdgeStats
+## getEdgeStats
 `getEdgeStats(edgeTypes, skipNA=False)`
 
 Returns edge attribute statistics.
@@ -115,7 +115,7 @@ Arguments:
 
 Documentation: [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_attr)
 
-### delEdges
+## delEdges
 `delEdges(sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, where="", limit="", sort="", timeout=0)`
 
 Deletes edges from the graph.

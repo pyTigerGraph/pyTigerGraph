@@ -1,4 +1,4 @@
-### echo
+## echo
 `echo()`
 
 Pings the database.
@@ -7,7 +7,7 @@ Expected return value is "Hello GSQL"
 
 Documentation: [GET /echo](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-echo-and-post-echo) and [POST /echo](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-echo-and-post-echo)
 
-### getEndpoints
+## getEndpoints
 `getEndpoints(builtin=False, dynamic=False, static=False)`
 
 Lists the REST++ endpoints and their parameters.
@@ -20,7 +20,7 @@ Arguments:
 If none of the above arguments are specified, all endpoints are listed.
 Documentation: [GET /endpoints](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-endpoints)
 
-### getStatistics
+## getStatistics
 `getStatistics(seconds=10, segment=10)`
 
 Arguments:
@@ -31,14 +31,14 @@ Retrieves real-time query performance statistics over the given time period.
 
 Documentation: [GET /statistics](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-statistics)
 
-### getVersion
+## getVersion
 `getVersion()`
 
 Retrieves the git versions of all components of the system.
 
 Documentation: [GET /version](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-version)
 
-### getVer
+## getVer
 `getVer(component="product", full=False)`
 
 Arguments:
@@ -48,7 +48,7 @@ Gets the version information of specific component.
 
 Get the full list of components using [`getVersion`](#getVersion).
 
-### getLicenseInfo
+## getLicenseInfo
 `getLicenseInfo()`
 
 Returns the expiration date and remaining days of the license.
