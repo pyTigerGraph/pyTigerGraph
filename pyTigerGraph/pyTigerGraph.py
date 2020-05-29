@@ -37,6 +37,7 @@ class TigerGraphConnection:
         self.apiToken   = apiToken
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug      = False
+        self.schema     = None
 
     # Private functions ========================================================
 
@@ -135,19 +136,21 @@ class TigerGraphConnection:
         """
         return self._get(self.gsUrl + "/gsqlserver/gsql/udtlist?graph=" + self.graphname, authMode="pwd")
 
-    def getSchema(self, udts=True):
+    def getSchema(self, udts=True, force=False):
         """Retrieves the schema (all vertex and edge type and - if not disabled - the User Defined Type details) of the graph.
 
-        Calls `_getUDTs()` if udts=True (default).
+        Arguments:
+        - `udts`: If `True`, calls `_getUDTs()`, i.e. includes User Defined Types in the schema details.
+        - `force`: If `True`, retrieves the schema details again, otherwise returns a cached copy of the schema details (if they were already fetched previously).
 
         Endpoint:      GET /gsqlserver/gsql/schema
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema
         """
-        res = self._get(self.gsUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname, authMode="pwd")
-        if not udts:
-            return res
-        res["UDTs"] = self._getUDTs()
-        return res
+        if not self.schema or force:
+            self.schema = self._get(self.gsUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname, authMode="pwd")
+            if udts:
+                self.schema["UDTs"] = self._getUDTs()
+        return self.schema
 
     def getUDTs(self):
         """Returns the list of User Defined Types (names only)."""
@@ -175,16 +178,25 @@ class TigerGraphConnection:
 
     # Vertex related functions =================================================
 
-    def getVertexTypes(self):
-        """Returns the list of vertex type names of the graph."""
+    def getVertexTypes(self, force=False):
+        """Returns the list of vertex type names of the graph.
+        
+        Arguments:
+        - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of vertex type details (if they were already fetched previously).
+        """
         ret = []
-        for vt in self.getSchema()["VertexTypes"]:
+        for vt in self.getSchema(force=force)["VertexTypes"]:
             ret.append(vt["Name"])
         return ret
 
-    def getVertexType(self, vertexType):
-        """Returns the details of the specified vertex type."""
-        for vt in self.getSchema()["VertexTypes"]:
+    def getVertexType(self, vertexType, force=False):
+        """Returns the details of the specified vertex type.
+        
+        Arguments:
+        - `vertexType`: The name of of the vertex type.
+        - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of vertex type details (if they were already fetched previously).
+        """
+        for vt in self.getSchema(force=force)["VertexTypes"]:
             if vt["Name"] == vertexType:
                 return vt;
         return {} # Vertex type was not found
@@ -451,21 +463,76 @@ class TigerGraphConnection:
 
     # Edge related functions ===================================================
 
-    def getEdgeTypes(self):
-        """Returns the list of edge type names of the graph."""
+    def getEdgeTypes(self, force=False):
+        """Returns the list of edge type names of the graph.
+        
+        Arguments:
+        - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of edge type details (if they were already fetched previously).
+        """
         ret = []
-        ets = self.getSchema()["EdgeTypes"]
+        ets = self.getSchema(force=force)["EdgeTypes"]
         for et in ets:
             ret.append(et["Name"])
         return ret
 
-    def getEdgeType(self, typeName):
-        """Returns the details of vertex type."""
-        ets = self.getSchema()["EdgeTypes"]
+    def getEdgeType(self, edgeType, force=False):
+        """Returns the details of vertex type.
+        
+        Arguments:
+        - `edgeType`: The name of the edge type.
+        - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of edge type details (if they were already fetched previously).
+        """
+        ets = self.getSchema(force=force)["EdgeTypes"]
         for et in ets:
-            if et["Name"] == typeName:
+            if et["Name"] == edgeType:
                 return et;
         return {}
+
+    def getEdgeSourceVertexType(self, edgeType):
+        """Returns the type of the edge type's source vertex.
+        
+        Arguments:
+        - `edgeType`: The name of the edge type.
+        """
+        edgeTypeDetails = self.getEdgeType(edgeType)
+        if edgeTypeDetails["FromVertexTypeName"] == "*":
+            return "*"
+        fromVertexTypes = edgeTypeDetails["FromVertexTypeList"]
+        if len(fromVertexTypes) == 1:
+            return fromVertexTypes[0]
+        return fromVertexTypes
+
+    def getEdgeTargetVertexType(self, edgeType):
+        """Returns the type of the edge type's target vertex.
+        
+        Arguments:
+        - `edgeType`: The name of the edge type.
+        """
+        toVertexTypes = self.getEdgeType(edgeType)["ToVertexTypeList"]
+        if len(toVertexTypes) == 1:
+            return toVertexTypes[0]
+        return toVertexTypes
+
+    def isDirected(self, edgeType):
+        """Is the specified edge type directed?
+        
+        Arguments:
+        - `edgeType`: The name of the edge type.
+        """
+        return self.getEdgeType(edgeType)["IsDirected"]
+    
+    def getReverseEdge(self, edgeType):
+        """Returns the name of the reverse edge of the specified edge type, if applicable.
+        
+        Arguments:
+        - `edgeType`: The name of the edge type.
+        """
+        if not self.isDirected(edgeType):
+            return None
+        config = self.getEdgeType(edgeType)["Config"]
+        if "REVERSE_EDGE" in config:
+            return config["REVERSE_EDGE"]
+        return None
 
     def getEdgeCount(self, sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where=""):
         """Return the number of edges.
@@ -602,7 +669,7 @@ class TigerGraphConnection:
         return self._post(self.restppUrl +  "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
 
     def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
-        """Retrieves edges of the given edge type.
+        """Retrieves edges of the given edge type originating from a specific source vertex.
 
         Only `sourceVertexType` and `sourceVertexId` are required.
         If `targetVertexId` is specified, then `targetVertexType` must also be specified.
@@ -647,6 +714,37 @@ class TigerGraphConnection:
         if timeout and timeout > 0:
             url += ("?" if isFirst else "&") + "timeout=" + str(timeout)
         return self._get(url)
+
+    def getEdgesByType(self, edgeType):
+        """Retrieves edges of the given edge type regardless the source vertex.
+        
+        Note: Edge attributes are not currently returned.
+        
+        Arguments:
+        - `edgeType`: The name of the edge type.
+        """
+        if not edgeType:
+            return []
+        
+        sourceVertexType = self.getEdgeSourceVertexType(edgeType)
+        if sourceVertexType == "*":
+            raise TigerGraphException("Wildcard edges are not currently supported.", None)
+        
+        queryText = \
+        "INTERPRET QUERY () FOR GRAPH $graph { \
+            SetAccum<EDGE> @@es; \
+            start = {$sourceEdgeType.*}; \
+            res = \
+                SELECT s \
+                FROM   start:s-($edgeType:e)->ANY:t \
+                ACCUM  @@es += e; \
+            PRINT @@es AS edges; \
+        }"
+        
+        queryText = queryText.replace("$graph",          self.graphname) \
+                             .replace('$sourceEdgeType', sourceVertexType) \
+                             .replace('$edgeType',       edgeType)
+        return self.runInterpretedQuery(queryText)[0]["edges"]
 
     def getEdgeStats(self, edgeTypes, skipNA=False):
         """Returns edge attribute statistics.
@@ -761,6 +859,8 @@ class TigerGraphConnection:
         Endpoint:      POST /gsqlserver/interpreted_query
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query
         """
+        if self.debug:
+            print(queryText)
         return self._post(self.gsUrl +"/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
 
     # Token management =========================================================

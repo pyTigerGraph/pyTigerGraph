@@ -76,10 +76,15 @@ Common arguments used in methods:
 **Edge related functions**
 - [getEdgeTypes](#getEdgeTypes)
 - [getEdgeType](#getEdgeType)
+- [getEdgeSourceVertexType](#getedgesourcevertextype)
+- [getEdgeTargetVertexType](#getedgetargetvertextype)
+- [isDirected](#isdirected)
+- [getReverseEdge](#getreverseedge)
 - [getEdgeCount](#getEdgeCount)
 - [upsertEdge](#upsertEdge)
 - [upsertEdges](#upsertEdges)
 - [getEdges](#getEdges)
+- [getEdgesByType](#getedgesbytype)
 - [getEdgeStats](#getEdgeStats)
 - [delEdges](#delEdges)
 
@@ -106,9 +111,15 @@ Common arguments used in methods:
 ## Schema related functions
 
 ### getSchema
-`getSchema(udts=True)`
+`getSchema(udts=True, force=False)`
 
 Retrieves the schema (all vertex and edge type and - if not disabled - the User Defined Type details) of the graph.
+
+Note: The graph schema details are chached (after the first direct or indirect call to `getSchema()`) to speed up metadata handling. Force refresh of schema details when neccesary.
+
+Arguments:
+- `udts`: If `True`, calls `_getUDTs()`, i.e. includes User Defined Types in the schema details.
+- `force`: If `True`, retrieves the schema details again, otherwise returns a cached copy of the schema details (if they were already fetched previously).
 
 Documentation: [GET /gsqlserver/gsql/schema](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema)
 
@@ -132,14 +143,27 @@ Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in
 ## Vertex related functions
 
 ### getVertexTypes
-`getVertexTypes()`
+`getVertexTypes(force=False)`
+
+Returns the list of vertex type names of the graph.
+
+Note: The graph details are chached (after the first direct or indirect call to `getSchema()`) to speed up metadata handling. Force refresh of schema details when neccesary.
+
+Arguments:
+- `force`: If `True`, retrieves the schema details again, otherwise returns a cached copy of the vertex type details (if they were already fetched previously).
 
 Returns the list of vertex type names of the graph.
 
 ### getVertexType
-`getVertexType(vertexType)`
+`getVertexType(vertexType, force=False)`
 
 Returns the details of the specified vertex type.
+
+Note: The graph details are chached (after the first direct or indirect call to `getSchema()`) to speed up metadata handling. Force refresh of schema details when neccesary.
+
+Arguments:
+- `vertexType`: The name of of the vertex type.
+- `force`: If `True`, retrieves the schema details again, otherwise returns a cached copy of the vertex type details (if they were already fetched previously).
 
 ### getVertexCount
 `getVertexCount(vertexType, where="")`
@@ -226,7 +250,7 @@ Arguments:
 - [`limit`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit): Maximum number of vertex instances to be returned (after sorting).
 - [`sort`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort): Comma separated list of attributes the results should be sorted by.
 
-NOTE: The primary ID of a vertex instance is **NOT** an attribute, thus cannot be used in above arguments.
+Note: The primary ID of a vertex instance is **NOT** an attribute, thus cannot be used in above arguments.
       Use [`getVerticesById`](#getVerticesById) if you need to retrieve by vertex ID.
 
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices)
@@ -265,7 +289,7 @@ Arguments:
 - `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared.
 - `timeout`: Time allowed for successful execution (0 = no limit, default).
 
-NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
+Note: The primary ID of a vertex instance is **NOT** an attribute, thus cannot be used in above arguments.
       Use [`delVerticesById`](#delVerticesById) if you need to delete by vertex ID.
 
 Returns a single number of vertices deleted.
@@ -289,14 +313,59 @@ Documentation: [DELETE /graph/{graph_name}/vertices](https://docs.tigergraph.com
 ## Edge related functions
 
 ### getEdgeTypes
-`getEdgeTypes()`
+`getEdgeTypes(force=False)`
+
+Returns the list of edge type names of the graph.
+
+Note: The graph details are chached (after the first direct or indirect call to `getSchema()`) to speed up metadata handling. Force refresh of schema details when neccesary.
+
+Arguments:
+- `force`: If `True`, retrieves the schema details again, otherwise returns a cached copy of the edge type details (if they were already fetched previously).
 
 Returns the list of edge type names of the graph.
 
 ### getEdgeType
-`getEdgeType(typeName)`
+`getEdgeType(edgeType, force=False)`
 
-Returns the details of vertex type.
+Returns the details of the specified edge type.
+
+Note: The graph details are chached (after the first direct or indirect call to `getSchema()`) to speed up metadata handling. Force refresh of schema details when neccesary.
+
+Arguments:
+- `edgeType`: The name of of the edge type.
+- `force`: If `True`, retrieves the schema details again, otherwise returns a cached copy of the edge type details (if they were already fetched previously).
+
+### getEdgeSourceVertexType
+`getEdgeSourceVertexType(edgeType)`
+
+Returns the type of the edge type's source vertex.
+        
+Arguments:
+- `edgeType`: The name of the edge type.
+
+### getEdgeTargetVertexType
+`getEdgeTargetVertexType(edgeType)`
+
+Returns the type of the edge type's target vertex.
+        
+Arguments:
+- `edgeType`: The name of the edge type.
+
+### isDirected
+`isDirected(edgeType)`
+
+Is the specified edge type directed?
+
+Arguments:
+- `edgeType`: The name of the edge type.
+
+### getReverseEdge
+`getReverseEdge(edgeType)`
+
+Returns the name of the reverse edge of the specified edge type, if applicable.
+
+Arguments:
+- `edgeType`: The name of the edge type.
 
 ### getEdgeCount
 `getEdgeCount(sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where="")`
@@ -379,7 +448,7 @@ Documentation: [POST /graph](https://docs.tigergraph.com/dev/restpp-api/built-in
 ### getEdges
 `getEdges(sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0)`
 
-Retrieves edges of the given edge type.
+Retrieves edges of the given edge type originating from a specific source vertex.
 
 Only `sourceVertexType` and `sourceVertexId` are required.
 If `targetVertexId` is specified, then `targetVertexType` must also be specified.
@@ -393,6 +462,16 @@ Arguments:
 - [`sort`](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort): Comma separated list of attributes the results should be sorted by.
 
 Documentation: [GET /graph/{graph_name}/vertices](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices)
+
+### getEdgesByType
+`getEdgesByType(edgeType)`
+
+Retrieves edges of the given edge type regardless the source vertex.
+        
+Note: Edge attributes are not currently returned.
+        
+Arguments:
+- `edgeType`: The name of the edge type.
 
 ### getEdgeStats
 `getEdgeStats(edgeTypes, skipNA=False)`
