@@ -470,8 +470,7 @@ class TigerGraphConnection:
         - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of edge type details (if they were already fetched previously).
         """
         ret = []
-        ets = self.getSchema(force=force)["EdgeTypes"]
-        for et in ets:
+        for et in self.getSchema(force=force)["EdgeTypes"]:
             ret.append(et["Name"])
         return ret
 
@@ -482,8 +481,7 @@ class TigerGraphConnection:
         - `edgeType`: The name of the edge type.
         - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of edge type details (if they were already fetched previously).
         """
-        ets = self.getSchema(force=force)["EdgeTypes"]
-        for et in ets:
+        for et in self.getSchema(force=force)["EdgeTypes"]:
             if et["Name"] == edgeType:
                 return et;
         return {}
@@ -508,6 +506,9 @@ class TigerGraphConnection:
         Arguments:
         - `edgeType`: The name of the edge type.
         """
+        edgeTypeDetails = self.getEdgeType(edgeType)
+        if edgeTypeDetails["ToVertexTypeName"] == "*":
+            return "*"
         toVertexTypes = self.getEdgeType(edgeType)["ToVertexTypeList"]
         if len(toVertexTypes) == 1:
             return toVertexTypes[0]
