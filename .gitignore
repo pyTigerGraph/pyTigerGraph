@@ -3,3 +3,7 @@ __pycache__
 .vscode
 dist
 .idea
+.project
+.pydevproject
+build/
+site/
