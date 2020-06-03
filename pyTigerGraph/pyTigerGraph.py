@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 import time
 
+
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
 
@@ -13,6 +14,7 @@ class TigerGraphException(Exception):
     def __init__(self, message, code=None):
         self.message = message
         self.code = code
+
 
 class TigerGraphConnection:
     """Python wrapper for TigerGraph's REST++ API.
@@ -25,7 +27,7 @@ class TigerGraphConnection:
                                                       Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort = "9000", gsPort = "14240", apiToken=""):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken=""):
         self.host       = host
         self.username   = username
         self.password   = password
@@ -41,7 +43,7 @@ class TigerGraphConnection:
 
     # Private functions ========================================================
 
-    def _errorCheck(self,res):
+    def _errorCheck(self, res):
         """Checks if the JSON document returned by an endpoint has contains error: true; if so, it raises an exception"""
         if "error" in res and res["error"]:
             raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
@@ -62,7 +64,7 @@ class TigerGraphConnection:
         if self.debug:
             print(method + " " + url + (" => " + data if data else ""))
         if authMode == "pwd":
-            _auth=(self.username, self.password)
+            _auth = (self.username, self.password)
         else:
             _auth = None
         if authMode == "token":
@@ -111,7 +113,7 @@ class TigerGraphConnection:
 
         For argument details, see `_req`.
         """
-        return self._req("DELETE", url)
+        return self._req("DELETE", url, authMode)
 
     def _upsertAttrs(self, attributes):
         """Transforms attributes (provided as a table) into a hierarchy as expect by the upsert functions"""
@@ -164,7 +166,7 @@ class TigerGraphConnection:
         for udt in self._getUDTs():
             if udt["name"] == udtName:
                 return udt["fields"]
-        return [] # UDT was not found
+        return []  # UDT was not found
 
     def upsertData(self, data):
         """Upserts data (vertices and edges) from a JSON document or equivalent object structure.
@@ -174,7 +176,7 @@ class TigerGraphConnection:
         """
         if not isinstance(data, str):
             data = json.dumps(data)
-        return self._post(self.restppUrl +  "/graph/" + self.graphname, data=data)[0]
+        return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]
 
     # Vertex related functions =================================================
 
@@ -198,8 +200,8 @@ class TigerGraphConnection:
         """
         for vt in self.getSchema(force=force)["VertexTypes"]:
             if vt["Name"] == vertexType:
-                return vt;
-        return {} # Vertex type was not found
+                return vt
+        return {}  # Vertex type was not found
 
     def getVertexCount(self, vertexType, where=""):
         """Returns the number of vertices.
@@ -257,7 +259,7 @@ class TigerGraphConnection:
             return None
         vals = self._upsertAttrs(attributes)
         data = json.dumps({"vertices": {vertexType: {vertexId: vals}}})
-        return self._post(self.restppUrl +  "/graph/" + self.graphname, data=data)[0]["accepted_vertices"]
+        return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_vertices"]
 
     def upsertVertices(self, vertexType, vertices):
         """Upserts multiple vertices (of the same type).
@@ -290,7 +292,7 @@ class TigerGraphConnection:
             vals = self._upsertAttrs(v[1])
             data[v[0]] = vals
         data = json.dumps({"vertices": {vertexType: data}})
-        return self._post(self.restppUrl +  "/graph/" + self.graphname, data=data)[0]["accepted_vertices"]
+        return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_vertices"]
 
     def getVertices(self, vertexType, select="", where="", limit="", sort="", timeout=0):
         """Retrieves vertices of the given vertex type.
@@ -345,7 +347,7 @@ class TigerGraphConnection:
         if isinstance(vertexIds, (int, str)):
             vids.append(vertexIds)
         elif not isinstance(vertexIds, list):
-            return None # TODO: a better return value?
+            return None  # TODO: a better return value?
         else:
             vids = vertexIds
         url = self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType + "/"
@@ -368,7 +370,7 @@ class TigerGraphConnection:
         if vertexTypes == "*":
             vts = self.getVertexTypes()
         elif isinstance(vertexTypes, str):
-            vts =[vertexTypes]
+            vts = [vertexTypes]
         elif isinstance(vertexTypes, list):
             vts = vertexTypes
         else:
@@ -418,7 +420,7 @@ class TigerGraphConnection:
         if where:
             url += "?filter=" + where
             isFirst = False
-        if limit and sort: # These two must be provided together
+        if limit and sort:  # These two must be provided together
             url += ("?" if isFirst else "&") + "limit=" + str(limit) + "&sort=" + sort
             isFirst = False
         if permanent:
@@ -447,7 +449,7 @@ class TigerGraphConnection:
         if isinstance(vertexIds, (int, str)):
             vids.append(vertexIds)
         elif not isinstance(vertexIds, list):
-            return None # TODO: a better return value?
+            return None  # TODO: a better return value?
         else:
             vids = vertexIds
         url1 = self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType + "/"
@@ -455,7 +457,7 @@ class TigerGraphConnection:
         if permanent:
             url2 = "?permanent=true"
         if timeout and timeout > 0:
-            url2 +=  ("&" if url2 else "?") + "timeout=" + str(timeout)
+            url2 += ("&" if url2 else "?") + "timeout=" + str(timeout)
         ret = 0
         for vid in vids:
             ret += self._delete(url1 + str(vid) + url2)["deleted_vertices"]
@@ -483,7 +485,7 @@ class TigerGraphConnection:
         """
         for et in self.getSchema(force=force)["EdgeTypes"]:
             if et["Name"] == edgeType:
-                return et;
+                return et
         return {}
 
     def getEdgeSourceVertexType(self, edgeType):
@@ -521,7 +523,7 @@ class TigerGraphConnection:
         - `edgeType`: The name of the edge type.
         """
         return self.getEdgeType(edgeType)["IsDirected"]
-    
+
     def getReverseEdge(self, edgeType):
         """Returns the name of the reverse edge of the specified edge type, if applicable.
         
@@ -578,7 +580,7 @@ class TigerGraphConnection:
                 url += "&filter=" + where
             res = self._get(url)
         else:
-            if not edgeType: # TODO is this a valid check?
+            if not edgeType:  # TODO is this a valid check?
                 raise TigerGraphException("A valid edge type or \"*\" must be specified for edgeType if where condition is set.", None)
             data = '{"function":"stat_edge_number","type":"' + edgeType + '"' \
                 + (',"from_type":"' + sourceVertexType + '"' if sourceVertexType else '')  \
@@ -592,7 +594,7 @@ class TigerGraphConnection:
             ret[r["e_type"]] = r["count"]
         return ret
 
-    def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes={}):
+    def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes=None):
         """Upserts an edge.
 
         Data is upserted:
@@ -615,11 +617,13 @@ class TigerGraphConnection:
         Endpoint:      POST /graph
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data
         """
+        if attributes is None:
+            attributes = {}
         if not isinstance(attributes, dict):
             return None
         vals = self._upsertAttrs(attributes)
         data = json.dumps({"edges": {sourceVertexType: {sourceVertexId: {edgeType: {targetVertexType: {targetVertexId: vals}}}}}})
-        return self._post(self.restppUrl +  "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
+        return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
 
     def upsertEdges(self, sourceVertexType, edgeType, targetVertexType, edges):
         """Upserts multiple edges (of the same type).
@@ -647,8 +651,7 @@ class TigerGraphConnection:
         """
         if not isinstance(edges, list):
             return None
-        data = {}
-        data[sourceVertexType] = {}
+        data = {sourceVertexType: {}}
         l1 = data[sourceVertexType]
         for e in edges:
             vals = self._upsertAttrs(e[2])
@@ -667,7 +670,7 @@ class TigerGraphConnection:
             # targetVertexId
             l4[e[1]] = vals
         data = json.dumps({"edges": data})
-        return self._post(self.restppUrl +  "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
+        return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
 
     def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
         """Retrieves edges of the given edge type originating from a specific source vertex.
@@ -726,11 +729,11 @@ class TigerGraphConnection:
         """
         if not edgeType:
             return []
-        
+
         sourceVertexType = self.getEdgeSourceVertexType(edgeType)
         if sourceVertexType == "*":
             raise TigerGraphException("Wildcard edges are not currently supported.", None)
-        
+
         queryText = \
         "INTERPRET QUERY () FOR GRAPH $graph { \
             SetAccum<EDGE> @@es; \
@@ -741,7 +744,7 @@ class TigerGraphConnection:
                 ACCUM  @@es += e; \
             PRINT @@es AS edges; \
         }"
-        
+
         queryText = queryText.replace("$graph",          self.graphname) \
                              .replace('$sourceEdgeType', sourceVertexType) \
                              .replace('$edgeType',       edgeType)
@@ -817,7 +820,7 @@ class TigerGraphConnection:
         if where:
             url += ("?" if isFirst else "&") + "filter=" + where
             isFirst = False
-        if limit and sort: # These two must be provided together
+        if limit and sort:  # These two must be provided together
             url += ("?" if isFirst else "&") + "limit=" + str(limit) + "&sort=" + sort
             isFirst = False
         if timeout and timeout > 0:
@@ -862,7 +865,7 @@ class TigerGraphConnection:
         """
         if self.debug:
             print(queryText)
-        return self._post(self.gsUrl +"/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
+        return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
 
     # Token management =========================================================
 
@@ -891,10 +894,10 @@ class TigerGraphConnection:
             if setToken:
                 self.apiToken   = res["token"]
                 self.authHeader = {'Authorization': "Bearer " + self.apiToken}
-            return (res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime('%Y-%m-%d %H:%M:%S'))
+            return res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime('%Y-%m-%d %H:%M:%S')
         if "Endpoint is not found from url = /requesttoken" in res["message"]:
             raise TigerGraphException("REST++ authentication is not enabled, can't generate token.", None)
-        raise TigerGraphException(res["message"],(res["code"] if "code" in res else None))
+        raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
 
     def refreshToken(self, secret, token=None, lifetime=2592000):
         """Extends a token's lifetime.
@@ -924,10 +927,10 @@ class TigerGraphConnection:
         res = json.loads(requests.request("PUT", self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token + ("&lifetime=" + str(lifetime) if lifetime else "")).text)
         if not res["error"]:
             exp = time.time() + res["expiration"]
-            return(res["token"], int(exp), datetime.utcfromtimestamp(exp).strftime('%Y-%m-%d %H:%M:%S'))
+            return res["token"], int(exp), datetime.utcfromtimestamp(exp).strftime('%Y-%m-%d %H:%M:%S')
         if "Endpoint is not found from url = /requesttoken" in res["message"]:
             raise TigerGraphException("REST++ authentication is not enabled, can't refresh token.", None)
-        raise TigerGraphException(res["message"],(res["code"] if "code" in res else None))
+        raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
 
     def deleteToken(self, secret, token=None, skipNA=True):
         """Deletes a token.
@@ -955,7 +958,7 @@ class TigerGraphConnection:
             return True
         if "Endpoint is not found from url = /requesttoken" in res["message"]:
             raise TigerGraphException("REST++ authentication is not enabled, can't delete token.", None)
-        raise TigerGraphException(res["message"],(res["code"] if "code" in res else None))
+        raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
 
     # Other functions ==========================================================
 
@@ -1023,7 +1026,7 @@ class TigerGraphConnection:
         if not seconds or type(seconds) != "int":
             seconds = 10
         else:
-            seconds = max(min(seconds,0),60)
+            seconds = max(min(seconds, 0), 60)
         if not segment or type(segment) != "int":
             segment = 10
         else:
@@ -1037,10 +1040,10 @@ class TigerGraphConnection:
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-version
         """
         response = requests.request("GET", self.restppUrl + "/version/" + self.graphname, headers=self.authHeader)
-        res = json.loads(response.text, strict=False)["message"].split("\n") # "strict=False" is why _get() was not used
+        res = json.loads(response.text, strict=False)["message"].split("\n")  # "strict=False" is why _get() was not used
         components = []
         for i in range(len(res)):
-            if i > 2 and i < len(res) - 1:
+            if 2 < i < len(res) - 1:
                 m = res[i].split()
                 component = {"name": m[0], "version": m[1], "hash": m[2], "datetime": m[3] + " " + m[4] + " " + m[5]}
                 components.append(component)
