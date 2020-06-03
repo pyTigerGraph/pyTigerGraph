@@ -2,6 +2,7 @@ tests.py
 __pycache__
 .vscode
 dist
+.idea
 .project
 .pydevproject
 build/
