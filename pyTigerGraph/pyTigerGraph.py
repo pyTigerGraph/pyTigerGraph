@@ -40,6 +40,7 @@ class TigerGraphConnection:
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug      = False
         self.schema     = None
+        self.ttkGetEF   = None
 
     # Private functions ========================================================
 
@@ -729,26 +730,40 @@ class TigerGraphConnection:
         """
         if not edgeType:
             return []
-
+        
+        # Check if ttk_getEdgesFrom query was installed
+        if self.ttkGetEF == None:
+            self.ttkGetEF = False
+            eps = self.getEndpoints(dynamic=True)
+            for ep in eps:
+                if ep.endswith("ttk_getEdgesFrom"):
+                    self.ttkGetEF = True
+        
         sourceVertexType = self.getEdgeSourceVertexType(edgeType)
         if sourceVertexType == "*":
             raise TigerGraphException("Wildcard edges are not currently supported.", None)
-
-        queryText = \
-        "INTERPRET QUERY () FOR GRAPH $graph { \
-            SetAccum<EDGE> @@es; \
-            start = {$sourceEdgeType.*}; \
-            res = \
-                SELECT s \
-                FROM   start:s-($edgeType:e)->ANY:t \
-                ACCUM  @@es += e; \
-            PRINT @@es AS edges; \
-        }"
-
-        queryText = queryText.replace("$graph",          self.graphname) \
-                             .replace('$sourceEdgeType', sourceVertexType) \
-                             .replace('$edgeType',       edgeType)
-        return self.runInterpretedQuery(queryText)[0]["edges"]
+        
+        if self.ttkGetEF:  # If installed version is available, use it, as it can return edge attributes too.
+            ret = self.runInstalledQuery("ttk_getEdgesFrom", {"edgeType": edgeType, "sourceVertexType": sourceVertexType})
+        else:  # If installed version is not available, use interpreted version. Always available, but can't return attributes.
+            queryText = \
+            'INTERPRET QUERY () FOR GRAPH $graph { \
+                SetAccum<EDGE> @@edges; \
+                start = {ANY}; \
+                res = \
+                    SELECT s \
+                    FROM   start:s-(:e)->ANY:t \
+                    WHERE  e.type == "$edgeType" \
+                       AND s.type == "$sourceEdgeType" \
+                    ACCUM  @@edges += e; \
+                PRINT @@edges AS edges; \
+            }'
+            
+            queryText = queryText.replace("$graph",          self.graphname) \
+                                 .replace('$sourceEdgeType', sourceVertexType) \
+                                 .replace('$edgeType',       edgeType)
+            ret = self.runInterpretedQuery(queryText)
+        return ret[0]["edges"]
 
     def getEdgeStats(self, edgeTypes, skipNA=False):
         """Returns edge attribute statistics.
