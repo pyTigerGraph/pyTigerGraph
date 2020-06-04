@@ -15,7 +15,7 @@
     
     
       
-        <title>Query Functions - pyTigerGraph</title>
+        <title>DataFrame Functions - pyTigerGraph</title>
       
     
     
@@ -50,7 +50,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#runinstalledquery" class="md-skip">
+        <a href="#graph-to-dataframe" class="md-skip">
           Skip to content
         </a>
       
@@ -78,7 +78,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Query Functions
+              DataFrame Functions
             
           </span>
         </div>
@@ -239,12 +239,10 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-3" type="checkbox" id="nav-2-3" checked>
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-3" type="checkbox" id="nav-2-3">
     
     <label class="md-nav__link" for="nav-2-3">
       Core Functions
@@ -314,56 +312,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Query Functions
-        <span class="md-nav__icon md-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"/></svg>
-        </span>
-      </label>
-    
-    <a href="./" title="Query Functions" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../QueryFunctions/" title="Query Functions" class="md-nav__link">
       Query Functions
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-      </span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#runinstalledquery" class="md-nav__link">
-    runInstalledQuery
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#runinterpretedquery" class="md-nav__link">
-    runInterpretedQuery
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -400,11 +353,81 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../DataFrame/" title="DataFrame Functions" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        DataFrame Functions
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"/></svg>
+        </span>
+      </label>
+    
+    <a href="./" title="DataFrame Functions" class="md-nav__link md-nav__link--active">
       DataFrame Functions
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting Started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getverticiedataframe" class="md-nav__link">
+    getVerticieDataframe()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getverticiedataframebyid" class="md-nav__link">
+    getVerticieDataframeByID
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedgesdataframe" class="md-nav__link">
+    getEdgesDataframe
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getinstalledqueriesdataframe" class="md-nav__link">
+    getInstalledQueriesDataframe
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -451,6 +474,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon">
@@ -461,15 +486,36 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#runinstalledquery" class="md-nav__link">
-    runInstalledQuery
+  <a href="#getting-started" class="md-nav__link">
+    Getting Started
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#runinterpretedquery" class="md-nav__link">
-    runInterpretedQuery
+  <a href="#getverticiedataframe" class="md-nav__link">
+    getVerticieDataframe()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getverticiedataframebyid" class="md-nav__link">
+    getVerticieDataframeByID
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getedgesdataframe" class="md-nav__link">
+    getEdgesDataframe
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getinstalledqueriesdataframe" class="md-nav__link">
+    getInstalledQueriesDataframe
   </a>
   
 </li>
@@ -486,7 +532,7 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/parkererickson/pyTigerGraph/edit/master/docs/QueryFunctions.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/parkererickson/pyTigerGraph/edit/master/docs/DataFrame.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
@@ -494,30 +540,72 @@
                   
                 
                 
-                  <h1>Query Functions</h1>
-                
-                <h2 id="runinstalledquery">runInstalledQuery</h2>
-<p><code>runInstalledQuery(queryName, params=None, timeout=16000, sizeLimit=32000000)</code></p>
-<p>Runs an installed query.</p>
-<p>The query must be already created and installed in the graph.
-Use <a href="#getEndpoints"><code>getEndpoints(dynamic=True)</code></a> or GraphStudio to find out the generated endpoint URL of the query, but only the query name needs to be specified here.</p>
-<p>Arguments:
-- <code>params</code>:    A string of <code>param1=value1&amp;param2=value2</code> format or a dictionary.
-- <code>timeout</code>:   Maximum duration for successful query execution.
-- <code>sizeLimit</code>: Maximum size of response (in bytes).</p>
-<p>Documentation: <a href="https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query">POST /query/{graph_name}/<query_name></a></p>
-<h2 id="runinterpretedquery">runInterpretedQuery</h2>
-<p><code>runInterpretedQuery(queryText, params=None)</code></p>
-<p>Runs an interpreted query.</p>
-<p>You must provide the query text in this format:</p>
-<pre><code>INTERPRET QUERY (&lt;params&gt;) FOR GRAPH &lt;graph_name&gt; {
-   &lt;statements&gt;
-}'
+                <h1 id="graph-to-dataframe">Graph To DataFrame</h1>
+<p>The graphToDataFrame sub-module provides results from various built-in endpoints in a Pandas DataFrame. For this module to work, you will have to install the Pandas module, by running <code>pip install pandas</code>. Take a look <a href="https://github.com/parkererickson/pyTigerGraph/blob/master/examples/dataFrameDemos.ipynb">here</a> for some demos displaying some of the functionality.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>First, you will need to import the submodule and pass in the connection object that is created with the core functionality. This will look something like this:</p>
+<pre><code class="python">import pyTigerGraph as tg 
+from pyTigerGraph import graphToDataFrame as tgDf
+
+conn = tg.TigerGraphConnection(host=&quot;https://20bd42e3162a40db9ca0a2f0a4352948.i.tgcloud.io&quot;, graphname=&quot;CrunchBasePre_2013&quot;, apiToken=token)
+
+dfConn = tgDf.graphToDataFrame(conn)
 </code></pre>
 
+<h2 id="getverticiedataframe">getVerticieDataframe()</h2>
+<p><code>getVerticieDataframe(vertexType, select="", where="", limit="", sort="", timeout=0)</code>
+Returns the verticies of a given vertex type that conform to the various arguments. 
+Arguments:
+- <code>vertexType</code>: Type of vertex desired
+- <code>select</code>: Comma separated list of vertex attributes to be retrieved or omitted.
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+- <code>where</code>:  Comma separated list of conditions that are all applied on each vertex' attributes.
+            The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+- <code>limit</code>:  Maximum number of vertex instances to be returned (after sorting).
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+- <code>sort</code>    Comma separated list of attributes the results should be sorted by.
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+Example:</p>
+<pre><code class="python">df = dfConn.getVerticieDataframe(&quot;company&quot;, limit=100)
+</code></pre>
+
+<h2 id="getverticiedataframebyid">getVerticieDataframeByID</h2>
+<p><code>getVerticieDataframeByID(vertexType, vertexIds)</code>
+Retrieves vertices of the given vertex type, identified by their ID.
+Arguments:
+- <code>vertexType</code>: Type of vertex desired
+- <code>vertexIds</code>: A list of vertex IDs.</p>
+<p>Example:</p>
+<pre><code class="python">df = dfConn.getVerticieDataframeByID(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
+</code></pre>
+
+<h2 id="getedgesdataframe">getEdgesDataframe</h2>
+<p><code>getEdgesDataframe(sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0)</code></p>
+<p>Retrieves edges of the given edge type originating from the list of source verticies.</p>
+<p>Only <code>sourceVertexType</code> and <code>sourceVerticies</code> are required.
+If <code>targetVertexId</code> is specified, then <code>targetVertexType</code> must also be specified.
+If <code>targetVertexType</code> is specified, then <code>edgeType</code> must also be specified.</p>
 <p>Arguments:
-- <code>params</code>:    A string of <code>param1=value1&amp;param2=value2</code> format or a dictionary.</p>
-<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query">POST /gsqlserver/interpreted_query</a></p>
+- <code>select</code>: Comma separated list of edge attributes to be retrieved or omitted.
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+- <code>where</code>:  Comma separated list of conditions that are all applied on each edge's attributes.
+            The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+- <code>limit</code>:  Maximum number of edge instances to be returned (after sorting).
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+- <code>sort</code>    Comma separated list of attributes the results should be sorted by.
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort</p>
+<p>Example:</p>
+<pre><code class="python">edgeDf = dfConn.getEdgesDataframe(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
+</code></pre>
+
+<h2 id="getinstalledqueriesdataframe">getInstalledQueriesDataframe</h2>
+<p><code>getInstalledQueriesDataframe()</code>
+Returns dataframe of all installed queries, does not take any arguments.
+Example:</p>
+<pre><code class="python">queries = df.getInstalledQueriesDataframe()
+</code></pre>
                 
               
               
@@ -536,7 +624,7 @@ Use <a href="#getEndpoints"><code>getEndpoints(dynamic=True)</code></a> or Graph
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../EdgeFunctions/" title="Edge Functions" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../OtherFunctions/" title="Other Functions" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -545,19 +633,19 @@ Use <a href="#getEndpoints"><code>getEndpoints(dynamic=True)</code></a> or Graph
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Edge Functions
+                Other Functions
               </div>
             </div>
           </a>
         
         
-          <a href="../TokenManagement/" title="API Tokens" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../CONTRIBUTING/" title="Contribute" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                API Tokens
+                Contribute
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
