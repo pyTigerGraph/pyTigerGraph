@@ -397,15 +397,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#getverticiedataframe" class="md-nav__link">
-    getVerticieDataframe()
+  <a href="#getvertexdataframe" class="md-nav__link">
+    getVertexDataframe
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#getverticiedataframebyid" class="md-nav__link">
-    getVerticieDataframeByID
+  <a href="#getvertexdataframebyid" class="md-nav__link">
+    getVertexDataframeByID
   </a>
   
 </li>
@@ -493,15 +493,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#getverticiedataframe" class="md-nav__link">
-    getVerticieDataframe()
+  <a href="#getvertexdataframe" class="md-nav__link">
+    getVertexDataframe
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#getverticiedataframebyid" class="md-nav__link">
-    getVerticieDataframeByID
+  <a href="#getvertexdataframebyid" class="md-nav__link">
+    getVertexDataframeByID
   </a>
   
 </li>
@@ -552,32 +552,50 @@ conn = tg.TigerGraphConnection(host=&quot;https://20bd42e3162a40db9ca0a2f0a43529
 dfConn = tgDf.graphToDataFrame(conn)
 </code></pre>
 
-<h2 id="getverticiedataframe">getVerticieDataframe()</h2>
-<p><code>getVerticieDataframe(vertexType, select="", where="", limit="", sort="", timeout=0)</code>
-Returns the verticies of a given vertex type that conform to the various arguments. 
-Arguments:
-- <code>vertexType</code>: Type of vertex desired
-- <code>select</code>: Comma separated list of vertex attributes to be retrieved or omitted.
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-- <code>where</code>:  Comma separated list of conditions that are all applied on each vertex' attributes.
+<h2 id="getvertexdataframe">getVertexDataframe</h2>
+<p><code>getVertexDataframe(vertexType, select="", where="", limit="", sort="", timeout=0)</code>
+Returns the verticies of a given vertex type that conform to the various arguments. </p>
+<p>Arguments:</p>
+<ul>
+<li>
+<p><code>vertexType</code>: Type of vertex desired</p>
+</li>
+<li>
+<p><code>select</code>: Comma separated list of vertex attributes to be retrieved or omitted.
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select</p>
+</li>
+<li>
+<p><code>where</code>:  Comma separated list of conditions that are all applied on each vertex' attributes.
             The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-- <code>limit</code>:  Maximum number of vertex instances to be returned (after sorting).
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-- <code>sort</code>    Comma separated list of attributes the results should be sorted by.
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter</p>
+</li>
+<li>
+<p><code>limit</code>:  Maximum number of vertex instances to be returned (after sorting).
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit</p>
+</li>
+<li>
+<p><code>sort</code>    Comma separated list of attributes the results should be sorted by.
             See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
 Example:</p>
-<pre><code class="python">df = dfConn.getVerticieDataframe(&quot;company&quot;, limit=100)
+</li>
+</ul>
+<pre><code class="python">df = dfConn.getVertexDataframe(&quot;company&quot;, limit=100)
 </code></pre>
 
-<h2 id="getverticiedataframebyid">getVerticieDataframeByID</h2>
-<p><code>getVerticieDataframeByID(vertexType, vertexIds)</code>
-Retrieves vertices of the given vertex type, identified by their ID.
-Arguments:
-- <code>vertexType</code>: Type of vertex desired
-- <code>vertexIds</code>: A list of vertex IDs.</p>
+<h2 id="getvertexdataframebyid">getVertexDataframeByID</h2>
+<p><code>getVertexDataframeByID(vertexType, vertexIds)</code>
+Retrieves vertices of the given vertex type, identified by their ID.</p>
+<p>Arguments:</p>
+<ul>
+<li>
+<p><code>vertexType</code>: Type of vertex desired</p>
+</li>
+<li>
+<p><code>vertexIds</code>: A list of vertex IDs.</p>
+</li>
+</ul>
 <p>Example:</p>
-<pre><code class="python">df = dfConn.getVerticieDataframeByID(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
+<pre><code class="python">df = dfConn.getVertexDataframeByID(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
 </code></pre>
 
 <h2 id="getedgesdataframe">getEdgesDataframe</h2>
@@ -586,16 +604,26 @@ Arguments:
 <p>Only <code>sourceVertexType</code> and <code>sourceVerticies</code> are required.
 If <code>targetVertexId</code> is specified, then <code>targetVertexType</code> must also be specified.
 If <code>targetVertexType</code> is specified, then <code>edgeType</code> must also be specified.</p>
-<p>Arguments:
-- <code>select</code>: Comma separated list of edge attributes to be retrieved or omitted.
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-- <code>where</code>:  Comma separated list of conditions that are all applied on each edge's attributes.
+<p>Arguments:</p>
+<ul>
+<li>
+<p><code>select</code>: Comma separated list of edge attributes to be retrieved or omitted.
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select</p>
+</li>
+<li>
+<p><code>where</code>:  Comma separated list of conditions that are all applied on each edge's attributes.
             The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-- <code>limit</code>:  Maximum number of edge instances to be returned (after sorting).
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-- <code>sort</code>    Comma separated list of attributes the results should be sorted by.
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter</p>
+</li>
+<li>
+<p><code>limit</code>:  Maximum number of edge instances to be returned (after sorting).
+            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit</p>
+</li>
+<li>
+<p><code>sort</code>    Comma separated list of attributes the results should be sorted by.
             See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort</p>
+</li>
+</ul>
 <p>Example:</p>
 <pre><code class="python">edgeDf = dfConn.getEdgesDataframe(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
 </code></pre>
