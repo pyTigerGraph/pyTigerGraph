@@ -16,7 +16,7 @@ class TigerGraphException(Exception):
         self.code = code
 
 
-class TigerGraphConnection:
+class TigerGraphConnection(object):
     """Python wrapper for TigerGraph's REST++ API.
 
     Common arguments used in methods:
