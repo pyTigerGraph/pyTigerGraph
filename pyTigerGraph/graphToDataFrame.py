@@ -63,9 +63,6 @@ class graphToDataFrame():
                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
         - `sort`    Comma separated list of attributes the results should be sorted by.
                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-
-        Endpoint:      GET /graph/{graph_name}/vertices
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
         """
         frames = []
         for vertex in sourceVerticies:
