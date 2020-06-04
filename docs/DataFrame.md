@@ -12,35 +12,44 @@ conn = tg.TigerGraphConnection(host="https://20bd42e3162a40db9ca0a2f0a4352948.i.
 dfConn = tgDf.graphToDataFrame(conn)
 ```
 
-## getVerticieDataframe()
-```getVerticieDataframe(vertexType, select="", where="", limit="", sort="", timeout=0)```
+## getVertexDataframe
+```getVertexDataframe(vertexType, select="", where="", limit="", sort="", timeout=0)```
 Returns the verticies of a given vertex type that conform to the various arguments. 
+
 Arguments:
+
 - `vertexType`: Type of vertex desired
+
 - `select`: Comma separated list of vertex attributes to be retrieved or omitted.
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+            See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select)
+
 - `where`:  Comma separated list of conditions that are all applied on each vertex' attributes.
             The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+            See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter)
+
 - `limit`:  Maximum number of vertex instances to be returned (after sorting).
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+            See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit)
+
 - `sort`    Comma separated list of attributes the results should be sorted by.
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+            See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort)
 Example:
 ```python
-df = dfConn.getVerticieDataframe("company", limit=100)
+df = dfConn.getVertexDataframe("company", limit=100)
 ```
 
-## getVerticieDataframeByID
-```getVerticieDataframeByID(vertexType, vertexIds)```
+## getVertexDataframeByID
+```getVertexDataframeByID(vertexType, vertexIds)```
 Retrieves vertices of the given vertex type, identified by their ID.
+
 Arguments:
+
 - `vertexType`: Type of vertex desired
+
 - `vertexIds`: A list of vertex IDs.
 
 Example:
 ```python
-df = dfConn.getVerticieDataframeByID("company", ["c:1", "c:2"])
+df = dfConn.getVertexDataframeByID("company", ["c:1", "c:2"])
 ```
 
 ## getEdgesDataframe
@@ -53,15 +62,19 @@ If `targetVertexId` is specified, then `targetVertexType` must also be specified
 If `targetVertexType` is specified, then `edgeType` must also be specified.
 
 Arguments:
+
 - `select`: Comma separated list of edge attributes to be retrieved or omitted.
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+            See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select)
+
 - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
             The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+            See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter)
+
 - `limit`:  Maximum number of edge instances to be returned (after sorting).
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+            See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit)
+
 - `sort`    Comma separated list of attributes the results should be sorted by.
-            See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+            See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort)
 
 Example:
 ```python

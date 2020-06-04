@@ -5,7 +5,7 @@ class graphToDataFrame():
     def __init__(self, connection):
         self.connection = connection
     
-    def getVerticieDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
+    def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
         """Retrieves vertices of the given vertex type.
 
         Arguments:
@@ -31,7 +31,7 @@ class graphToDataFrame():
         df = pd.concat([df.drop("attributes", axis=1), pd.DataFrame(df["attributes"].tolist())], axis=1)
         return df
 
-    def getVerticieDataframeByID(self, vertexType, vertexIds):
+    def getVertexDataframeByID(self, vertexType, vertexIds):
         """Retrieves vertices of the given vertex type, identified by their ID.
 
         Arguments
