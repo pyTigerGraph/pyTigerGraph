@@ -3,6 +3,7 @@ import pyTigerGraph
 
 class graphToDataFrame():
     def __init__(self, connection):
+        assert isinstance(connection, pyTigerGraph.TigerGraphConnection), "Must pass in a TigerGraphConnection"
         self.connection = connection
     
     def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
