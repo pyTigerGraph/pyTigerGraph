@@ -28,19 +28,19 @@ class TigerGraphConnection(object):
     """
 
     def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken=""):
-        self.host       = host
-        self.username   = username
-        self.password   = password
-        self.graphname  = graphname
+        self.host = host
+        self.username = username
+        self.password = password
+        self.graphname = graphname
         self.restppPort = str(restppPort)
-        self.restppUrl  = self.host + ":" + self.restppPort
-        self.gsPort     = str(gsPort)
-        self.gsUrl      = self.host + ":" + self.gsPort
-        self.apiToken   = apiToken
+        self.restppUrl = self.host + ":" + self.restppPort
+        self.gsPort = str(gsPort)
+        self.gsUrl = self.host + ":" + self.gsPort
+        self.apiToken = apiToken
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
-        self.debug      = False
-        self.schema     = None
-        self.ttkGetEF   = None
+        self.debug = False
+        self.schema = None
+        self.ttkGetEF = None
 
     # Private functions ========================================================
 
