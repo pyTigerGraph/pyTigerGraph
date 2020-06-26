@@ -13,6 +13,7 @@ nav:
             - 'API Tokens': TokenManagement.md
             - 'Other Functions': OtherFunctions.md
         - 'DataFrame Functions': DataFrame.md
+        - 'GSQL Functions': Gsql.md
     - Contribute: CONTRIBUTING.md
     - License: license.md
 theme:

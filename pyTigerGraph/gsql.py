@@ -1,9 +1,11 @@
 import urllib.request
 import os
 import subprocess, yaml, re
+import pyTigerGraph
 
 class Gsql():
     def __init__(self, connection, client_version="2.6.0", jarLocation="~/.gsql", certNeeded=True, certLocation="~/.gsql/my-cert.txt"):
+        assert isinstance(connection, pyTigerGraph.TigerGraphConnection), "Must pass in a TigerGraphConnection"
         self.connection = connection
         self.jarLocation = os.path.expanduser(jarLocation)
         self.certLocation = os.path.expanduser(certLocation)
