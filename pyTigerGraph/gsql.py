@@ -3,7 +3,7 @@ import os
 import subprocess, yaml, re
 
 class gsql():
-    def __init__(self, connection, client_version, jarLocation="./", certNeeded=True, certLocation="./my-cert.txt"):
+    def __init__(self, connection, client_version, jarLocation=".gsql/", certNeeded=True, certLocation=".gsql/my-cert.txt"):
         self.connection = connection
         self.jarLocation = jarLocation
         self.certLocation = certLocation
@@ -12,20 +12,25 @@ class gsql():
         if (noJava):
             Exception("Install Java")
         '''
-        jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
-                + 'com/tigergraph/client/gsql_client/' + client_version 
-                + '/gsql_client-' + client_version + '.jar')
-                
-        urllib.request.urlretrieve(jar_url, jarLocation + 'gsql_client.jar') # TODO: Store this with the package?
+        if(not os.path.exists(jarLocation)):
+            os.mkdir(jarLocation)
+    
+        if(not os.path.exists(jarLocation+"gsql_client.jar")):
+            print("Downloading gsql client Jar")
+            jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
+                    + 'com/tigergraph/client/gsql_client/' + client_version 
+                    + '/gsql_client-' + client_version + '.jar')
+                    
+            urllib.request.urlretrieve(jar_url, jarLocation + 'gsql_client.jar') # TODO: Store this with the package?
         
         if(certNeeded): #HTTP/HTTPS
             '''
             if (noOpenSSL):
                 Exception("No OpenSSL, provide own certificication")
             '''
-            #if(certDoesntExist):
-            print(self.connection.gsUrl[8:])
-            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation) # TODO: Python-native SSL?
+            if(not os.path.exists(certLocation)):
+                print("Creating new SSL Certificate")
+                os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation) # TODO: Python-native SSL?
 
 
     def gsql(self, query, options=None):
