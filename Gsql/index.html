@@ -15,7 +15,7 @@
     
     
       
-        <title>Getting Started - pyTigerGraph</title>
+        <title>GSQL Functions - pyTigerGraph</title>
       
     
     
@@ -51,7 +51,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started" class="md-skip">
+        <a href="#gsql-submodule-beta" class="md-skip">
           Skip to content
         </a>
       
@@ -79,7 +79,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Getting Started
+              GSQL Functions
             
           </span>
         </div>
@@ -216,20 +216,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-    <a href="./" title="Getting Started" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../GettingStarted/" title="Getting Started" class="md-nav__link">
       Getting Started
     </a>
-    
   </li>
 
         
@@ -375,11 +366,67 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../Gsql/" title="GSQL Functions" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        GSQL Functions
+        <span class="md-nav__icon md-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"/></svg>
+        </span>
+      </label>
+    
+    <a href="./" title="GSQL Functions" class="md-nav__link md-nav__link--active">
       GSQL Functions
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting Started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gsql" class="md-nav__link">
+    gsql
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#createsecret" class="md-nav__link">
+    createSecret
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -429,6 +476,37 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting Started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gsql" class="md-nav__link">
+    gsql
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#createsecret" class="md-nav__link">
+    createSecret
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -439,7 +517,7 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/parkererickson/pyTigerGraph/edit/master/docs/GettingStarted.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/parkererickson/pyTigerGraph/edit/master/docs/Gsql.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
@@ -447,21 +525,22 @@
                   
                 
                 
-                <h1 id="getting-started">Getting Started</h1>
-<p>To download pyTigerGraph, simply run:
-<code>pip install pyTigerGraph</code>
-Once the package installs, you can import it and instantiate a connection to your database:</p>
-<pre><code class="py">import pyTigerGraph as tg
+                <h1 id="gsql-submodule-beta">GSQL Submodule (Beta)</h1>
+<p>The GSQL submodule provides GSQL shell functionality, allowing you to create and execute queries, loading tasks, and authentication tasks. Java must be installed on the system. OpenSSL is also used, but you can provide your own certificate if OpenSSL is not installed on your system.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>First, you will need to import the submodule and pass in a TigerGraphConnection object. This will look something like this:</p>
+<pre><code class="python">import pyTigerGraph as tg 
+from pyTigerGraph import gsql
 
-conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quot;&lt;graph_name&gt;&quot;, username=&quot;&lt;username&gt;&quot;, password=&quot;&lt;password&gt;&quot;, apiToken=&quot;&lt;api_token&gt;&quot;)
+conn = tg.TigerGraphConnection(host='https://localhost', graphname=&quot;social&quot;)
+
+shell = gsql.Gsql(conn, certNeeded=False)
 </code></pre>
 
-<p>If your database is not using the standard ports (or they are mapped), you can use the following arguments to specify those:
-- restppPort (default 9000): <a href="https://docs.tigergraph.com/dev/restpp-api/restpp-requests">REST++ API port</a>
-- gsPort (default: 14240): <a href="https://docs.tigergraph.com/ui/graphstudio/overview#TigerGraphGraphStudioUIGuide-GraphStudioOn-Premises">GraphStudio port</a></p>
-<p>For example, in case of using a local virtual machine with the ports mapped:</p>
-<pre><code class="py">conn = tg.TigerGraphConnection(host=&quot;localhost&quot;, restppPort=25900, gsPort=25240, graphname=&quot;MyGraph&quot;, username=&quot;tigergraph&quot;, password=&quot;tigergraph&quot;, apiToken=&quot;2aa016d747ede9gg6da3drslm98srfoj&quot;)
-</code></pre>
+<h2 id="gsql">gsql</h2>
+<p>Once you have the connection setup, we can use the gsql() method to send a query. By default, all commands are run using the graph that is passed in with the TigerGraphConnection. You can customize the command line options via the options argument, which takes in a list. If you wish to run a query on the whole server, simply set the options argument to [].</p>
+<h2 id="createsecret">createSecret</h2>
+<p>Returns a secret key. Takes in a string as an argument if you want to use an alias while generating the key.</p>
                 
               
               
@@ -480,7 +559,7 @@ conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quo
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href=".." title="Home" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../DataFrame/" title="DataFrame Functions" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -489,19 +568,19 @@ conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quo
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Home
+                DataFrame Functions
               </div>
             </div>
           </a>
         
         
-          <a href="../Auth/" title="Authentication" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../CONTRIBUTING/" title="Contribute" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Authentication
+                Contribute
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
