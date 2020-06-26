@@ -2,53 +2,71 @@ import urllib.request
 import os
 import subprocess, yaml, re
 
-class gsql():
-    def __init__(self, connection, client_version, jarLocation=".gsql/", certNeeded=True, certLocation=".gsql/my-cert.txt"):
+class Gsql():
+    def __init__(self, connection, client_version="2.6.0", jarLocation="~/.gsql", certNeeded=True, certLocation="~/.gsql/my-cert.txt"):
         self.connection = connection
-        self.jarLocation = jarLocation
-        self.certLocation = certLocation
+        self.jarLocation = os.path.expanduser(jarLocation)
+        self.certLocation = os.path.expanduser(certLocation)
+        self.certNeeded = certNeeded
+        self.client_version = client_version
         self.url = connection.gsUrl[8:] # Getting URL with gsql port w/o https://
+        self.stdout=''
+        self.stderr=''
+        
         '''
         if (noJava):
             Exception("Install Java")
         '''
-        if(not os.path.exists(jarLocation)):
-            os.mkdir(jarLocation)
+
+        if(not os.path.exists(self.jarLocation)):
+            os.mkdir(self.jarLocation)
     
-        if(not os.path.exists(jarLocation+"gsql_client.jar")):
+        if(not os.path.exists(self.jarLocation+"/gsql_client.jar")):
             print("Downloading gsql client Jar")
             jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
                     + 'com/tigergraph/client/gsql_client/' + client_version 
                     + '/gsql_client-' + client_version + '.jar')
                     
-            urllib.request.urlretrieve(jar_url, jarLocation + 'gsql_client.jar') # TODO: Store this with the package?
+            urllib.request.urlretrieve(jar_url, self.jarLocation + '/gsql_client.jar') # TODO: Store this with the package?
         
         if(certNeeded): #HTTP/HTTPS
             '''
             if (noOpenSSL):
                 Exception("No OpenSSL, provide own certificication")
             '''
-            if(not os.path.exists(certLocation)):
+            if(not os.path.exists(self.certLocation)):
                 print("Creating new SSL Certificate")
                 os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation) # TODO: Python-native SSL?
 
 
     def gsql(self, query, options=None):
-        cmd = ['java', '-DGSQL_CLIENT_VERSION=v2_6_0', '-jar', 'gsql_client.jar',
-        '-cacert', self.certLocation, '-u', self.connection.username, '-p', self.connection.password, 
+        
+        if (options == None):
+            options = ["-g", self.connection.graphname]
+        
+        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.client_version.replace('.','_'),
+               '-jar', self.jarLocation + '/gsql_client.jar' ]
+
+        if self.certNeeded:
+            cmd += ['-cacert', self.certLocation]
+
+        cmd += [
+        '-u', self.connection.username, '-p', self.connection.password, 
         '-ip', self.url]
-        if (not options):
-            comp = subprocess.run(cmd + ["-g", self.connection.graphname] + [query], 
-                                stdout=subprocess.PIPE).stdout.decode()
-        else:
-           comp = subprocess.run(cmd + options + [query], 
-                                stdout=subprocess.PIPE).stdout.decode() 
+        
+        comp = subprocess.run(cmd + options + [query], 
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+
+        self.stdout = comp.stdout.decode()
+        self.stderr = comp.stderr.decode()
         
         try:
-            json_string = re.search('(\{|\[).*$',comp.replace('\n',''))[0]
+            json_string = re.search('(\{|\[).*$',
+                                    self.stdout.replace('\n',''))[0]
             json_object = yaml.safe_load(json_string)
         except:
-            return comp
+            return self.stdout
         else:
             return json_object
         
