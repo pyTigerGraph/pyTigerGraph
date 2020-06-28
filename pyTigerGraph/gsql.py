@@ -11,7 +11,7 @@ class Gsql():
         self.certLocation = os.path.expanduser(certLocation)
         self.certNeeded = certNeeded
         self.client_version = client_version
-        self.url = connection.gsUrl[8:] # Getting URL with gsql port w/o https://
+        self.url = connection.gsUrl.replace("https://", "").replace("http://", "") # Getting URL with gsql port w/o https://
         self.stdout=''
         self.stderr=''
         
