@@ -655,7 +655,10 @@ class TigerGraphConnection(object):
         data = {sourceVertexType: {}}
         l1 = data[sourceVertexType]
         for e in edges:
-            vals = self._upsertAttrs(e[2])
+            if len(e)>2:
+                vals = self._upsertAttrs(e[2])
+            else:
+                vals = {}
             # fromVertexId
             if e[0] not in l1:
                 l1[e[0]] = {}
