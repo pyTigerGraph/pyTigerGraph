@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pyTigerGraph
-Version: 0.0.6.2
+Version: 0.0.6.4
 Summary: Library to connect to TigerGraph databases
 Home-page: https://github.com/parkererickson/pyTigerGraph
 Author: Parker Erickson / TigerGraph
