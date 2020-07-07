@@ -23,13 +23,12 @@ class Gsql():
         if(not os.path.exists(self.jarLocation)):
             os.mkdir(self.jarLocation)
     
-        if(not os.path.exists(self.jarLocation+"/gsql_client.jar")):
-            print("Downloading gsql client Jar")
-            jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
+        print("Downloading gsql client Jar")
+        jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
                     + 'com/tigergraph/client/gsql_client/' + client_version 
                     + '/gsql_client-' + client_version + '.jar')
                     
-            urllib.request.urlretrieve(jar_url, self.jarLocation + '/gsql_client.jar') # TODO: Store this with the package?
+        urllib.request.urlretrieve(jar_url, self.jarLocation + '/gsql_client.jar') # TODO: Store this with the package?
         
         if(certNeeded): #HTTP/HTTPS
             '''
