@@ -295,7 +295,7 @@ class TigerGraphConnection(object):
         data = json.dumps({"vertices": {vertexType: data}})
         return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_vertices"]
 
-    def getVertices(self, vertexType, select="", where="", sort="", limit="", timeout=0):
+    def getVertices(self, vertexType, select="", where="", limit="", sort="", timeout=0):
         """Retrieves vertices of the given vertex type.
 
         Arguments:
@@ -304,10 +304,10 @@ class TigerGraphConnection(object):
         - `where`:  Comma separated list of conditions that are all applied on each vertex' attributes.
                     The conditions are in logical conjunction (i.e. they are "AND'ed" together).
                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        - `sort`    Comma separated list of attributes the results should be sorted by.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
         - `limit`:  Maximum number of vertex instances to be returned (after sorting).
                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`    Comma separated list of attributes the results should be sorted by.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
 
         NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
               Use `getVerticesById` if you need to retrieve by vertex ID.
@@ -323,11 +323,11 @@ class TigerGraphConnection(object):
         if where:
             url += ("?" if isFirst else "&") + "filter=" + where
             isFirst = False
-        if sort:
-            url += ("?" if isFirst else "&") + "sort=" + sort
-            isFirst = False
         if limit:
             url += ("?" if isFirst else "&") + "limit=" + str(limit)
+            isFirst = False
+        if sort:
+            url += ("?" if isFirst else "&") + "sort=" + sort
             isFirst = False
         if timeout and timeout > 0:
             url += ("?" if isFirst else "&") + "timeout=" + str(timeout)
@@ -343,7 +343,7 @@ class TigerGraphConnection(object):
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
         """
         if not vertexIds:
-            raise TigerGraphException("No vertex ID was specified.", None)
+            raise TigerGraphException("No vertex ID was not specified.", None)
         vids = []
         if isinstance(vertexIds, (int, str)):
             vids.append(vertexIds)
@@ -538,7 +538,7 @@ class TigerGraphConnection(object):
             return config["REVERSE_EDGE"]
         return None
 
-    def getEdgeCountFrom(self, sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where=""):
+    def getEdgeCount(self, sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where=""):
         """Return the number of edges.
 
         Arguments
@@ -582,7 +582,7 @@ class TigerGraphConnection(object):
             res = self._get(url)
         else:
             if not edgeType:  # TODO is this a valid check?
-                raise TigerGraphException("A valid edge type or \"*\" must be specified for edge type.", None)
+                raise TigerGraphException("A valid edge type or \"*\" must be specified for edgeType if where condition is set.", None)
             data = '{"function":"stat_edge_number","type":"' + edgeType + '"' \
                 + (',"from_type":"' + sourceVertexType + '"' if sourceVertexType else '')  \
                 + (',"to_type":"' + targetVertexType + '"' if targetVertexType else '')  \
@@ -594,9 +594,6 @@ class TigerGraphConnection(object):
         for r in res:
             ret[r["e_type"]] = r["count"]
         return ret
-
-    def getEdgeCount(self, edgeType="*", sourceVertexType=None, targetVertexType=None):
-        return self.getEdgeCountFrom(edgeType=edgeType, sourceVertexType=sourceVertexType, targetVertexType=targetVertexType)
 
     def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes=None):
         """Upserts an edge.
@@ -679,7 +676,7 @@ class TigerGraphConnection(object):
         data = json.dumps({"edges": data})
         return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
 
-    def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", sort="", limit="", timeout=0):
+    def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
         """Retrieves edges of the given edge type originating from a specific source vertex.
 
         Only `sourceVertexType` and `sourceVertexId` are required.
@@ -692,16 +689,16 @@ class TigerGraphConnection(object):
         - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
                     The conditions are in logical conjunction (i.e. they are "AND'ed" together).
                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        - `sort`    Comma separated list of attributes the results should be sorted by.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
         - `limit`:  Maximum number of edge instances to be returned (after sorting).
                     See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`    Comma separated list of attributes the results should be sorted by.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
 
         Endpoint:      GET /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
         """
         if not sourceVertexType or not sourceVertexId:
-            raise TigerGraphException("Both source vertex type and source vertex ID must be provided.", None)
+            raise TigerGraphException("Both sourceVertexType and sourceVertexId must be provided.", None)
         url = self.restppUrl + "/graph/" + self.graphname + "/edges/" + sourceVertexType + "/" + str(sourceVertexId)
         if edgeType:
             url += "/" + edgeType
@@ -716,11 +713,11 @@ class TigerGraphConnection(object):
         if where:
             url += ("?" if isFirst else "&") + "filter=" + where
             isFirst = False
-        if sort:
-            url += ("?" if isFirst else "&") + "sort=" + sort
-            isFirst = False
         if limit:
             url += ("?" if isFirst else "&") + "limit=" + str(limit)
+            isFirst = False
+        if sort:
+            url += ("?" if isFirst else "&") + "sort=" + sort
             isFirst = False
         if timeout and timeout > 0:
             url += ("?" if isFirst else "&") + "timeout=" + str(timeout)
@@ -878,15 +875,12 @@ class TigerGraphConnection(object):
                <statements>
             }'
 
-        Use `$graphname` in the `FOR GRAPH` clause to avoid hard-coding it; it will be replaced by the actual graph name.
-
         Arguments:
         - `params`:    A string of param1=value1&param2=value2 format or a dictionary.
 
         Endpoint:      POST /gsqlserver/interpreted_query
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query
         """
-        queryText = queryText.replace("$graphname", self.graphname)
         if self.debug:
             print(queryText)
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
@@ -1025,8 +1019,8 @@ class TigerGraphConnection(object):
                     eps[ep] = res[ep]
             ret.update(eps)
         if dyn:
-            eps = {}
             res = self._get(url + "dynamic=true", resKey=None)
+            eps = {}
             for ep in res:
                 if re.search("^GET /query/" + self.graphname, ep):
                     eps[ep] = res[ep]
@@ -1057,15 +1051,13 @@ class TigerGraphConnection(object):
             segment = max(min(segment,0),100)
         return self._get(self.restppUrl + "/statistics/" + self.graphname + "?seconds=" + str(seconds) + "&segment=" + str(segment), resKey=None)
 
-    def getVersion(self, raw=False):
+    def getVersion(self):
         """Retrieves the git versions of all components of the system.
 
         Endpoint:      GET /version
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-version
         """
         response = requests.request("GET", self.restppUrl + "/version/" + self.graphname, headers=self.authHeader)
-        if raw:
-            return response.text
         res = json.loads(response.text, strict=False)["message"].split("\n")  # "strict=False" is why _get() was not used
         components = []
         for i in range(len(res)):
