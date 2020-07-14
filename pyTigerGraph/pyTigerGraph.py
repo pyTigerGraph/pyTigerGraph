@@ -343,7 +343,7 @@ class TigerGraphConnection(object):
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
         """
         if not vertexIds:
-            raise TigerGraphException("No vertex ID was not specified.", None)
+            raise TigerGraphException("No vertex ID was specified.", None)
         vids = []
         if isinstance(vertexIds, (int, str)):
             vids.append(vertexIds)
@@ -538,8 +538,8 @@ class TigerGraphConnection(object):
             return config["REVERSE_EDGE"]
         return None
 
-    def getEdgeCount(self, sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where=""):
-        """Return the number of edges.
+    def getEdgeCountFrom(self, sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where=""):
+        """Returns the number of edges from a specific vertex.
 
         Arguments
         - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
@@ -582,7 +582,7 @@ class TigerGraphConnection(object):
             res = self._get(url)
         else:
             if not edgeType:  # TODO is this a valid check?
-                raise TigerGraphException("A valid edge type or \"*\" must be specified for edgeType if where condition is set.", None)
+                raise TigerGraphException("A valid edge type or \"*\" must be specified for edge type.", None)
             data = '{"function":"stat_edge_number","type":"' + edgeType + '"' \
                 + (',"from_type":"' + sourceVertexType + '"' if sourceVertexType else '')  \
                 + (',"to_type":"' + targetVertexType + '"' if targetVertexType else '')  \
@@ -594,6 +594,14 @@ class TigerGraphConnection(object):
         for r in res:
             ret[r["e_type"]] = r["count"]
         return ret
+
+    def getEdgeCount(self, edgeType="*", sourceVertexType=None, targetVertexType=None):
+        return self.getEdgeCountFrom(edgeType=edgeType, sourceVertexType=sourceVertexType, targetVertexType=targetVertexType)
+    """Returns the number of edges of an edge type.
+    
+    This is a simplified version of `getEdgeCountFrom`, to be used when the total number of edges of a given type is needed, regardless which vertex instance they are originated from.
+    See documentation of `getEdgeCountFrom` above for more details.
+    """
 
     def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes=None):
         """Upserts an edge.
@@ -698,7 +706,7 @@ class TigerGraphConnection(object):
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
         """
         if not sourceVertexType or not sourceVertexId:
-            raise TigerGraphException("Both sourceVertexType and sourceVertexId must be provided.", None)
+            raise TigerGraphException("Both source vertex type and source vertex ID must be provided.", None)
         url = self.restppUrl + "/graph/" + self.graphname + "/edges/" + sourceVertexType + "/" + str(sourceVertexId)
         if edgeType:
             url += "/" + edgeType
@@ -875,12 +883,15 @@ class TigerGraphConnection(object):
                <statements>
             }'
 
+        Use `$graphname` in the `FOR GRAPH` clause to avoid hard-coding it; it will be replaced by the actual graph name.
+
         Arguments:
         - `params`:    A string of param1=value1&param2=value2 format or a dictionary.
 
         Endpoint:      POST /gsqlserver/interpreted_query
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query
         """
+        queryText = queryText.replace("$graphname", self.graphname)
         if self.debug:
             print(queryText)
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
@@ -1019,8 +1030,8 @@ class TigerGraphConnection(object):
                     eps[ep] = res[ep]
             ret.update(eps)
         if dyn:
-            res = self._get(url + "dynamic=true", resKey=None)
             eps = {}
+            res = self._get(url + "dynamic=true", resKey=None)
             for ep in res:
                 if re.search("^GET /query/" + self.graphname, ep):
                     eps[ep] = res[ep]
@@ -1051,13 +1062,15 @@ class TigerGraphConnection(object):
             segment = max(min(segment,0),100)
         return self._get(self.restppUrl + "/statistics/" + self.graphname + "?seconds=" + str(seconds) + "&segment=" + str(segment), resKey=None)
 
-    def getVersion(self):
+    def getVersion(self, raw=False):
         """Retrieves the git versions of all components of the system.
 
         Endpoint:      GET /version
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-version
         """
         response = requests.request("GET", self.restppUrl + "/version/" + self.graphname, headers=self.authHeader)
+        if raw:
+            return response.text
         res = json.loads(response.text, strict=False)["message"].split("\n")  # "strict=False" is why _get() was not used
         components = []
         for i in range(len(res)):
