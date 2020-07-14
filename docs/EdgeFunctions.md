@@ -8,7 +8,7 @@ Returns the list of edge type names of the graph.
 
 Returns the details of vertex type.
 
-## getEdgeCount
+## getEdgeCountFrom
 `getEdgeCount(sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where="")`
 
 Returns the number of edges.
@@ -32,6 +32,14 @@ Returns a dictionary of `<edge_type>: <edge_count>` pairs.
 
 Documentation: [GET /graph/{graph_name}/edges](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges) and
                [POST /builtins](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_number)
+
+## getEdgeCount
+`getEdgeCount(self, edgeType="*", sourceVertexType=None, targetVertexType=None)`
+
+Returns the number of edges of an edge type.
+    
+This is a simplified version of `getEdgeCountFrom`, to be used when the total number of edges of a given type is needed, regardless which vertex instance they are originated from.
+See documentation of `getEdgeCountFrom` above for more details.
 
 ## upsertEdge
 `upsertEdge(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes={})`
