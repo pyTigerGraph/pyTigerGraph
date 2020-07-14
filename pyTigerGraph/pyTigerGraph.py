@@ -16,7 +16,7 @@ class TigerGraphException(Exception):
         self.code = code
 
 
-class TigerGraphConnection:
+class TigerGraphConnection(object):
     """Python wrapper for TigerGraph's REST++ API.
 
     Common arguments used in methods:
@@ -28,19 +28,19 @@ class TigerGraphConnection:
     """
 
     def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken=""):
-        self.host       = host
-        self.username   = username
-        self.password   = password
-        self.graphname  = graphname
+        self.host = host
+        self.username = username
+        self.password = password
+        self.graphname = graphname
         self.restppPort = str(restppPort)
-        self.restppUrl  = self.host + ":" + self.restppPort
-        self.gsPort     = str(gsPort)
-        self.gsUrl      = self.host + ":" + self.gsPort
-        self.apiToken   = apiToken
+        self.restppUrl = self.host + ":" + self.restppPort
+        self.gsPort = str(gsPort)
+        self.gsUrl = self.host + ":" + self.gsPort
+        self.apiToken = apiToken
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
-        self.debug      = False
-        self.schema     = None
-        self.ttkGetEF   = None
+        self.debug = False
+        self.schema = None
+        self.ttkGetEF = None
 
     # Private functions ========================================================
 
@@ -658,7 +658,10 @@ class TigerGraphConnection:
         data = {sourceVertexType: {}}
         l1 = data[sourceVertexType]
         for e in edges:
-            vals = self._upsertAttrs(e[2])
+            if len(e)>2:
+                vals = self._upsertAttrs(e[2])
+            else:
+                vals = {}
             # fromVertexId
             if e[0] not in l1:
                 l1[e[0]] = {}
