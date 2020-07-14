@@ -535,8 +535,8 @@ conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quo
 </code></pre>
 
 <p>If your database is not using the standard ports (or they are mapped), you can use the following arguments to specify those:
-- restppPort (default 9000): <a href="https://docs.tigergraph.com/dev/restpp-api/restpp-requests">REST++ API port</a>
-- gsPort (default: 14240): <a href="https://docs.tigergraph.com/ui/graphstudio/overview#TigerGraphGraphStudioUIGuide-GraphStudioOn-Premises">GraphStudio port</a></p>
+* restppPort (default 9000): <a href="https://docs.tigergraph.com/dev/restpp-api/restpp-requests">REST++ API port</a>
+* gsPort (default: 14240): <a href="https://docs.tigergraph.com/ui/graphstudio/overview#TigerGraphGraphStudioUIGuide-GraphStudioOn-Premises">GraphStudio port</a></p>
 <p>For example, in case of using a local virtual machine with the ports mapped:</p>
 <pre><code class="py">conn = tg.TigerGraphConnection(host=&quot;localhost&quot;, restppPort=25900, gsPort=25240, graphname=&quot;MyGraph&quot;, username=&quot;tigergraph&quot;, password=&quot;tigergraph&quot;, apiToken=&quot;2aa016d747ede9gg6da3drslm98srfoj&quot;)
 </code></pre>

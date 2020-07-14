@@ -350,6 +350,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#getedgecountfrom" class="md-nav__link">
+    getEdgeCountFrom
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#getedgecount" class="md-nav__link">
     getEdgeCount
   </a>
@@ -530,6 +537,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#getedgecountfrom" class="md-nav__link">
+    getEdgeCountFrom
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#getedgecount" class="md-nav__link">
     getEdgeCount
   </a>
@@ -599,7 +613,7 @@
 <h2 id="getedgetype">getEdgeType</h2>
 <p><code>getEdgeType(typeName)</code></p>
 <p>Returns the details of vertex type.</p>
-<h2 id="getedgecount">getEdgeCount</h2>
+<h2 id="getedgecountfrom">getEdgeCountFrom</h2>
 <p><code>getEdgeCount(sourceVertexType=None, sourceVertexId=None, edgeType=None, targetVertexType=None, targetVertexId=None, where="")</code></p>
 <p>Returns the number of edges.</p>
 <p>Arguments:
@@ -617,6 +631,11 @@ If <code>targetVertexType</code> is specified, then <code>edgeType</code> must a
 <p>Returns a dictionary of <code>&lt;edge_type&gt;: &lt;edge_count&gt;</code> pairs.</p>
 <p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges">GET /graph/{graph_name}/edges</a> and
                <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_number">POST /builtins</a></p>
+<h2 id="getedgecount">getEdgeCount</h2>
+<p><code>getEdgeCount(self, edgeType="*", sourceVertexType=None, targetVertexType=None)</code></p>
+<p>Returns the number of edges of an edge type.</p>
+<p>This is a simplified version of <code>getEdgeCountFrom</code>, to be used when the total number of edges of a given type is needed, regardless which vertex instance they are originated from.
+See documentation of <code>getEdgeCountFrom</code> above for more details.</p>
 <h2 id="upsertedge">upsertEdge</h2>
 <p><code>upsertEdge(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes={})</code></p>
 <p>Upserts an edge.</p>
