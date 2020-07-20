@@ -4,7 +4,7 @@ import subprocess, yaml, re
 import pyTigerGraph
 
 class Gsql():
-    def __init__(self, connection, client_version="3.0.0", jarLocation="~/.gsql", certNeeded=True, certLocation="~/.gsql/my-cert.txt"):
+    def __init__(self, connection, client_version="3.0.0", jarLocation="~/.gsql", certNeeded=True, certLocation="~/.gsql/my-cert.txt", jarDownload=True, certDownload=True):
         assert isinstance(connection, pyTigerGraph.TigerGraphConnection), "Must pass in a TigerGraphConnection"
         self.connection = connection
         self.jarLocation = os.path.expanduser(jarLocation)
@@ -23,21 +23,23 @@ class Gsql():
         if(not os.path.exists(self.jarLocation)):
             os.mkdir(self.jarLocation)
     
-        print("Downloading gsql client Jar")
-        jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
+        if jarDownload:
+            print("Downloading gsql client Jar")
+            jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
                     + 'com/tigergraph/client/gsql_client/' + client_version 
                     + '/gsql_client-' + client_version + '.jar')
                     
-        urllib.request.urlretrieve(jar_url, self.jarLocation + '/gsql_client.jar') # TODO: Store this with the package?
+            urllib.request.urlretrieve(jar_url, self.jarLocation + '/gsql_client.jar') # TODO: Store this with the package?
         
-        if(certNeeded): #HTTP/HTTPS
+        if(certNeeded and certDownload): #HTTP/HTTPS
             '''
             if (noOpenSSL):
                 Exception("No OpenSSL, provide own certificication")
             '''
-            if(not os.path.exists(self.certLocation)):
-                print("Creating new SSL Certificate")
-                os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation) # TODO: Python-native SSL?
+            print("Downloading SSL Certificate")
+            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation) # TODO: Python-native SSL?
+            if os.stat(self.certLocation).st_size == 0:
+                print('Certificate download failed. Please check that the server is online.')
 
 
     def gsql(self, query, options=None):
