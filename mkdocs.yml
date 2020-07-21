@@ -22,4 +22,4 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
-repo_url: https://github.com/parkererickson/pyTigerGraph
+repo_url: https://github.com/pyTigerGraph/pyTigerGraph
