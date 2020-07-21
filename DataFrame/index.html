@@ -412,8 +412,22 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#upsertvertexdataframe" class="md-nav__link">
+    upsertVertexDataframe
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#getedgesdataframe" class="md-nav__link">
     getEdgesDataframe
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upsertedgesdataframe" class="md-nav__link">
+    upsertEdgesDataframe
   </a>
   
 </li>
@@ -520,8 +534,22 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#upsertvertexdataframe" class="md-nav__link">
+    upsertVertexDataframe
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#getedgesdataframe" class="md-nav__link">
     getEdgesDataframe
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upsertedgesdataframe" class="md-nav__link">
+    upsertEdgesDataframe
   </a>
   
 </li>
@@ -556,13 +584,11 @@
                 <h1 id="graph-to-dataframe">Graph To DataFrame</h1>
 <p>The graphToDataFrame sub-module provides results from various built-in endpoints in a Pandas DataFrame. For this module to work, you will have to install the Pandas module, by running <code>pip install pandas</code>. Take a look <a href="https://github.com/parkererickson/pyTigerGraph/blob/master/examples/dataFrameDemos.ipynb">here</a> for some demos displaying some of the functionality.</p>
 <h2 id="getting-started">Getting Started</h2>
-<p>First, you will need to import the submodule and pass in the connection object that is created with the core functionality. This will look something like this:</p>
+<p>First, you will need to create a TigerGraphConnection:</p>
 <pre><code class="python">import pyTigerGraph as tg 
-from pyTigerGraph import graphToDataFrame as tgDf
 
 conn = tg.TigerGraphConnection(host=&quot;https://20bd42e3162a40db9ca0a2f0a4352948.i.tgcloud.io&quot;, graphname=&quot;CrunchBasePre_2013&quot;, apiToken=token)
 
-dfConn = tgDf.graphToDataFrame(conn)
 </code></pre>
 
 <h2 id="getvertexdataframe">getVertexDataframe</h2>
@@ -592,7 +618,7 @@ Returns the verticies of a given vertex type that conform to the various argumen
 Example:</p>
 </li>
 </ul>
-<pre><code class="python">df = dfConn.getVertexDataframe(&quot;company&quot;, limit=100)
+<pre><code class="python">df = conn.getVertexDataframe(&quot;company&quot;, limit=100)
 </code></pre>
 
 <h2 id="getvertexdataframebyid">getVertexDataframeByID</h2>
@@ -608,9 +634,26 @@ Retrieves vertices of the given vertex type, identified by their ID.</p>
 </li>
 </ul>
 <p>Example:</p>
-<pre><code class="python">df = dfConn.getVertexDataframeByID(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
+<pre><code class="python">df = conn.getVertexDataframeByID(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
 </code></pre>
 
+<h2 id="upsertvertexdataframe">upsertVertexDataframe</h2>
+<p><code>upsertVertexDataframe(df, vertexType, v_id=None, attributes=None)</code>
+Upserts vertices from a Pandas data frame. </p>
+<p>Arguments:
+- <code>df</code>: The data frame to upsert.</p>
+<ul>
+<li>
+<p><code>vertexType</code>: The type of vertex to upsert data to.</p>
+</li>
+<li>
+<p><code>v_id</code>: The field name where the vertex primary id is given. If omitted the dataframe index will be used instead.</p>
+</li>
+<li>
+<p><code>attributes</code>: A dictionary in the form of {target: source} where source is the column name in the dataframe and target is the attribute name in the graph vertex. When omitted all columns would be upserted with their current names. In this case column names must match the vertex's attribute names.</p>
+</li>
+</ul>
+<p><code>conn.upsertVertexDataframe(df=person, vertexType='person', v_id='name')</code></p>
 <h2 id="getedgesdataframe">getEdgesDataframe</h2>
 <p><code>getEdgesDataframe(sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0)</code></p>
 <p>Retrieves edges of the given edge type originating from the list of source verticies.</p>
@@ -638,14 +681,41 @@ If <code>targetVertexType</code> is specified, then <code>edgeType</code> must a
 </li>
 </ul>
 <p>Example:</p>
-<pre><code class="python">edgeDf = dfConn.getEdgesDataframe(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
+<pre><code class="python">edgeDf = conn.getEdgesDataframe(&quot;company&quot;, [&quot;c:1&quot;, &quot;c:2&quot;])
 </code></pre>
 
+<h2 id="upsertedgesdataframe">upsertEdgesDataframe</h2>
+<p><code>upsertEdgesDataframe(df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None, attributes=None)</code></p>
+<p>Upserts edges from a Pandas dataframe. </p>
+<p>Arguments:</p>
+<ul>
+<li>
+<p><code>df</code>: The dataframe to upsert.</p>
+</li>
+<li>
+<p><code>sourceVertexType</code>: The type of source vertex for the edge.</p>
+</li>
+<li>
+<p><code>edgeType</code>: The type of edge to upsert data to.</p>
+</li>
+<li>
+<p><code>targetVertexType</code>: The type of target vertex for the edge.</p>
+</li>
+<li>
+<p><code>from_id</code>: The field name where the source vertex primary id is given. If omitted the dataframe index would be used instead. </p>
+</li>
+<li>
+<p><code>to_id</code>: The field name where the target vertex primary id is given. If omitted the dataframe index would be used instead. </p>
+</li>
+<li>
+<p><code>attributes</code>:  A dictionary in the form of {target: source} where source is the column name in the dataframe and target is the attribute name in the graph vertex. When omitted all columns would be upserted with their current names. In this case column names must match the vertex's attribute names.</p>
+</li>
+</ul>
 <h2 id="getinstalledqueriesdataframe">getInstalledQueriesDataframe</h2>
 <p><code>getInstalledQueriesDataframe()</code>
 Returns dataframe of all installed queries, does not take any arguments.
 Example:</p>
-<pre><code class="python">queries = df.getInstalledQueriesDataframe()
+<pre><code class="python">queries = conn.getInstalledQueriesDataframe()
 </code></pre>
                 
               
