@@ -1143,7 +1143,7 @@ class TigerGraphConnection(object):
         """
         data = self.getVertices(vertexType, select=select, where=where, limit=limit, sort=sort, timeout=timeout)
         df = pd.DataFrame(data)
-        df = pd.concat([df.drop("attributes", axis=1), pd.DataFrame(df["attributes"].tolist())], axis=1)
+        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
         return df
 
     def getVertexDataframeByID(self, vertexType, vertexIds):
@@ -1158,7 +1158,7 @@ class TigerGraphConnection(object):
         """
         data = self.getVerticesById(vertexType, vertexIds)
         df = pd.DataFrame(data)
-        df = pd.concat([df.drop("attributes", axis=1), pd.DataFrame(df["attributes"].tolist())], axis=1)
+        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
         return df
 
     def getEdgesDataframe(self, sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
@@ -1184,7 +1184,10 @@ class TigerGraphConnection(object):
             data = self.getEdges(sourceVertexType, vertex, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, timeout)
             df = pd.DataFrame(data)
             try:
-                frames.append(pd.concat([df.drop("attributes", axis=1), pd.DataFrame(df["attributes"].tolist())], axis=1))
+                frames.append(pd.concat([
+                    df.drop(["from_type","attributes"], axis=1),
+                    pd.DataFrame(df["attributes"].tolist())
+                ], axis=1))
             except:
                 frames.append(df)
         return pd.concat(frames).reset_index().drop("index", axis=1)
