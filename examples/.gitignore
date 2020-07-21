@@ -1,2 +1,4 @@
 .ipynb_checkpoints
-__pycahce__/
+__pycahce__/*~
+*~
+*.csv
