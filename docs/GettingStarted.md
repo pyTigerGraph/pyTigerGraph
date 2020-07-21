@@ -15,3 +15,7 @@ For example, in case of using a local virtual machine with the ports mapped:
 ```py
 conn = tg.TigerGraphConnection(host="localhost", restppPort=25900, gsPort=25240, graphname="MyGraph", username="tigergraph", password="tigergraph", apiToken="2aa016d747ede9gg6da3drslm98srfoj")
 ```
+
+# GSQL 101 With pyTigerGraph
+
+Checkout [this](https://github.com/parkererickson/pyTigerGraph/blob/master/examples/GSQL101%20-%20PyTigerGraph.ipynb) example for completing the GSQL 101 course in a Jupyter Notebook environment. Through this, you will also learn of various pyTigerGraph methods that you can use.
