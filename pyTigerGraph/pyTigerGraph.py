@@ -1199,6 +1199,76 @@ class TigerGraphConnection(object):
         data = self.getEndpoints(dynamic=True)
         df = pd.DataFrame(data).T
         return df
+    
+
+    def upsertVertexDataframe(self, df, vertexType, v_id=None, attributes=None):
+        """Upserts vertices from a Pandas data frame. 
+
+        Arguments:
+        - `df`:          The data frame to upsert.
+        - `vertexType`:  The type of vertex to upsert data to.
+        - `v_id`:        The field name where the vertex primary id is given. If omitted the dataframe 
+                         index would be used instead.
+        - `attributes`:  A dictionary in the form of {target: source} where source is the column name 
+                         in the dataframe and target is the attribute name in the graph vertex. When omitted
+                         all columns would be upserted with their current names. In this case column names 
+                         must match the vertex's attribute names.
+        """
+    
+        json_up = []
+    
+        for index in df.index:
+        
+            json_up.append(json.loads(df.loc[index].to_json()))
+            json_up[-1] = (
+                index if v_id == None else json_up[-1][v_id],  
+                json_up[-1] if attributes == None 
+                else {target: json_up[-1][source] 
+                      for target, source in attributes.items()}
+            )
+        
+        return self.upsertVertices(vertexType=vertexType, vertices=json_up)
+
+    
+    def upsertEdgesDataframe(
+        self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None, 
+        attributes=None):
+        """Upserts edges from a Pandas dataframe. 
+
+        Arguments:
+        - `df`:                The dataframe to upsert.
+        - `sourceVertexType`:  The type of source vertex for the edge.
+        - `edgeType`:          The type of edge to upsert data to.
+        - `targetVertexType`:  The type of target vertex for the edge.
+        - `from_id`:     The field name where the source vertex primary id is given. If omitted the 
+                         dataframe index would be used instead. 
+        - `to_id`:       The field name where the target vertex primary id is given. If omitted the 
+                         dataframe index would be used instead. 
+        - `attributes`:  A dictionary in the form of {target: source} where source is the column name 
+                         in the dataframe and target is the attribute name in the graph vertex. When omitted
+                         all columns would be upserted with their current names. In this case column names 
+                         must match the vertex's attribute names.
+        """
+    
+        json_up = []
+    
+        for index in df.index:
+        
+            json_up.append(json.loads(df.loc[index].to_json()))
+            json_up[-1] = (
+                index if from_id == None else json_up[-1][from_id],  
+                index if to_id == None else json_up[-1][to_id],  
+                json_up[-1] if attributes == None 
+                else {target: json_up[-1][source] 
+                      for target, source in attributes.items()}
+            )
+        
+        return self.upsertEdges(
+            sourceVertexType=sourceVertexType, 
+            edgeType=edgeType,
+            targetVertexType=targetVertexType,
+            edges=json_up
+        )
 
 
     
