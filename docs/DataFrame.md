@@ -2,14 +2,12 @@
 The graphToDataFrame sub-module provides results from various built-in endpoints in a Pandas DataFrame. For this module to work, you will have to install the Pandas module, by running ```pip install pandas```. Take a look [here](https://github.com/parkererickson/pyTigerGraph/blob/master/examples/dataFrameDemos.ipynb) for some demos displaying some of the functionality.
 
 ## Getting Started
-First, you will need to import the submodule and pass in the connection object that is created with the core functionality. This will look something like this:
+First, you will need to create a TigerGraphConnection:
 ```python
 import pyTigerGraph as tg 
-from pyTigerGraph import graphToDataFrame as tgDf
 
 conn = tg.TigerGraphConnection(host="https://20bd42e3162a40db9ca0a2f0a4352948.i.tgcloud.io", graphname="CrunchBasePre_2013", apiToken=token)
 
-dfConn = tgDf.graphToDataFrame(conn)
 ```
 
 ## getVertexDataframe
@@ -34,7 +32,7 @@ Arguments:
             See [https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort)
 Example:
 ```python
-df = dfConn.getVertexDataframe("company", limit=100)
+df = conn.getVertexDataframe("company", limit=100)
 ```
 
 ## getVertexDataframeByID
@@ -49,8 +47,23 @@ Arguments:
 
 Example:
 ```python
-df = dfConn.getVertexDataframeByID("company", ["c:1", "c:2"])
+df = conn.getVertexDataframeByID("company", ["c:1", "c:2"])
 ```
+
+## upsertVertexDataframe
+```upsertVertexDataframe(df, vertexType, v_id=None, attributes=None)```
+Upserts vertices from a Pandas data frame. 
+
+Arguments:
+- `df`: The data frame to upsert.
+
+- `vertexType`: The type of vertex to upsert data to.
+
+- `v_id`: The field name where the vertex primary id is given. If omitted the dataframe index will be used instead.
+
+- `attributes`: A dictionary in the form of {target: source} where source is the column name in the dataframe and target is the attribute name in the graph vertex. When omitted all columns would be upserted with their current names. In this case column names must match the vertex's attribute names.
+
+```conn.upsertVertexDataframe(df=person, vertexType='person', v_id='name')```
 
 ## getEdgesDataframe
 ```getEdgesDataframe(sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0)```
@@ -78,13 +91,34 @@ Arguments:
 
 Example:
 ```python
-edgeDf = dfConn.getEdgesDataframe("company", ["c:1", "c:2"])
+edgeDf = conn.getEdgesDataframe("company", ["c:1", "c:2"])
 ```
+
+## upsertEdgesDataframe
+```upsertEdgesDataframe(df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None, attributes=None)```
+
+Upserts edges from a Pandas dataframe. 
+
+Arguments:
+
+- `df`: The dataframe to upsert.
+
+- `sourceVertexType`: The type of source vertex for the edge.
+
+- `edgeType`: The type of edge to upsert data to.
+
+- `targetVertexType`: The type of target vertex for the edge.
+
+- `from_id`: The field name where the source vertex primary id is given. If omitted the dataframe index would be used instead. 
+
+- `to_id`: The field name where the target vertex primary id is given. If omitted the dataframe index would be used instead. 
+
+- `attributes`:  A dictionary in the form of {target: source} where source is the column name in the dataframe and target is the attribute name in the graph vertex. When omitted all columns would be upserted with their current names. In this case column names must match the vertex's attribute names.
 
 ## getInstalledQueriesDataframe
 ```getInstalledQueriesDataframe()```
 Returns dataframe of all installed queries, does not take any arguments.
 Example:
 ```python
-queries = df.getInstalledQueriesDataframe()
+queries = conn.getInstalledQueriesDataframe()
 ```
