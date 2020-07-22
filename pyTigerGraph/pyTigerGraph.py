@@ -185,7 +185,7 @@ class TigerGraphConnection(object):
 
     def getVertexTypes(self, force=False):
         """Returns the list of vertex type names of the graph.
-        
+
         Arguments:
         - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of vertex type details (if they were already fetched previously).
         """
@@ -196,7 +196,7 @@ class TigerGraphConnection(object):
 
     def getVertexType(self, vertexType, force=False):
         """Returns the details of the specified vertex type.
-        
+
         Arguments:
         - `vertexType`: The name of of the vertex type.
         - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of vertex type details (if they were already fetched previously).
@@ -470,7 +470,7 @@ class TigerGraphConnection(object):
 
     def getEdgeTypes(self, force=False):
         """Returns the list of edge type names of the graph.
-        
+
         Arguments:
         - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of edge type details (if they were already fetched previously).
         """
@@ -481,7 +481,7 @@ class TigerGraphConnection(object):
 
     def getEdgeType(self, edgeType, force=False):
         """Returns the details of vertex type.
-        
+
         Arguments:
         - `edgeType`: The name of the edge type.
         - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of edge type details (if they were already fetched previously).
@@ -492,36 +492,74 @@ class TigerGraphConnection(object):
         return {}
 
     def getEdgeSourceVertexType(self, edgeType):
-        """Returns the type of the edge type's source vertex.
-        
+        """Returns the type(s) of the edge type's source vertex.
+
         Arguments:
         - `edgeType`: The name of the edge type.
+
+        Returns:
+        - A single source vertex type name string if the edge has a single source vertex type
+        - "*" if the edge can originate from any vertex type (notation used in 2.6.1 and earlier versions)
+            See https://docs.tigergraph.com/v/2.6/dev/gsql-ref/ddl-and-loading/defining-a-graph-schema#creating-an-edge-from-or-to-any-vertex-type
+        - A set of vertex type name strings (unique values) if the edge has multiple source vertex types (notation used in 3.0 and later versions)
+            Note: Even if the source vertex types were defined as "*", the rest API will list them as pairs (i.e. not as "*" in 2.6.1 and earlier versions),
+                  just like as if there were defined one by one (e.g. `FROM v1, TO v2 | FROM v3, TO v4 | …`)
+            Note: The returned set contains all source vertex types, but does not certainly mean that the edge is defined between all source and all target
+                  vertex types. You need to look at the individual source/target pairs to find out which combinations are valid/defined.
         """
         edgeTypeDetails = self.getEdgeType(edgeType)
-        if edgeTypeDetails["FromVertexTypeName"] == "*":
+
+        # Edge type with a single source vertex type
+        if edgeTypeDetails["FromVertexTypeName"] != "*":
+            return edgeTypeDetails["FromVertexTypeName"]
+
+        # Edge type with multiple source vertex types
+        if "EdgePairs" in edgeTypeDetails:
+            # v3.0 and later notation
+            vts = set()
+            for ep in edgeTypeDetails["EdgePairs"]:
+                vts.add(ep["From"])
+            return vts
+        else:
+            # 2.6.1 and earlier notation
             return "*"
-        fromVertexTypes = edgeTypeDetails["FromVertexTypeList"]
-        if len(fromVertexTypes) == 1:
-            return fromVertexTypes[0]
-        return fromVertexTypes
 
     def getEdgeTargetVertexType(self, edgeType):
-        """Returns the type of the edge type's target vertex.
-        
+        """Returns the type(s) of the edge type's target vertex.
+
         Arguments:
         - `edgeType`: The name of the edge type.
+
+        Returns:
+        - A single source vertex type name string if the edge has a single source vertex type
+        - "*" if the edge can originate from any vertex type (notation used in 2.6.1 and earlier versions)
+            See https://docs.tigergraph.com/v/2.6/dev/gsql-ref/ddl-and-loading/defining-a-graph-schema#creating-an-edge-from-or-to-any-vertex-type
+        - A set of vertex type name strings (unique values) if the edge has multiple source vertex types (notation used in 3.0 and later versions)
+            Note: Even if the source vertex types were defined as "*", the rest API will list them as pairs (i.e. not as "*" in 2.6.1 and earlier versions),
+                  just like as if there were defined one by one (e.g. `FROM v1, TO v2 | FROM v3, TO v4 | …`)
+            Note: The returned set contains all target vertex types, but does not certainly mean that the edge is defined between all source and all target
+                  vertex types. You need to look at the individual source/target pairs to find out which combinations are valid/defined.
         """
         edgeTypeDetails = self.getEdgeType(edgeType)
-        if edgeTypeDetails["ToVertexTypeName"] == "*":
+
+        # Edge type with a single target vertex type
+        if edgeTypeDetails["ToVertexTypeName"] != "*":
+            return edgeTypeDetails["ToVertexTypeName"]
+
+        # Edge type with multiple target vertex types
+        if "EdgePairs" in edgeTypeDetails:
+            # v3.0 and later notation
+            vts = set()
+            for ep in edgeTypeDetails["EdgePairs"]:
+                vts.add(ep["To"])
+            return vts
+        else:
+            # 2.6.1 and earlier notation
             return "*"
-        toVertexTypes = self.getEdgeType(edgeType)["ToVertexTypeList"]
-        if len(toVertexTypes) == 1:
-            return toVertexTypes[0]
-        return toVertexTypes
 
     def isDirected(self, edgeType):
         """Is the specified edge type directed?
-        
+
         Arguments:
         - `edgeType`: The name of the edge type.
         """
@@ -529,7 +567,7 @@ class TigerGraphConnection(object):
 
     def getReverseEdge(self, edgeType):
         """Returns the name of the reverse edge of the specified edge type, if applicable.
-        
+
         Arguments:
         - `edgeType`: The name of the edge type.
         """
@@ -561,7 +599,7 @@ class TigerGraphConnection(object):
         For valid values of `where` condition, see https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
 
         Returns a dictionary of <edge_type>: <edge_count> pairs.
- 
+
         Endpoint:      GET /graph/{graph_name}/edges
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges
         Endpoint:      POST /builtins
@@ -600,7 +638,7 @@ class TigerGraphConnection(object):
     def getEdgeCount(self, edgeType="*", sourceVertexType=None, targetVertexType=None):
         return self.getEdgeCountFrom(edgeType=edgeType, sourceVertexType=sourceVertexType, targetVertexType=targetVertexType)
     """Returns the number of edges of an edge type.
-    
+
     This is a simplified version of `getEdgeCountFrom`, to be used when the total number of edges of a given type is needed, regardless which vertex instance they are originated from.
     See documentation of `getEdgeCountFrom` above for more details.
     """
@@ -735,15 +773,15 @@ class TigerGraphConnection(object):
 
     def getEdgesByType(self, edgeType):
         """Retrieves edges of the given edge type regardless the source vertex.
-        
+
         Note: Edge attributes are not currently returned.
-        
+
         Arguments:
         - `edgeType`: The name of the edge type.
         """
         if not edgeType:
             return []
-        
+
         # Check if ttk_getEdgesFrom query was installed
         if self.ttkGetEF == None:
             self.ttkGetEF = False
@@ -751,11 +789,11 @@ class TigerGraphConnection(object):
             for ep in eps:
                 if ep.endswith("ttk_getEdgesFrom"):
                     self.ttkGetEF = True
-        
+
         sourceVertexType = self.getEdgeSourceVertexType(edgeType)
-        if sourceVertexType == "*":
-            raise TigerGraphException("Wildcard edges are not currently supported.", None)
-        
+        if isinstance(sourceVertexType, set) or sourceVertexType == "*":
+            raise TigerGraphException("Edges with multiple source vertex types are not currently supported.", None)
+
         if self.ttkGetEF:  # If installed version is available, use it, as it can return edge attributes too.
             ret = self.runInstalledQuery("ttk_getEdgesFrom", {"edgeType": edgeType, "sourceVertexType": sourceVertexType})
         else:  # If installed version is not available, use interpreted version. Always available, but can't return attributes.
@@ -771,7 +809,7 @@ class TigerGraphConnection(object):
                     ACCUM  @@edges += e; \
                 PRINT @@edges AS edges; \
             }'
-            
+
             queryText = queryText.replace("$graph",          self.graphname) \
                                  .replace('$sourceEdgeType', sourceVertexType) \
                                  .replace('$edgeType',       edgeType)
@@ -942,33 +980,33 @@ class TigerGraphConnection(object):
         return df
 
     def upsertVertexDataframe(self, df, vertexType, v_id=None, attributes=None):
-        """Upserts vertices from a Pandas data frame. 
+        """Upserts vertices from a Pandas data frame.
 
         Arguments:
         - `df`:          The data frame to upsert.
         - `vertexType`:  The type of vertex to upsert data to.
-        - `v_id`:        The field name where the vertex primary id is given. If omitted the dataframe 
+        - `v_id`:        The field name where the vertex primary id is given. If omitted the dataframe
                          index would be used instead.
-        - `attributes`:  A dictionary in the form of {target: source} where source is the column name 
+        - `attributes`:  A dictionary in the form of {target: source} where source is the column name
                          in the dataframe and target is the attribute name in the graph vertex. When omitted
-                         all columns would be upserted with their current names. In this case column names 
+                         all columns would be upserted with their current names. In this case column names
                          must match the vertex's attribute names.
         """
-    
+
         json_up = []
-    
+
         for index in df.index:
-        
+
             json_up.append(json.loads(df.loc[index].to_json()))
             json_up[-1] = (
-                index if v_id == None else json_up[-1][v_id],  
-                json_up[-1] if attributes == None 
-                else {target: json_up[-1][source] 
+                index if v_id == None else json_up[-1][v_id],
+                json_up[-1] if attributes == None
+                else {target: json_up[-1][source]
                       for target, source in attributes.items()}
             )
-        
+
         return self.upsertVertices(vertexType=vertexType, vertices=json_up)
-    
+
     def getEdgesDataframe(self, sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
         """Retrieves edges of the given edge type originating from the list of source verticies.
 
@@ -1001,40 +1039,40 @@ class TigerGraphConnection(object):
         return pd.concat(frames).reset_index().drop("index", axis=1)
 
     def upsertEdgesDataframe(
-        self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None, 
+        self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None,
         attributes=None):
-        """Upserts edges from a Pandas dataframe. 
+        """Upserts edges from a Pandas dataframe.
 
         Arguments:
         - `df`:                The dataframe to upsert.
         - `sourceVertexType`:  The type of source vertex for the edge.
         - `edgeType`:          The type of edge to upsert data to.
         - `targetVertexType`:  The type of target vertex for the edge.
-        - `from_id`:     The field name where the source vertex primary id is given. If omitted the 
-                         dataframe index would be used instead. 
-        - `to_id`:       The field name where the target vertex primary id is given. If omitted the 
-                         dataframe index would be used instead. 
-        - `attributes`:  A dictionary in the form of {target: source} where source is the column name 
+        - `from_id`:     The field name where the source vertex primary id is given. If omitted the
+                         dataframe index would be used instead.
+        - `to_id`:       The field name where the target vertex primary id is given. If omitted the
+                         dataframe index would be used instead.
+        - `attributes`:  A dictionary in the form of {target: source} where source is the column name
                          in the dataframe and target is the attribute name in the graph vertex. When omitted
-                         all columns would be upserted with their current names. In this case column names 
+                         all columns would be upserted with their current names. In this case column names
                          must match the vertex's attribute names.
         """
-    
+
         json_up = []
-    
+
         for index in df.index:
-        
+
             json_up.append(json.loads(df.loc[index].to_json()))
             json_up[-1] = (
-                index if from_id == None else json_up[-1][from_id],  
-                index if to_id == None else json_up[-1][to_id],  
-                json_up[-1] if attributes == None 
-                else {target: json_up[-1][source] 
+                index if from_id == None else json_up[-1][from_id],
+                index if to_id == None else json_up[-1][to_id],
+                json_up[-1] if attributes == None
+                else {target: json_up[-1][source]
                       for target, source in attributes.items()}
             )
-        
+
         return self.upsertEdges(
-            sourceVertexType=sourceVertexType, 
+            sourceVertexType=sourceVertexType,
             edgeType=edgeType,
             targetVertexType=targetVertexType,
             edges=json_up
@@ -1047,7 +1085,7 @@ class TigerGraphConnection(object):
         data = self.getEndpoints(dynamic=True)
         df = pd.DataFrame(data).T
         return df
-    
+
     # Token management =========================================================
 
     def getToken(self, secret, setToken=True, lifetime=None):
