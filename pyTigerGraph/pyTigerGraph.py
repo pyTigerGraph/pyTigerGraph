@@ -47,7 +47,7 @@ class TigerGraphConnection(object):
 
     def _errorCheck(self, res):
         """Checks if the JSON document returned by an endpoint has contains error: true; if so, it raises an exception"""
-        if "error" in res and res["error"]:
+        if "error" in res and res["error"] and res["error"] != "false":  # Endpoint might return string "false" rather than Boolean false
             raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
 
     def _req(self, method, url, authMode="token", headers=None, data=None, resKey="results", skipCheck=False, params=None):
@@ -79,6 +79,7 @@ class TigerGraphConnection(object):
             _data = data
         else:
             _data = None
+
         res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params)
 
         if self.debug:
@@ -152,8 +153,8 @@ class TigerGraphConnection(object):
         """
         if not self.schema or force:
             self.schema = self._get(self.gsUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname, authMode="pwd")
-            if udts:
-                self.schema["UDTs"] = self._getUDTs()
+        if udts and ("UDTs" not in self.schema or force):
+            self.schema["UDTs"] = self._getUDTs()
         return self.schema
 
     def getUDTs(self):
@@ -897,6 +898,156 @@ class TigerGraphConnection(object):
             print(queryText)
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
 
+    # Pandas dataframe support =================================================
+
+    def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
+        """Retrieves vertices of the given vertex type.
+
+        Arguments:
+        - `vertexType`: Type of vertex desired
+        - `select`: Comma separated list of vertex attributes to be retrieved or omitted.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+        - `where`:  Comma separated list of conditions that are all applied on each vertex' attributes.
+                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+        - `limit`:  Maximum number of vertex instances to be returned (after sorting).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`    Comma separated list of attributes the results should be sorted by.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+
+        NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
+              Use `getVerticesById` if you need to retrieve by vertex ID.
+
+        Endpoint:      GET /graph/{graph_name}/vertices
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
+        """
+        data = self.getVertices(vertexType, select=select, where=where, limit=limit, sort=sort, timeout=timeout)
+        df = pd.DataFrame(data)
+        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
+        return df
+
+    def getVertexDataframeByID(self, vertexType, vertexIds):
+        """Retrieves vertices of the given vertex type, identified by their ID.
+
+        Arguments
+        - `vertexType`: Type of vertex desired
+        - `vertexIds`: A single vertex ID or a list of vertex IDs.
+
+        Endpoint:      GET /graph/{graph_name}/vertices
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
+        """
+        data = self.getVerticesById(vertexType, vertexIds)
+        df = pd.DataFrame(data)
+        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
+        return df
+
+    def upsertVertexDataframe(self, df, vertexType, v_id=None, attributes=None):
+        """Upserts vertices from a Pandas data frame. 
+
+        Arguments:
+        - `df`:          The data frame to upsert.
+        - `vertexType`:  The type of vertex to upsert data to.
+        - `v_id`:        The field name where the vertex primary id is given. If omitted the dataframe 
+                         index would be used instead.
+        - `attributes`:  A dictionary in the form of {target: source} where source is the column name 
+                         in the dataframe and target is the attribute name in the graph vertex. When omitted
+                         all columns would be upserted with their current names. In this case column names 
+                         must match the vertex's attribute names.
+        """
+    
+        json_up = []
+    
+        for index in df.index:
+        
+            json_up.append(json.loads(df.loc[index].to_json()))
+            json_up[-1] = (
+                index if v_id == None else json_up[-1][v_id],  
+                json_up[-1] if attributes == None 
+                else {target: json_up[-1][source] 
+                      for target, source in attributes.items()}
+            )
+        
+        return self.upsertVertices(vertexType=vertexType, vertices=json_up)
+    
+    def getEdgesDataframe(self, sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
+        """Retrieves edges of the given edge type originating from the list of source verticies.
+
+        Only `sourceVertexType` and `sourceVerticies` are required.
+        If `targetVertexId` is specified, then `targetVertexType` must also be specified.
+        If `targetVertexType` is specified, then `edgeType` must also be specified.
+
+        Arguments:
+        - `select`: Comma separated list of edge attributes to be retrieved or omitted.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+        - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
+                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+        - `limit`:  Maximum number of edge instances to be returned (after sorting).
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`    Comma separated list of attributes the results should be sorted by.
+                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+        """
+        frames = []
+        for vertex in sourceVerticies:
+            data = self.getEdges(sourceVertexType, vertex, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, timeout)
+            df = pd.DataFrame(data)
+            try:
+                frames.append(pd.concat([
+                    df.drop(["from_type","attributes"], axis=1),
+                    pd.DataFrame(df["attributes"].tolist())
+                ], axis=1))
+            except:
+                frames.append(df)
+        return pd.concat(frames).reset_index().drop("index", axis=1)
+
+    def upsertEdgesDataframe(
+        self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None, 
+        attributes=None):
+        """Upserts edges from a Pandas dataframe. 
+
+        Arguments:
+        - `df`:                The dataframe to upsert.
+        - `sourceVertexType`:  The type of source vertex for the edge.
+        - `edgeType`:          The type of edge to upsert data to.
+        - `targetVertexType`:  The type of target vertex for the edge.
+        - `from_id`:     The field name where the source vertex primary id is given. If omitted the 
+                         dataframe index would be used instead. 
+        - `to_id`:       The field name where the target vertex primary id is given. If omitted the 
+                         dataframe index would be used instead. 
+        - `attributes`:  A dictionary in the form of {target: source} where source is the column name 
+                         in the dataframe and target is the attribute name in the graph vertex. When omitted
+                         all columns would be upserted with their current names. In this case column names 
+                         must match the vertex's attribute names.
+        """
+    
+        json_up = []
+    
+        for index in df.index:
+        
+            json_up.append(json.loads(df.loc[index].to_json()))
+            json_up[-1] = (
+                index if from_id == None else json_up[-1][from_id],  
+                index if to_id == None else json_up[-1][to_id],  
+                json_up[-1] if attributes == None 
+                else {target: json_up[-1][source] 
+                      for target, source in attributes.items()}
+            )
+        
+        return self.upsertEdges(
+            sourceVertexType=sourceVertexType, 
+            edgeType=edgeType,
+            targetVertexType=targetVertexType,
+            edges=json_up
+        )
+
+    def getInstalledQueriesDataframe(self):
+        """
+        Returns dataframe of all installed queries. Does not take any arguments
+        """
+        data = self.getEndpoints(dynamic=True)
+        df = pd.DataFrame(data).T
+        return df
+    
     # Token management =========================================================
 
     def getToken(self, secret, setToken=True, lifetime=None):
@@ -1070,9 +1221,12 @@ class TigerGraphConnection(object):
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-version
         """
         response = requests.request("GET", self.restppUrl + "/version/" + self.graphname, headers=self.authHeader)
+        res = json.loads(response.text, strict=False)  # "strict=False" is why _get() was not used
+        self._errorCheck(res)
+
         if raw:
             return response.text
-        res = json.loads(response.text, strict=False)["message"].split("\n")  # "strict=False" is why _get() was not used
+        res = res["message"].split("\n")
         components = []
         for i in range(len(res)):
             if 2 < i < len(res) - 1:
@@ -1116,160 +1270,7 @@ class TigerGraphConnection(object):
             ret["message"]        = "This instance does not have a valid enterprise license. Is this a trial version?"
             ret["daysRemaining"]  = -1
         else:
-            raise TigerGraphException(res["message"], res["code]"])
+            raise TigerGraphException(res["message"], res["code"])
         return ret
 
-
-    def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
-        """Retrieves vertices of the given vertex type.
-
-        Arguments:
-        - `vertexType`: Type of vertex desired
-        - `select`: Comma separated list of vertex attributes to be retrieved or omitted.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-        - `where`:  Comma separated list of conditions that are all applied on each vertex' attributes.
-                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        - `limit`:  Maximum number of vertex instances to be returned (after sorting).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        - `sort`    Comma separated list of attributes the results should be sorted by.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-
-        NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
-              Use `getVerticesById` if you need to retrieve by vertex ID.
-
-        Endpoint:      GET /graph/{graph_name}/vertices
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
-        """
-        data = self.getVertices(vertexType, select=select, where=where, limit=limit, sort=sort, timeout=timeout)
-        df = pd.DataFrame(data)
-        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
-        return df
-
-    def getVertexDataframeByID(self, vertexType, vertexIds):
-        """Retrieves vertices of the given vertex type, identified by their ID.
-
-        Arguments
-        - `vertexType`: Type of vertex desired
-        - `vertexIds`: A single vertex ID or a list of vertex IDs.
-
-        Endpoint:      GET /graph/{graph_name}/vertices
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
-        """
-        data = self.getVerticesById(vertexType, vertexIds)
-        df = pd.DataFrame(data)
-        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
-        return df
-
-    def getEdgesDataframe(self, sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
-        """Retrieves edges of the given edge type originating from the list of source verticies.
-
-        Only `sourceVertexType` and `sourceVerticies` are required.
-        If `targetVertexId` is specified, then `targetVertexType` must also be specified.
-        If `targetVertexType` is specified, then `edgeType` must also be specified.
-
-        Arguments:
-        - `select`: Comma separated list of edge attributes to be retrieved or omitted.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-        - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
-                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        - `limit`:  Maximum number of edge instances to be returned (after sorting).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        - `sort`    Comma separated list of attributes the results should be sorted by.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-        """
-        frames = []
-        for vertex in sourceVerticies:
-            data = self.getEdges(sourceVertexType, vertex, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, timeout)
-            df = pd.DataFrame(data)
-            try:
-                frames.append(pd.concat([
-                    df.drop(["from_type","attributes"], axis=1),
-                    pd.DataFrame(df["attributes"].tolist())
-                ], axis=1))
-            except:
-                frames.append(df)
-        return pd.concat(frames).reset_index().drop("index", axis=1)
-
-    def getInstalledQueriesDataframe(self):
-        """
-        Returns dataframe of all installed queries. Does not take any arguments
-        """
-        data = self.getEndpoints(dynamic=True)
-        df = pd.DataFrame(data).T
-        return df
-    
-
-    def upsertVertexDataframe(self, df, vertexType, v_id=None, attributes=None):
-        """Upserts vertices from a Pandas data frame. 
-
-        Arguments:
-        - `df`:          The data frame to upsert.
-        - `vertexType`:  The type of vertex to upsert data to.
-        - `v_id`:        The field name where the vertex primary id is given. If omitted the dataframe 
-                         index would be used instead.
-        - `attributes`:  A dictionary in the form of {target: source} where source is the column name 
-                         in the dataframe and target is the attribute name in the graph vertex. When omitted
-                         all columns would be upserted with their current names. In this case column names 
-                         must match the vertex's attribute names.
-        """
-    
-        json_up = []
-    
-        for index in df.index:
-        
-            json_up.append(json.loads(df.loc[index].to_json()))
-            json_up[-1] = (
-                index if v_id == None else json_up[-1][v_id],  
-                json_up[-1] if attributes == None 
-                else {target: json_up[-1][source] 
-                      for target, source in attributes.items()}
-            )
-        
-        return self.upsertVertices(vertexType=vertexType, vertices=json_up)
-
-    
-    def upsertEdgesDataframe(
-        self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None, 
-        attributes=None):
-        """Upserts edges from a Pandas dataframe. 
-
-        Arguments:
-        - `df`:                The dataframe to upsert.
-        - `sourceVertexType`:  The type of source vertex for the edge.
-        - `edgeType`:          The type of edge to upsert data to.
-        - `targetVertexType`:  The type of target vertex for the edge.
-        - `from_id`:     The field name where the source vertex primary id is given. If omitted the 
-                         dataframe index would be used instead. 
-        - `to_id`:       The field name where the target vertex primary id is given. If omitted the 
-                         dataframe index would be used instead. 
-        - `attributes`:  A dictionary in the form of {target: source} where source is the column name 
-                         in the dataframe and target is the attribute name in the graph vertex. When omitted
-                         all columns would be upserted with their current names. In this case column names 
-                         must match the vertex's attribute names.
-        """
-    
-        json_up = []
-    
-        for index in df.index:
-        
-            json_up.append(json.loads(df.loc[index].to_json()))
-            json_up[-1] = (
-                index if from_id == None else json_up[-1][from_id],  
-                index if to_id == None else json_up[-1][to_id],  
-                json_up[-1] if attributes == None 
-                else {target: json_up[-1][source] 
-                      for target, source in attributes.items()}
-            )
-        
-        return self.upsertEdges(
-            sourceVertexType=sourceVertexType, 
-            edgeType=edgeType,
-            targetVertexType=targetVertexType,
-            edges=json_up
-        )
-
-
-    
 # EOF
