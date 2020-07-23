@@ -9,7 +9,7 @@ License: MIT
 Download-URL: https://github.com/parkererickson/pyTigerGraph/archive/v_01.tar.gz
 Description: # pyTigerGraph
         
-        pyTigerGraph is a Python package for connecting to TigerGraph databases. Check out the extended docs [here](https://parkererickson.github.io/pyTigerGraph/)
+        pyTigerGraph is a Python package for connecting to TigerGraph databases. Check out the extended docs [here](https://pytigergraph.github.io/pyTigerGraph/)
         
         ## Getting Started
         To download pyTigerGraph, simply run:
@@ -43,6 +43,7 @@ Description: # pyTigerGraph
         
         ## Credits
         pyTigerGraph was originally created by Parker Erickson, a Computer Science student at the University of Minnesota. Special thanks to contributors Jon Herke and Szilard Barany of TigerGraph. Read [this](CONTRIBUTING.md) to learn more about how you can contribute.
+        
 Keywords: TigerGraph,Graph Database
 Platform: UNKNOWN
 Classifier: Development Status :: 4 - Beta

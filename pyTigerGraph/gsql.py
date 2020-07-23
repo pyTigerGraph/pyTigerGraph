@@ -1,6 +1,6 @@
 import urllib.request
 import os
-import subprocess, yaml, re
+import subprocess, json, re
 import pyTigerGraph
 
 class Gsql():
@@ -67,7 +67,7 @@ class Gsql():
         try:
             json_string = re.search('(\{|\[).*$',
                                     self.stdout.replace('\n',''))[0]
-            json_object = yaml.safe_load(json_string)
+            json_object = json.loads(json_string)
         except:
             return self.stdout
         else:
