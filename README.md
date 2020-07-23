@@ -1,6 +1,6 @@
 # pyTigerGraph
 
-pyTigerGraph is a Python package for connecting to TigerGraph databases. Check out the extended docs [here](https://parkererickson.github.io/pyTigerGraph/)
+pyTigerGraph is a Python package for connecting to TigerGraph databases. Check out the extended docs [here](https://pytigergraph.github.io/pyTigerGraph/)
 
 ## Getting Started
 To download pyTigerGraph, simply run:
