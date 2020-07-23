@@ -936,7 +936,29 @@ class TigerGraphConnection(object):
             print(queryText)
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
 
-    # Pandas dataframe support =================================================
+    # Pandas DataFrame support =================================================
+
+    def vertexSetToDataframe(self, vertexSet):
+        """Converts a vertex set to Pandas DataFrame
+        
+        Vertex set is assumed to have this structure:
+        [
+            {
+                "v_id": <vertex_id>,
+                "v_type": <vertex_type_name>,
+                "attributes":
+                    {
+                        "attr1": <value1>,
+                        "attr2": <value2>,
+                         ⋮
+                    }
+            },
+                ⋮
+        ]
+        """
+        df = pd.DataFrame(vertexSet)
+        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
+        return df
 
     def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
         """Retrieves vertices of the given vertex type.
