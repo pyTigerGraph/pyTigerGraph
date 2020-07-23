@@ -15,10 +15,18 @@ class pyTGCyto:
     def clearData(self):
         self.data = self._initData()
         
-    def getVertices(self, vertexType, labelAttr="", select="", where="", sort="", limit="", timeout=0):
-        vertices = self.tgconn.getVertices(vertexType, select, where, sort, limit, timeout)
+    def getVertices(self, vertexType, labelAttr="", ids=None, select="", where="", limit="", sort="", timeout=0):
+        conn = self.tgconn
+        v_ids = []
+        vertices = []
+        if ids:
+            vertices = conn.getVerticesById(vertexType, ids)
+        else:
+            vertices = conn.getVertices(vertexType, select, where, limit, sort, timeout)
         name = ""
+        v_ids = []
         for vertex in vertices:
+            v_ids.append(vertex['v_id'])
             if labelAttr == 'v_id' or not labelAttr:
                 name = vertex['v_id']
             else:
@@ -29,14 +37,25 @@ class pyTGCyto:
             node = {'data': {'id': vertex['v_type'] + self.sep + vertex['v_id'], 'name': name, 'v_type': vertex['v_type']}}
             # TODO: add other attributes as well
             self.data["nodes"].append(node)
+        return v_ids
 
-    def getEdgesByType(self, edgeType):
+    def getEdgesByType(self, edgeType, sourceVertices=None):
+        conn = self.tgconn
+        v_ids = set()
+        edges = []
+        if sourceVertices:
+            vt = conn.getEdgeSourceVertexType(edgeType)
+            for sc in sourceVertices:
+                edges.append(conn.getEdges(vt, sc, edgeType)[0])
+        else:
+            edges = conn.getEdgesByType(edgeType)
         eId = 0
-        edges = self.tgconn.getEdgesByType(edgeType)
         for edge in edges:
             cedge = {'data': {'id': edge['e_type'] + self.sep + str(eId), 'source': edge['from_type'] + self.sep + edge['from_id'], 'target': edge['to_type'] + self.sep + edge['to_id']}}
             self.data["edges"].append(cedge)
             eId += 1
+            v_ids.add(edge['to_id'])
+        return list(v_ids)
         
     def getData(self):
         return self.data
