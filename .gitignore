@@ -8,3 +8,4 @@ dist
 build/
 site/
 .DS_Store
+pyTigerGraph.egg-info
