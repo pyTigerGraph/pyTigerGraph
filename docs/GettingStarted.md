@@ -18,4 +18,24 @@ conn = tg.TigerGraphConnection(host="localhost", restppPort=25900, gsPort=25240,
 
 # GSQL 101 With pyTigerGraph
 
-Checkout [this](https://github.com/parkererickson/pyTigerGraph/blob/master/examples/GSQL101%20-%20PyTigerGraph.ipynb) example for completing the GSQL 101 course in a Jupyter Notebook environment. Through this, you will also learn of various pyTigerGraph methods that you can use.
+Checkout [this](https://github.com/pyTigerGraph/pyTigerGraph/blob/master/examples/GSQL101%20-%20PyTigerGraph.ipynb) example for completing the GSQL 101 course in a Jupyter Notebook environment. Through this, you will also learn of various pyTigerGraph methods that you can use.
+
+## TigerGraphConnection
+```pyTigerGraph.TigerGraphConnection( host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", useCert=True, clientVersion='3.0.0', secret=None)```
+    Initiate a connection object.
+
+        Arguments
+
+        - `host`:              The ip address of the TigerGraph server.
+        - `graphname`:         The default graph for running queries.
+        - `username`:          The username on the TigerGraph server.
+        - `password`:          The password for that user.
+        - `restppPort`:        The post for REST++ queries.
+        - `gsPort`:            The port of all other queries.
+        - `apiToken`:          A token to use when making queries.
+        - `useCert`:           True if we need to use a certificate because the server is secure (such as on TigerGraph 
+                               Cloud). This needs to be False when connecting to an unsecure server such as TigerGraph Developer. 
+                               When True the certificate would be downloaded when it is first needed. 
+                               on the first GSQL command.
+        - `clientVersion`:     Indicates which GSQL client version to download.
+
