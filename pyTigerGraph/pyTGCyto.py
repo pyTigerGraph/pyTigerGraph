@@ -45,8 +45,8 @@ class pyTGCyto:
         edges = []
         if sourceVertices:
             vt = conn.getEdgeSourceVertexType(edgeType)
-            for sc in sourceVertices:
-                edges.append(conn.getEdges(vt, sc, edgeType)[0])
+            for sv in sourceVertices:
+                edges.extend(conn.getEdges(vt, sv, edgeType))
         else:
             edges = conn.getEdgesByType(edgeType)
         eId = 0
