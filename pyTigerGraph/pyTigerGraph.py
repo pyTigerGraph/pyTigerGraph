@@ -1048,9 +1048,13 @@ class TigerGraphConnection(object):
     # Pandas DataFrame support =================================================
 
     def vertexSetToDataFrame(self, vertexSet, withId=True, withType=False):
-        """Converts a vertex set to Pandas DataFrame
-
-        Vertex set is assumed to have this structure:
+        """Converts a vertex set to Pandas DataFrame.
+        
+        Vertex sets are used for both the input and output of `SELECT` statements. They contain instances of vertices of the same type.
+        For each vertex instance the vertex ID, the vertex type and the (optional) attributes are present (under `v_id`, `v_type` and `attributes` keys, respectively).
+        See example in `edgeSetToDataFrame`.
+        
+        A vertex set has this structure:
         [
             {
                 "v_id": <vertex_id>,
@@ -1064,6 +1068,8 @@ class TigerGraphConnection(object):
             },
                 ⋮
         ]
+        
+        See: https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-statements#vertex-set-variable-declaration-and-assignment
         """
         df = pd.DataFrame(vertexSet)
         cols = []
@@ -1077,7 +1083,23 @@ class TigerGraphConnection(object):
     def edgeSetToDataFrame(self, edgeSet, withId=True, withType=False):
         """Converts an edge set to Pandas DataFrame
 
-        Edge set is assumed to have this structure:
+        Edge sets contain instances of the same edge type. Edge sets are not generated "naturally" like vertex sets, you need to collect edges in (global) accumulators,
+            e.g. in case you want to visualise them in GraphStudio or by other tools.
+        Example:
+        
+            SetAccum<EDGE> @@edges;
+            start = {Country.*};
+            result =
+                SELECT t
+                FROM   start:s -(PROVINCE_IN_COUNTRY:e)- Province:t
+                ACCUM  @@edges += e;
+            PRINT start, result, @@edges;
+
+        The `@@edges` is an edge set.
+        It contains for each edge instance the source and target vertex type and ID, the edge type, an directedness indicator and the (optional) attributes.
+        Note: `start` and `result` are vertex sets.
+
+        An edge set has this structure:
         [
             {
                 "e_type": <edge_type_name>,
