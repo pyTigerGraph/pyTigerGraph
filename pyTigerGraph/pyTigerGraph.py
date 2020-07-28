@@ -7,6 +7,7 @@ import pandas as pd
 import os
 import subprocess
 
+
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
 
@@ -671,12 +672,12 @@ class TigerGraphConnection(object):
         return ret
 
     def getEdgeCount(self, edgeType="*", sourceVertexType=None, targetVertexType=None):
-        return self.getEdgeCountFrom(edgeType=edgeType, sourceVertexType=sourceVertexType, targetVertexType=targetVertexType)
-    """Returns the number of edges of an edge type.
+        """Returns the number of edges of an edge type.
 
-    This is a simplified version of `getEdgeCountFrom`, to be used when the total number of edges of a given type is needed, regardless which vertex instance they are originated from.
-    See documentation of `getEdgeCountFrom` above for more details.
-    """
+        This is a simplified version of `getEdgeCountFrom`, to be used when the total number of edges of a given type is needed, regardless which vertex instance they are originated from.
+        See documentation of `getEdgeCountFrom` above for more details.
+        """
+        return self.getEdgeCountFrom(edgeType=edgeType, sourceVertexType=sourceVertexType, targetVertexType=targetVertexType)
 
     def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes=None):
         """Upserts an edge.
@@ -738,7 +739,7 @@ class TigerGraphConnection(object):
         data = {sourceVertexType: {}}
         l1 = data[sourceVertexType]
         for e in edges:
-            if len(e)>2:
+            if len(e) > 2:
                 vals = self._upsertAttrs(e[2])
             else:
                 vals = {}
@@ -827,7 +828,7 @@ class TigerGraphConnection(object):
             return []
 
         # Check if ttk_getEdgesFrom query was installed
-        if self.ttkGetEF == None:
+        if self.ttkGetEF is None:
             self.ttkGetEF = False
             eps = self.getEndpoints(dynamic=True)
             for ep in eps:
@@ -987,9 +988,23 @@ class TigerGraphConnection(object):
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
 
     def parseQueryOutput(self, output, graphOnly=True):
+        """Parses query output and separates vertex and edge data (and optionally other output) for easier use.
+
+        The output of this function can be used e.g. with the `vertexSetToDataFrame()` and `edgeSetToDataFrame()` functions or
+        (after some transformation) to pass a subgraph to a visualisation component.
+
+        Arguments:
+        - `output`:    The data structure returned by `runInstalledQuery()` or `runInterpretedQuery()`
+        - `graphOnly`: Should output be restricted to vertices and edges (True, default) or should any other output (e.g. values of
+                       variables or accumulators, or plain text printed) be captured as well.
+
+        Returns: A dictionary with two (or three) keys: "Vertices", "Edges" and optionally "Output". First two refer to another dictionary
+            containing keys for each vertex and edge types found, and the instances of those vertex and edge types. "Output" is a list of
+            dictionaries containing the key/value pairs of any other output.
+        """
         vs = {}
         es = {}
-        os = []
+        ou = []
         # Outermost data type is a list
         i = 0
         for o1 in output:
@@ -998,11 +1013,11 @@ class TigerGraphConnection(object):
                 o3 = o1[o2]
                 if not isinstance(o3, list):
                     if not graphOnly:  # Vertices and edges are coming in lists; but complex data types too, so more check are needed later
-                        os.append({o2: o3})
+                        ou.append({o2: o3})
                 else:
                     ox = o3[0]
                     if not isinstance(ox, dict):
-                        os.append({o2: o3})
+                        ou.append({o2: o3})
                     else:
                         if "v_type" in ox:
                             for o4 in o3:
@@ -1017,11 +1032,11 @@ class TigerGraphConnection(object):
                                     es[et] = []
                                 es[et].append(o4)
                         elif not graphOnly:
-                            os.append({o3: ox})
+                            ou.append({o3: ox})
             i += 1
         ret = {"Vertices": vs, "Edges": es}
         if not graphOnly:
-            ret["Output"] = os
+            ret["Output"] = ou
         return ret
 
     # Pandas DataFrame support =================================================
@@ -1106,8 +1121,8 @@ class TigerGraphConnection(object):
 
             json_up.append(json.loads(df.loc[index].to_json()))
             json_up[-1] = (
-                index if v_id == None else json_up[-1][v_id],
-                json_up[-1] if attributes == None
+                index if v_id is None else json_up[-1][v_id],
+                json_up[-1] if attributes is None
                 else {target: json_up[-1][source]
                       for target, source in attributes.items()}
             )
@@ -1142,9 +1157,9 @@ class TigerGraphConnection(object):
 
             json_up.append(json.loads(df.loc[index].to_json()))
             json_up[-1] = (
-                index if from_id == None else json_up[-1][from_id],
-                index if to_id == None else json_up[-1][to_id],
-                json_up[-1] if attributes == None
+                index if from_id is None else json_up[-1][from_id],
+                index if to_id is None else json_up[-1][to_id],
+                json_up[-1] if attributes is None
                 else {target: json_up[-1][source]
                       for target, source in attributes.items()}
             )
@@ -1311,7 +1326,6 @@ class TigerGraphConnection(object):
             return pd.DataFrame(ret).T
         return ret
 
-
     def getStatistics(self, seconds=10, segment=10):
         """Retrieves real-time query performance statistics over the given time period.
 
@@ -1393,43 +1407,41 @@ class TigerGraphConnection(object):
             raise TigerGraphException(res["message"], res["code"])
         return ret
 
-
     # GSQL support =================================================
 
     def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt"):
 
         self.jarLocation = os.path.expanduser(jarLocation)
         self.certLocation = os.path.expanduser(certLocation)
-        self.url = self.gsUrl.replace("https://", "").replace("http://", "") # Getting URL with gsql port w/o https://
-
+        self.url = self.gsUrl.replace("https://", "").replace("http://", "")  # Getting URL with gsql port w/o https://
 
         # Check if java runtime is installed.
         if subprocess.run(['which', 'java']).returncode != 0:
             raise TigerGraphException("Could not find java runtime. Please download and install from https://www.oracle.com/java/technologies/javase-downloads.html", None)
 
         # Create a directory for the jar file if it does not exist.
-        if(not os.path.exists(self.jarLocation)):
+        if not os.path.exists(self.jarLocation):
             os.mkdir(self.jarLocation)
 
-        # Downlad the gsql_client.jar file
+        # Download the gsql_client.jar file
         if self.downloadJar:
             print("Downloading gsql client Jar")
 
             ver = self.getVer()
             jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/'
-                    + 'com/tigergraph/client/gsql_client/' + ver
-                    + '/gsql_client-' + ver + '.jar')
+                       + 'com/tigergraph/client/gsql_client/' + ver
+                       + '/gsql_client-' + ver + '.jar')
             r = requests.get(jar_url)
-            open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content) # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
+            open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content)  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
 
-        if self.downloadCert: #HTTP/HTTPS
+        if self.downloadCert:  # HTTP/HTTPS
 
             # Check if openssl is installed.
             if subprocess.run(['which', 'openssl']).returncode != 0:
                 raise TigerGraphException("Could not find openssl. Please install.", None)
 
             print("Downloading SSL Certificate")
-            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation) # TODO: Python-native SSL?
+            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation)  # TODO: Python-native SSL?
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
 
@@ -1447,18 +1459,19 @@ class TigerGraphConnection(object):
         if not self.gsqlInitiated:
             self.initGsql()
 
-        if (options == None):
+        if options is None:
             options = ["-g", self.graphname]
 
         cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.getVer().replace('.','_'),
-               '-jar', self.jarLocation + '/gsql_client.jar' ]  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
+               '-jar', self.jarLocation + '/gsql_client.jar']  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
 
         if self.useCert:
             cmd += ['-cacert', self.certLocation]
 
         cmd += [
-        '-u', self.username, '-p', self.password,
-        '-ip', self.url]
+            '-u', self.username,
+            '-p', self.password,
+            '-ip', self.url]
 
         comp = subprocess.run(cmd + options + [query],
                               stdout=subprocess.PIPE,
@@ -1476,13 +1489,12 @@ class TigerGraphConnection(object):
             return json_object
 
     def createSecret(self, alias=""):
-
         if not self.gsqlInitiated:
             self.initGsql()
 
-        response = self.gsql("CREATE SECRET" + " " + alias)
+        response = self.gsql("CREATE SECRET " + alias)
         try:
-            secret = re.search('The secret\: (\w*)',response.replace('\n',''))[1]
+            secret = re.search('The secret\: (\w*)', response.replace('\n',''))[1]
             return secret
         except:
             return None
