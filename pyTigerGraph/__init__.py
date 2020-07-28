@@ -1,2 +1,3 @@
 from pyTigerGraph.pyTigerGraph import TigerGraphConnection
-from pyTigerGraph.gsql import Gsql
+__version__ = "0.0.7"
+__license__ = "MIT"

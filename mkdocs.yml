@@ -18,6 +18,8 @@ nav:
     - License: license.md
 theme:
     name: material
+    favicon: pyTigerGraphLogo-removebg-preview.png
+    logo: pyTigerGraphLogo-removebg-preview.png
 
 extra_css:
   - stylesheets/extra.css

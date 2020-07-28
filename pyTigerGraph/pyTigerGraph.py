@@ -4,7 +4,8 @@ import re
 from datetime import datetime
 import time
 import pandas as pd
-
+import os
+import subprocess
 
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
@@ -18,17 +19,35 @@ class TigerGraphException(Exception):
 
 
 class TigerGraphConnection(object):
-    """Python wrapper for TigerGraph's REST++ API.
+    """Python wrapper for TigerGraph's REST++ and GSQL APIs
 
     Common arguments used in methods:
     vertexType, sourceVertexType, targetVertexType -- The name of a vertex type in the graph.
                                                       Use `getVertexTypes()` to fetch the list of vertex types currently in the graph.
     vertexId, sourceVertexId, targetVertexId       -- The PRIMARY_ID of a vertex instance (of the appropriate data type).
     edgeType                                       -- The name of the edge type in the graph.
-                                                      Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
+                                                      Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.   
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken=""):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", useCert=True, clientVersion='3.0.0', secret=None):
+        """Initiate a connection object.
+
+        Arguments
+
+        - `host`:              The ip address of the TigerGraph server.
+        - `graphname`:         The default graph for running queries.
+        - `username`:          The username on the TigerGraph server.
+        - `password`:          The password for that user.
+        - `restppPort`:        The post for REST++ queries.
+        - `gsPort`:            The port of all other queries.
+        - `apiToken`:          A token to use when making queries.
+        - `useCert`:           True if we need to use a certificate because the server is secure (such as on TigerGraph 
+                               Cloud). This needs to be False when connecting to an unsecure server such as TigerGraph Developer. 
+                               When True the certificate would be downloaded when it is first needed. 
+                               on the first GSQL command.
+        - `clientVersion`:     Indicates which GSQL client version to download.
+        """
+        
         self.host = host
         self.username = username
         self.password = password
@@ -42,6 +61,11 @@ class TigerGraphConnection(object):
         self.debug = False
         self.schema = None
         self.ttkGetEF = None
+        self.downloadCert = useCert
+        self.downloadJar = True
+        self.useCert = useCert
+        self.clientVersion = clientVersion
+        self.gsqlInitiated = False
 
     # Private functions ========================================================
 
@@ -1013,6 +1037,8 @@ class TigerGraphConnection(object):
                          in the dataframe and target is the attribute name in the graph vertex. When omitted
                          all columns would be upserted with their current names. In this case column names
                          must match the vertex's attribute names.
+
+        Returns: The number of vertices upserted.
         """
 
         json_up = []
@@ -1078,6 +1104,8 @@ class TigerGraphConnection(object):
                          in the dataframe and target is the attribute name in the graph vertex. When omitted
                          all columns would be upserted with their current names. In this case column names
                          must match the vertex's attribute names.
+
+        Returns: the number of edges upserted.
         """
 
         json_up = []
@@ -1332,5 +1360,101 @@ class TigerGraphConnection(object):
         else:
             raise TigerGraphException(res["message"], res["code"])
         return ret
+
+
+    # GSQL support =================================================
+
+    def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt"):
+        
+        self.jarLocation = os.path.expanduser(jarLocation)
+        self.certLocation = os.path.expanduser(certLocation)
+        self.url = self.gsUrl.replace("https://", "").replace("http://", "") # Getting URL with gsql port w/o https://
+
+
+        # Check if java runtime is installed.
+        if subprocess.run(['which', 'java']).returncode != 0:
+            raise TigerGraphException("Could not find java runtime. Please download and install from https://www.oracle.com/java/technologies/javase-downloads.html", None)
+
+        # Create a directory for the jar file if it does not exist.
+        if(not os.path.exists(self.jarLocation)):
+            os.mkdir(self.jarLocation)
+
+        # Downlad the gsql_client.jar file
+        if self.downloadJar:
+            print("Downloading gsql client Jar")
+
+            jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
+                    + 'com/tigergraph/client/gsql_client/' + self.clientVersion 
+                    + '/gsql_client-' + self.clientVersion + '.jar')        
+            r = requests.get(jar_url) 
+            open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content)
+        
+        if self.downloadCert: #HTTP/HTTPS
+
+            # Check if openssl is installed.
+            if subprocess.run(['which', 'openssl']).returncode != 0:
+                raise TigerGraphException("Could not find openssl. Please install.", None)
+            
+            print("Downloading SSL Certificate")
+            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation) # TODO: Python-native SSL?
+            if os.stat(self.certLocation).st_size == 0:
+                raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
+
+            self.gsqlInitiated = True
+
+    def gsql(self, query, options=None):
+        """Runs a GSQL query and process the output.
+
+        Arguments:
+        - `query`:      The text of the query to run as one string. 
+        - `options`:    A list of strings that will be passed as options the the gsql_client. Use 
+                        `options=[]` to overide the default graph.
+        """
+
+        if not self.gsqlInitiated:
+            self.initGsql()
+        
+        if (options == None):
+            options = ["-g", self.graphname]
+        
+        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.clientVersion.replace('.','_'),
+               '-jar', self.jarLocation + '/gsql_client.jar' ]
+
+        if self.useCert:
+            cmd += ['-cacert', self.certLocation]
+
+        cmd += [
+        '-u', self.username, '-p', self.password, 
+        '-ip', self.url]
+        
+        comp = subprocess.run(cmd + options + [query], 
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+
+        self.stdout = comp.stdout.decode()
+        self.stderr = comp.stderr.decode()
+        
+        try:
+            json_string = re.search('(\{|\[).*$',
+                                    self.stdout.replace('\n',''))[0]
+            json_object = json.loads(json_string)
+        except:
+            return self.stdout
+        else:
+            return json_object
+        
+    def createSecret(self, alias=""):
+
+        if not self.gsqlInitiated:
+            self.initGsql()
+        
+        response = self.gsql("CREATE SECRET" + " " + alias)
+        try:
+            secret = re.search('The secret\: (\w*)',response.replace('\n',''))[1]
+            return secret
+        except:
+            return None
+
+    # TODO: showSecret()
 
 # EOF

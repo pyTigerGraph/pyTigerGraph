@@ -22,6 +22,8 @@ conn = tg.TigerGraphConnection(host="localhost", restppPort=25900, gsPort=25240,
 
 ## Example Projects
 
+- [GSQL101 on a notebook](https://github.com/pyTigerGraph/pyTigerGraph/blob/master/examples/GSQL101%20-%20PyTigerGraph.ipynb)
+
 - [Connecting to TigerGraph Database with pyTigerGraph](https://colab.research.google.com/drive/1sYv3Jvc6KYsqC4D-Rxkvjh4iPnrp4rg7)
 
 - [Predicting IPOs using Graph Convolutional Neural Networks](https://towardsdatascience.com/predicting-initial-public-offerings-using-graph-convolutional-neural-networks-42df5ce16006?source=friends_link&sk=17501f6534a0352951d118eb8b597599)
