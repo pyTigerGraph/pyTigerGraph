@@ -990,8 +990,14 @@ class TigerGraphConnection(object):
     def parseQueryOutput(self, output, graphOnly=True):
         """Parses query output and separates vertex and edge data (and optionally other output) for easier use.
 
+        The JSON output from a query can contain a mixture of results: vertex sets (the output of a SELECT statement),
+            edge sets (e.g. collected in a global accumulator), printout of global and local variables and accumulators,
+            including complex types (LIST, MAP, etc.). The type of the various output entries is not explicit, you need
+            to inspect the content to find out what it is actually.
+        This function "cleans" this output, separating and collecting vertices and edges in an easy to access way.
+            It can also collect other output or ignore it.
         The output of this function can be used e.g. with the `vertexSetToDataFrame()` and `edgeSetToDataFrame()` functions or
-        (after some transformation) to pass a subgraph to a visualisation component.
+            (after some transformation) to pass a subgraph to a visualisation component.
 
         Arguments:
         - `output`:    The data structure returned by `runInstalledQuery()` or `runInterpretedQuery()`
@@ -1445,7 +1451,7 @@ class TigerGraphConnection(object):
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
 
-            self.gsqlInitiated = True
+        self.gsqlInitiated = True
 
     def gsql(self, query, options=None):
         """Runs a GSQL query and process the output.
