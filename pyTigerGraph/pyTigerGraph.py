@@ -1120,7 +1120,7 @@ class TigerGraphConnection(object):
         """
         df = pd.DataFrame(edgeSet)
         cols = []
-        if type(withId) == bool:
+        if withId:
             cols.extend([df["from_type"], df["from_id"], df["to_type"], df["to_id"]])
         if withType:
             cols.append(df["e_type"])
