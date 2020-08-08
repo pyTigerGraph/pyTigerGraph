@@ -7,6 +7,7 @@ import pandas as pd
 import os
 import subprocess
 
+
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
 
@@ -26,10 +27,10 @@ class TigerGraphConnection(object):
                                                       Use `getVertexTypes()` to fetch the list of vertex types currently in the graph.
     vertexId, sourceVertexId, targetVertexId       -- The PRIMARY_ID of a vertex instance (of the appropriate data type).
     edgeType                                       -- The name of the edge type in the graph.
-                                                      Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.   
+                                                      Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", useCert=True, clientVersion='3.0.0', secret=None):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", useCert=True):
         """Initiate a connection object.
 
         Arguments
@@ -41,13 +42,12 @@ class TigerGraphConnection(object):
         - `restppPort`:        The post for REST++ queries.
         - `gsPort`:            The port of all other queries.
         - `apiToken`:          A token to use when making queries.
-        - `useCert`:           True if we need to use a certificate because the server is secure (such as on TigerGraph 
-                               Cloud). This needs to be False when connecting to an unsecure server such as TigerGraph Developer. 
-                               When True the certificate would be downloaded when it is first needed. 
+        - `useCert`:           True if we need to use a certificate because the server is secure (such as on TigerGraph
+                               Cloud). This needs to be False when connecting to an unsecure server such as TigerGraph Developer.
+                               When True the certificate would be downloaded when it is first needed.
                                on the first GSQL command.
-        - `clientVersion`:     Indicates which GSQL client version to download.
         """
-        
+
         self.host = host
         self.username = username
         self.password = password
@@ -60,11 +60,10 @@ class TigerGraphConnection(object):
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug = False
         self.schema = None
-        self.ttkGetEF = None
+        self.ttkGetEF = None  # TODO: this needs to be rethought, or at least renamed
         self.downloadCert = useCert
         self.downloadJar = True
         self.useCert = useCert
-        self.clientVersion = clientVersion
         self.gsqlInitiated = False
 
     # Private functions ========================================================
@@ -321,7 +320,7 @@ class TigerGraphConnection(object):
         data = json.dumps({"vertices": {vertexType: data}})
         return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_vertices"]
 
-    def getVertices(self, vertexType, select="", where="", limit="", sort="", timeout=0):
+    def getVertices(self, vertexType, select="", where="", limit="", sort="", fmt="py", withId=True, withType=False, timeout=0):
         """Retrieves vertices of the given vertex type.
 
         Arguments:
@@ -357,9 +356,19 @@ class TigerGraphConnection(object):
             isFirst = False
         if timeout and timeout > 0:
             url += ("?" if isFirst else "&") + "timeout=" + str(timeout)
-        return self._get(url)
 
-    def getVerticesById(self, vertexType, vertexIds):
+        ret = self._get(url)
+
+        if fmt == "json":
+            return json.dumps(ret)
+        if fmt == "df":
+            return self.vertexSetToDataFrame(ret, withId, withType)
+        return ret
+
+    def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
+        return self.getVertices(vertexType, select="", where="", limit="", sort="", fmt="df", withId=True, withType=False, timeout=0)
+
+    def getVerticesById(self, vertexType, vertexIds, fmt="py", withId=True, withType=False):
         """Retrieves vertices of the given vertex type, identified by their ID.
 
         Arguments
@@ -378,10 +387,19 @@ class TigerGraphConnection(object):
         else:
             vids = vertexIds
         url = self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType + "/"
+
         ret = []
         for vid in vids:
             ret += self._get(url + str(vid))
+
+        if fmt == "json":
+            return json.dumps(ret)
+        if fmt == "df":
+            return self.vertexSetToDataFrame(ret, withId, withType)
         return ret
+
+    def getVertexDataframeById(self, vertexType, vertexIds):
+        return self.getVerticiesById(vertexType, vertexIds, fmt="df", withId=True, withType=False)
 
     def getVertexStats(self, vertexTypes, skipNA=False):
         """Returns vertex attribute statistics.
@@ -660,12 +678,12 @@ class TigerGraphConnection(object):
         return ret
 
     def getEdgeCount(self, edgeType="*", sourceVertexType=None, targetVertexType=None):
-        return self.getEdgeCountFrom(edgeType=edgeType, sourceVertexType=sourceVertexType, targetVertexType=targetVertexType)
-    """Returns the number of edges of an edge type.
+        """Returns the number of edges of an edge type.
 
-    This is a simplified version of `getEdgeCountFrom`, to be used when the total number of edges of a given type is needed, regardless which vertex instance they are originated from.
-    See documentation of `getEdgeCountFrom` above for more details.
-    """
+        This is a simplified version of `getEdgeCountFrom`, to be used when the total number of edges of a given type is needed, regardless which vertex instance they are originated from.
+        See documentation of `getEdgeCountFrom` above for more details.
+        """
+        return self.getEdgeCountFrom(edgeType=edgeType, sourceVertexType=sourceVertexType, targetVertexType=targetVertexType)
 
     def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes=None):
         """Upserts an edge.
@@ -727,7 +745,7 @@ class TigerGraphConnection(object):
         data = {sourceVertexType: {}}
         l1 = data[sourceVertexType]
         for e in edges:
-            if len(e)>2:
+            if len(e) > 2:
                 vals = self._upsertAttrs(e[2])
             else:
                 vals = {}
@@ -748,7 +766,7 @@ class TigerGraphConnection(object):
         data = json.dumps({"edges": data})
         return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
 
-    def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
+    def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", fmt="py", withId=True, withType=False, timeout=0):
         """Retrieves edges of the given edge type originating from a specific source vertex.
 
         Only `sourceVertexType` and `sourceVertexId` are required.
@@ -769,6 +787,7 @@ class TigerGraphConnection(object):
         Endpoint:      GET /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
         """
+        # TODO: change sourceVertexId to sourceVertexIds and allow passing both number and list as parameter
         if not sourceVertexType or not sourceVertexId:
             raise TigerGraphException("Both source vertex type and source vertex ID must be provided.", None)
         url = self.restppUrl + "/graph/" + self.graphname + "/edges/" + sourceVertexType + "/" + str(sourceVertexId)
@@ -793,21 +812,32 @@ class TigerGraphConnection(object):
             isFirst = False
         if timeout and timeout > 0:
             url += ("?" if isFirst else "&") + "timeout=" + str(timeout)
-        return self._get(url)
+        ret = self._get(url)
 
-    def getEdgesByType(self, edgeType):
+        if fmt == "json":
+            return json.dumps(ret)
+        if fmt == "df":
+            return self.edgeSetToDataFrame(ret, withId, withType)
+        return ret
+
+    def getEdgesDataframe(self,sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
+        return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, fmt="df", timeout=timeout)
+
+    def getEdgesByType(self, edgeType, fmt="py", withId=True, withType=False):
         """Retrieves edges of the given edge type regardless the source vertex.
 
         Note: Edge attributes are not currently returned.
 
         Arguments:
         - `edgeType`: The name of the edge type.
+
+        TODO: add limit parameter
         """
         if not edgeType:
             return []
 
         # Check if ttk_getEdgesFrom query was installed
-        if self.ttkGetEF == None:
+        if self.ttkGetEF is None:
             self.ttkGetEF = False
             eps = self.getEndpoints(dynamic=True)
             for ep in eps:
@@ -815,12 +845,12 @@ class TigerGraphConnection(object):
                     self.ttkGetEF = True
 
         sourceVertexType = self.getEdgeSourceVertexType(edgeType)
-        if isinstance(sourceVertexType, set) or sourceVertexType == "*":
+        if isinstance(sourceVertexType, set) or sourceVertexType == "*":  # TODO: support edges with multiple source vertex types
             raise TigerGraphException("Edges with multiple source vertex types are not currently supported.", None)
 
         if self.ttkGetEF:  # If installed version is available, use it, as it can return edge attributes too.
             ret = self.runInstalledQuery("ttk_getEdgesFrom", {"edgeType": edgeType, "sourceVertexType": sourceVertexType})
-        else:  # If installed version is not available, use interpreted version. Always available, but can't return attributes.
+        else:  # If installed version is not available, use interpreted version. Always available, but couldn't return attributes before v3.0.
             queryText = \
             'INTERPRET QUERY () FOR GRAPH $graph { \
                 SetAccum<EDGE> @@edges; \
@@ -838,7 +868,13 @@ class TigerGraphConnection(object):
                                  .replace('$sourceEdgeType', sourceVertexType) \
                                  .replace('$edgeType',       edgeType)
             ret = self.runInterpretedQuery(queryText)
-        return ret[0]["edges"]
+        ret = ret[0]["edges"]
+
+        if fmt == "json":
+            return json.dumps(ret)
+        if fmt == "df":
+            return self.edgeSetToDataFrame(ret, withId, withType)
+        return ret
 
     def getEdgeStats(self, edgeTypes, skipNA=False):
         """Returns edge attribute statistics.
@@ -960,54 +996,151 @@ class TigerGraphConnection(object):
             print(queryText)
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
 
-    # Pandas dataframe support =================================================
+    def parseQueryOutput(self, output, graphOnly=True):
+        """Parses query output and separates vertex and edge data (and optionally other output) for easier use.
 
-    def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
-        """Retrieves vertices of the given vertex type.
-
-        Arguments:
-        - `vertexType`: Type of vertex desired
-        - `select`: Comma separated list of vertex attributes to be retrieved or omitted.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-        - `where`:  Comma separated list of conditions that are all applied on each vertex' attributes.
-                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        - `limit`:  Maximum number of vertex instances to be returned (after sorting).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        - `sort`    Comma separated list of attributes the results should be sorted by.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-
-        NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
-              Use `getVerticesById` if you need to retrieve by vertex ID.
-
-        Endpoint:      GET /graph/{graph_name}/vertices
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
-        """
-        data = self.getVertices(vertexType, select=select, where=where, limit=limit, sort=sort, timeout=timeout)
-        df = pd.DataFrame(data)
-        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
-        return df
-
-    def getVertexDataframeByID(self, vertexType, vertexIds):
-        """Retrieves vertices of the given vertex type, identified by their ID.
-
-        Arguments
-        - `vertexType`: Type of vertex desired
-        - `vertexIds`: A single vertex ID or a list of vertex IDs.
-
-        Endpoint:      GET /graph/{graph_name}/vertices
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
-        """
-        data = self.getVerticesById(vertexType, vertexIds)
-        df = pd.DataFrame(data)
-        df = pd.concat([df["v_id"], pd.DataFrame(df["attributes"].tolist())], axis=1)
-        return df
-
-    def upsertVertexDataframe(self, df, vertexType, v_id=None, attributes=None):
-        """Upserts vertices from a Pandas data frame.
+        The JSON output from a query can contain a mixture of results: vertex sets (the output of a SELECT statement),
+            edge sets (e.g. collected in a global accumulator), printout of global and local variables and accumulators,
+            including complex types (LIST, MAP, etc.). The type of the various output entries is not explicit, you need
+            to inspect the content to find out what it is actually.
+        This function "cleans" this output, separating and collecting vertices and edges in an easy to access way.
+            It can also collect other output or ignore it.
+        The output of this function can be used e.g. with the `vertexSetToDataFrame()` and `edgeSetToDataFrame()` functions or
+            (after some transformation) to pass a subgraph to a visualisation component.
 
         Arguments:
-        - `df`:          The data frame to upsert.
+        - `output`:    The data structure returned by `runInstalledQuery()` or `runInterpretedQuery()`
+        - `graphOnly`: Should output be restricted to vertices and edges (True, default) or should any other output (e.g. values of
+                       variables or accumulators, or plain text printed) be captured as well.
+
+        Returns: A dictionary with two (or three) keys: "Vertices", "Edges" and optionally "Output". First two refer to another dictionary
+            containing keys for each vertex and edge types found, and the instances of those vertex and edge types. "Output" is a list of
+            dictionaries containing the key/value pairs of any other output.
+        """
+        vs = {}
+        es = {}
+        ou = []
+        # Outermost data type is a list
+        i = 0
+        for o1 in output:
+            # Next level data type is dictionary
+            for o2 in o1:
+                o3 = o1[o2]
+                if not isinstance(o3, list):
+                    if not graphOnly:  # Vertices and edges are coming in lists; but complex data types too, so more check are needed later
+                        ou.append({o2: o3})
+                else:
+                    ox = o3[0]
+                    if not isinstance(ox, dict):
+                        ou.append({o2: o3})
+                    else:
+                        if "v_type" in ox:
+                            for o4 in o3:
+                                vt = o4["v_type"]
+                                if vt not in vs:
+                                    vs[vt] = []
+                                vs[vt].append(o4)
+                        elif "e_type" in ox:
+                            for o4 in o3:
+                                et = o4["e_type"]
+                                if et not in es:
+                                    es[et] = []
+                                es[et].append(o4)
+                        elif not graphOnly:
+                            ou.append({o3: ox})
+            i += 1
+        ret = {"Vertices": vs, "Edges": es}
+        if not graphOnly:
+            ret["Output"] = ou
+        return ret
+
+    # Pandas DataFrame support =================================================
+
+    def vertexSetToDataFrame(self, vertexSet, withId=True, withType=False):
+        """Converts a vertex set to Pandas DataFrame.
+        
+        Vertex sets are used for both the input and output of `SELECT` statements. They contain instances of vertices of the same type.
+        For each vertex instance the vertex ID, the vertex type and the (optional) attributes are present (under `v_id`, `v_type` and `attributes` keys, respectively).
+        See example in `edgeSetToDataFrame`.
+        
+        A vertex set has this structure:
+        [
+            {
+                "v_id": <vertex_id>,
+                "v_type": <vertex_type_name>,
+                "attributes":
+                    {
+                        "attr1": <value1>,
+                        "attr2": <value2>,
+                         ⋮
+                    }
+            },
+                ⋮
+        ]
+        
+        See: https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-statements#vertex-set-variable-declaration-and-assignment
+        """
+        df = pd.DataFrame(vertexSet)
+        cols = []
+        if withId:
+            cols.append(df["v_id"])
+        if withType:
+            cols.append(df["v_type"])
+        cols.append(pd.DataFrame(df["attributes"].tolist()))
+        return pd.concat(cols, axis=1)
+
+    def edgeSetToDataFrame(self, edgeSet, withId=True, withType=False):
+        """Converts an edge set to Pandas DataFrame
+
+        Edge sets contain instances of the same edge type. Edge sets are not generated "naturally" like vertex sets, you need to collect edges in (global) accumulators,
+            e.g. in case you want to visualise them in GraphStudio or by other tools.
+        Example:
+        
+            SetAccum<EDGE> @@edges;
+            start = {Country.*};
+            result =
+                SELECT t
+                FROM   start:s -(PROVINCE_IN_COUNTRY:e)- Province:t
+                ACCUM  @@edges += e;
+            PRINT start, result, @@edges;
+
+        The `@@edges` is an edge set.
+        It contains for each edge instance the source and target vertex type and ID, the edge type, an directedness indicator and the (optional) attributes.
+        Note: `start` and `result` are vertex sets.
+
+        An edge set has this structure:
+        [
+            {
+                "e_type": <edge_type_name>,
+                "from_type": <source_vertex_type_name>,
+                "from_id": <source_vertex_id>,
+                "to_type": <target_vertex_type_name>,
+                "to_id": <targe_vertex_id>,
+                "directed": <true_or_false>,
+                "attributes":
+                    {
+                        "attr1": <value1>,
+                        "attr2": <value2>,
+                         ⋮
+                    }
+            },
+                ⋮
+        ]
+        """
+        df = pd.DataFrame(edgeSet)
+        cols = []
+        if withId:
+            cols.extend([df["from_type"], df["from_id"], df["to_type"], df["to_id"]])
+        if withType:
+            cols.append(df["e_type"])
+        cols.append(pd.DataFrame(df["attributes"].tolist()))
+        return pd.concat(cols, axis=1)
+
+    def upsertVertexDataFrame(self, df, vertexType, v_id=None, attributes=None):
+        """Upserts vertices from a Pandas DataFrame.
+
+        Arguments:
+        - `df`:          The DataFrame to upsert.
         - `vertexType`:  The type of vertex to upsert data to.
         - `v_id`:        The field name where the vertex primary id is given. If omitted the dataframe
                          index would be used instead.
@@ -1025,52 +1158,21 @@ class TigerGraphConnection(object):
 
             json_up.append(json.loads(df.loc[index].to_json()))
             json_up[-1] = (
-                index if v_id == None else json_up[-1][v_id],
-                json_up[-1] if attributes == None
+                index if v_id is None else json_up[-1][v_id],
+                json_up[-1] if attributes is None
                 else {target: json_up[-1][source]
                       for target, source in attributes.items()}
             )
 
         return self.upsertVertices(vertexType=vertexType, vertices=json_up)
 
-    def getEdgesDataframe(self, sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
-        """Retrieves edges of the given edge type originating from the list of source verticies.
-
-        Only `sourceVertexType` and `sourceVerticies` are required.
-        If `targetVertexId` is specified, then `targetVertexType` must also be specified.
-        If `targetVertexType` is specified, then `edgeType` must also be specified.
-
-        Arguments:
-        - `select`: Comma separated list of edge attributes to be retrieved or omitted.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-        - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
-                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        - `limit`:  Maximum number of edge instances to be returned (after sorting).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        - `sort`    Comma separated list of attributes the results should be sorted by.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
-        """
-        frames = []
-        for vertex in sourceVerticies:
-            data = self.getEdges(sourceVertexType, vertex, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, timeout)
-            df = pd.DataFrame(data)
-            try:
-                frames.append(pd.concat([
-                    df.drop(["from_type","attributes"], axis=1),
-                    pd.DataFrame(df["attributes"].tolist())
-                ], axis=1))
-            except:
-                frames.append(df)
-        return pd.concat(frames).reset_index().drop("index", axis=1)
-
-    def upsertEdgesDataframe(
+    def upsertEdgeDataFrame(
         self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None,
         attributes=None):
-        """Upserts edges from a Pandas dataframe.
+        """Upserts edges from a Pandas DataFrame.
 
         Arguments:
-        - `df`:                The dataframe to upsert.
+        - `df`:                The DataFrame to upsert.
         - `sourceVertexType`:  The type of source vertex for the edge.
         - `edgeType`:          The type of edge to upsert data to.
         - `targetVertexType`:  The type of target vertex for the edge.
@@ -1083,7 +1185,7 @@ class TigerGraphConnection(object):
                          all columns would be upserted with their current names. In this case column names
                          must match the vertex's attribute names.
 
-        Returns: the number of edges upserted.
+        Returns: The number of edges upserted.
         """
 
         json_up = []
@@ -1092,27 +1194,19 @@ class TigerGraphConnection(object):
 
             json_up.append(json.loads(df.loc[index].to_json()))
             json_up[-1] = (
-                index if from_id == None else json_up[-1][from_id],
-                index if to_id == None else json_up[-1][to_id],
-                json_up[-1] if attributes == None
+                index if from_id is None else json_up[-1][from_id],
+                index if to_id is None else json_up[-1][to_id],
+                json_up[-1] if attributes is None
                 else {target: json_up[-1][source]
                       for target, source in attributes.items()}
             )
 
         return self.upsertEdges(
-            sourceVertexType=sourceVertexType,
-            edgeType=edgeType,
-            targetVertexType=targetVertexType,
-            edges=json_up
+            sourceVertexType = sourceVertexType,
+            edgeType = edgeType,
+            targetVertexType = targetVertexType,
+            edges = json_up
         )
-
-    def getInstalledQueriesDataframe(self):
-        """
-        Returns dataframe of all installed queries. Does not take any arguments
-        """
-        data = self.getEndpoints(dynamic=True)
-        df = pd.DataFrame(data).T
-        return df
 
     # Token management =========================================================
 
@@ -1258,6 +1352,17 @@ class TigerGraphConnection(object):
             ret.update(self._get(url + "static=true", resKey=None))
         return ret
 
+    def getInstalledQueries(self, fmt="py"):
+        """
+        Returns installed queries.
+        """
+        ret = self.getEndpoints(dynamic=True)
+        if fmt == "json":
+            return json.dumps(ret)
+        if fmt == "df":
+            return pd.DataFrame(ret).T
+        return ret
+
     def getStatistics(self, seconds=10, segment=10):
         """Retrieves real-time query performance statistics over the given time period.
 
@@ -1339,96 +1444,94 @@ class TigerGraphConnection(object):
             raise TigerGraphException(res["message"], res["code"])
         return ret
 
-
     # GSQL support =================================================
 
     def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt"):
-        
+
         self.jarLocation = os.path.expanduser(jarLocation)
         self.certLocation = os.path.expanduser(certLocation)
-        self.url = self.gsUrl.replace("https://", "").replace("http://", "") # Getting URL with gsql port w/o https://
-
+        self.url = self.gsUrl.replace("https://", "").replace("http://", "")  # Getting URL with gsql port w/o https://
 
         # Check if java runtime is installed.
         if subprocess.run(['which', 'java']).returncode != 0:
             raise TigerGraphException("Could not find java runtime. Please download and install from https://www.oracle.com/java/technologies/javase-downloads.html", None)
 
         # Create a directory for the jar file if it does not exist.
-        if(not os.path.exists(self.jarLocation)):
+        if not os.path.exists(self.jarLocation):
             os.mkdir(self.jarLocation)
 
-        # Downlad the gsql_client.jar file
+        # Download the gsql_client.jar file
         if self.downloadJar:
             print("Downloading gsql client Jar")
 
-            jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/' 
-                    + 'com/tigergraph/client/gsql_client/' + self.clientVersion 
-                    + '/gsql_client-' + self.clientVersion + '.jar')        
-            r = requests.get(jar_url) 
-            open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content)
-        
-        if self.downloadCert: #HTTP/HTTPS
+            ver = self.getVer()
+            jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/'
+                       + 'com/tigergraph/client/gsql_client/' + ver
+                       + '/gsql_client-' + ver + '.jar')
+            r = requests.get(jar_url)
+            open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content)  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
+
+        if self.downloadCert:  # HTTP/HTTPS
 
             # Check if openssl is installed.
             if subprocess.run(['which', 'openssl']).returncode != 0:
                 raise TigerGraphException("Could not find openssl. Please install.", None)
-            
+
             print("Downloading SSL Certificate")
-            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation) # TODO: Python-native SSL?
+            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation)  # TODO: Python-native SSL?
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
 
-            self.gsqlInitiated = True
+        self.gsqlInitiated = True
 
     def gsql(self, query, options=None):
         """Runs a GSQL query and process the output.
 
         Arguments:
-        - `query`:      The text of the query to run as one string. 
-        - `options`:    A list of strings that will be passed as options the the gsql_client. Use 
+        - `query`:      The text of the query to run as one string.
+        - `options`:    A list of strings that will be passed as options the the gsql_client. Use
                         `options=[]` to overide the default graph.
         """
 
         if not self.gsqlInitiated:
             self.initGsql()
-        
-        if (options == None):
+
+        if options is None:
             options = ["-g", self.graphname]
-        
-        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.clientVersion.replace('.','_'),
-               '-jar', self.jarLocation + '/gsql_client.jar' ]
+
+        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.getVer().replace('.','_'),
+               '-jar', self.jarLocation + '/gsql_client.jar']  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
 
         if self.useCert:
             cmd += ['-cacert', self.certLocation]
 
         cmd += [
-        '-u', self.username, '-p', self.password, 
-        '-ip', self.url]
-        
-        comp = subprocess.run(cmd + options + [query], 
+            '-u', self.username,
+            '-p', self.password,
+            '-ip', self.url]
+
+        comp = subprocess.run(cmd + options + [query],
                               stdout=subprocess.PIPE,
                               stderr=subprocess.PIPE)
 
         self.stdout = comp.stdout.decode()
         self.stderr = comp.stderr.decode()
-        
+
         try:
-            json_string = re.search('(\{|\[).*$',
-                                    self.stdout.replace('\n',''))[0]
+            json_string = re.search('(\{|\[).*$', self.stdout.replace('\n',''))[0]
             json_object = json.loads(json_string)
         except:
             return self.stdout
         else:
             return json_object
-        
-    def createSecret(self, alias=""):
 
+    def createSecret(self, alias=""):
         if not self.gsqlInitiated:
             self.initGsql()
-        
-        response = self.gsql("CREATE SECRET" + " " + alias)
+
+        response = self.gsql("CREATE SECRET " + alias)
         try:
-            secret = re.search('The secret\: (\w*)',response.replace('\n',''))[1]
+            secret = re.search('The secret\: (\w*)', response.replace('\n',''))[1]
             return secret
         except:
             return None
