@@ -365,6 +365,9 @@ class TigerGraphConnection(object):
             return self.vertexSetToDataFrame(ret, withId, withType)
         return ret
 
+    def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
+        return self.getVertices(vertexType, select="", where="", limit="", sort="", fmt="df", withId=True, withType=False, timeout=0)
+
     def getVerticesById(self, vertexType, vertexIds, fmt="py", withId=True, withType=False):
         """Retrieves vertices of the given vertex type, identified by their ID.
 
@@ -394,6 +397,9 @@ class TigerGraphConnection(object):
         if fmt == "df":
             return self.vertexSetToDataFrame(ret, withId, withType)
         return ret
+
+    def getVertexDataframeById(self, vertexType, vertexIds):
+        return self.getVerticiesById(vertexType, vertexIds, fmt="df", withId=True, withType=False)
 
     def getVertexStats(self, vertexTypes, skipNA=False):
         """Returns vertex attribute statistics.
@@ -813,6 +819,9 @@ class TigerGraphConnection(object):
         if fmt == "df":
             return self.edgeSetToDataFrame(ret, withId, withType)
         return ret
+
+    def getEdgesDataframe(self,sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
+        return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, fmt="df", timeout=timeout)
 
     def getEdgesByType(self, edgeType, fmt="py", withId=True, withType=False):
         """Retrieves edges of the given edge type regardless the source vertex.
