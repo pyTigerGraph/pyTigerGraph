@@ -1446,7 +1446,7 @@ class TigerGraphConnection(object):
 
     # GSQL support =================================================
 
-    def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt"):
+    def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt", version=None):
 
         self.jarLocation = os.path.expanduser(jarLocation)
         self.certLocation = os.path.expanduser(certLocation)
@@ -1463,8 +1463,10 @@ class TigerGraphConnection(object):
         # Download the gsql_client.jar file
         if self.downloadJar:
             print("Downloading gsql client Jar")
-
-            ver = self.getVer()
+            if version == None:
+                ver = self.getVer()
+            else:
+                ver = version
             jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/'
                        + 'com/tigergraph/client/gsql_client/' + ver
                        + '/gsql_client-' + ver + '.jar')
@@ -1484,16 +1486,20 @@ class TigerGraphConnection(object):
 
         self.gsqlInitiated = True
 
-    def gsql(self, query, options=None):
+    def gsql(self, query, options=None, version=None):
         """Runs a GSQL query and process the output.
 
         Arguments:
         - `query`:      The text of the query to run as one string.
         - `options`:    A list of strings that will be passed as options the the gsql_client. Use
                         `options=[]` to overide the default graph.
+        - `version`:    By default None, and attempts to get version of TigerGraph via getVer() (requires token).
+                        If necessary, specify the version with a string.
         """
 
         if not self.gsqlInitiated:
+            self.initGsql(version=version)
+        else:
             self.initGsql()
 
         if options is None:
