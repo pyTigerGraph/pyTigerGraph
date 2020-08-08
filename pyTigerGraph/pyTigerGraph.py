@@ -1496,11 +1496,11 @@ class TigerGraphConnection(object):
         - `version`:    By default None, and attempts to get version of TigerGraph via getVer() (requires token).
                         If necessary, specify the version with a string.
         """
-
         if not self.gsqlInitiated:
-            self.initGsql(version=version)
-        else:
-            self.initGsql()
+            if not version:
+                self.initGsql(version=version)
+            else:
+                self.initGsql()
 
         if options is None:
             options = ["-g", self.graphname]
