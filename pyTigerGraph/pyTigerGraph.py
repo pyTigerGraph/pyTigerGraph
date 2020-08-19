@@ -1499,13 +1499,14 @@ class TigerGraphConnection(object):
         if not self.gsqlInitiated:
             if version == None:
                 self.initGsql()
+                version = self.getVer()
             else:
                 self.initGsql(version=version)
 
         if options is None:
             options = ["-g", self.graphname]
 
-        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.getVer().replace('.','_'),
+        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + version.replace('.','_'),
                '-jar', self.jarLocation + '/gsql_client.jar']  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
 
         if self.useCert:
