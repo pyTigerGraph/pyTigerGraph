@@ -509,6 +509,7 @@
                 
                 <h2 id="runinstalledquery">runInstalledQuery</h2>
 <p><code>runInstalledQuery(queryName, params=None, timeout=16000, sizeLimit=32000000)</code></p>
+<p>Sample example: <code>conn.runInstalledQuery("getUserInfo", {'userID': 'user121'})</code></p>
 <p>Runs an installed query.</p>
 <p>The query must be already created and installed in the graph.
 Use <a href="#getEndpoints"><code>getEndpoints(dynamic=True)</code></a> or GraphStudio to find out the generated endpoint URL of the query, but only the query name needs to be specified here.</p>
