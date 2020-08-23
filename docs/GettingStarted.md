@@ -5,7 +5,7 @@ Once the package installs, you can import it and instantiate a connection to you
 ```py
 import pyTigerGraph as tg
 
-conn = tg.TigerGraphConnection(host="<hostname>", graphname="<graph_name>", username="<username>", password="<password>", apiToken="<api_token>")
+conn = tg.TigerGraphConnection(host="<hostname>", graphname="<graph_name>", username="<username>", password="<password>", apiToken="<api_token>", version="<tg_version>")
 ```
 If your database is not using the standard ports (or they are mapped), you can use the following arguments to specify those:
 - restppPort (default 9000): [REST++ API port](https://docs.tigergraph.com/dev/restpp-api/restpp-requests)
@@ -37,5 +37,5 @@ Checkout [this](https://github.com/pyTigerGraph/pyTigerGraph/blob/master/example
                                Cloud). This needs to be False when connecting to an unsecure server such as TigerGraph Developer. 
                                When True the certificate would be downloaded when it is first needed. 
                                on the first GSQL command.
-        - `clientVersion`:     Indicates which GSQL client version to download.
+        - `version`:     Indicates which GSQL client version to download.
 
