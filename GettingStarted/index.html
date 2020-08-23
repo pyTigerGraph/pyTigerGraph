@@ -451,7 +451,7 @@
 Once the package installs, you can import it and instantiate a connection to your database:</p>
 <pre><code class="py">import pyTigerGraph as tg
 
-conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quot;&lt;graph_name&gt;&quot;, username=&quot;&lt;username&gt;&quot;, password=&quot;&lt;password&gt;&quot;, apiToken=&quot;&lt;api_token&gt;&quot;)
+conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quot;&lt;graph_name&gt;&quot;, username=&quot;&lt;username&gt;&quot;, password=&quot;&lt;password&gt;&quot;, apiToken=&quot;&lt;api_token&gt;&quot;, version=&quot;&lt;tg_version&gt;&quot;)
 </code></pre>
 
 <p>If your database is not using the standard ports (or they are mapped), you can use the following arguments to specify those:
@@ -479,7 +479,7 @@ conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quo
                            Cloud). This needs to be False when connecting to an unsecure server such as TigerGraph Developer. 
                            When True the certificate would be downloaded when it is first needed. 
                            on the first GSQL command.
-    - `clientVersion`:     Indicates which GSQL client version to download.
+    - `version`:     Indicates which GSQL client version to download.
 </code></pre>
                 
               
