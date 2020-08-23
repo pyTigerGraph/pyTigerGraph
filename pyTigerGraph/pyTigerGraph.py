@@ -30,7 +30,7 @@ class TigerGraphConnection(object):
                                                       Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", useCert=True):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.0", apiToken="", useCert=True):
         """Initiate a connection object.
 
         Arguments
@@ -57,6 +57,7 @@ class TigerGraphConnection(object):
         self.gsPort = str(gsPort)
         self.gsUrl = self.host + ":" + self.gsPort
         self.apiToken = apiToken
+        self.version = version
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug = False
         self.schema = None
@@ -399,7 +400,7 @@ class TigerGraphConnection(object):
         return ret
 
     def getVertexDataframeById(self, vertexType, vertexIds):
-        return self.getVerticiesById(vertexType, vertexIds, fmt="df", withId=True, withType=False)
+        return self.getVerticesById(vertexType, vertexIds, fmt="df", withId=True, withType=False)
 
     def getVertexStats(self, vertexTypes, skipNA=False):
         """Returns vertex attribute statistics.
@@ -1446,7 +1447,7 @@ class TigerGraphConnection(object):
 
     # GSQL support =================================================
 
-    def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt", version=None):
+    def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt"):
 
         self.jarLocation = os.path.expanduser(jarLocation)
         self.certLocation = os.path.expanduser(certLocation)
@@ -1463,13 +1464,9 @@ class TigerGraphConnection(object):
         # Download the gsql_client.jar file
         if self.downloadJar:
             print("Downloading gsql client Jar")
-            if version == None:
-                ver = self.getVer()
-            else:
-                ver = version
             jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/'
-                       + 'com/tigergraph/client/gsql_client/' + ver
-                       + '/gsql_client-' + ver + '.jar')
+                       + 'com/tigergraph/client/gsql_client/' + self.version
+                       + '/gsql_client-' + self.version + '.jar')
             r = requests.get(jar_url)
             open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content)  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
 
@@ -1486,27 +1483,21 @@ class TigerGraphConnection(object):
 
         self.gsqlInitiated = True
 
-    def gsql(self, query, options=None, version=None):
+    def gsql(self, query, options=None):
         """Runs a GSQL query and process the output.
 
         Arguments:
         - `query`:      The text of the query to run as one string.
         - `options`:    A list of strings that will be passed as options the the gsql_client. Use
                         `options=[]` to overide the default graph.
-        - `version`:    By default None, and attempts to get version of TigerGraph via getVer() (requires token).
-                        If necessary, specify the version with a string.
         """
         if not self.gsqlInitiated:
-            if version == None:
-                self.initGsql()
-                version = self.getVer()
-            else:
-                self.initGsql(version=version)
+            self.initGsql()
 
         if options is None:
             options = ["-g", self.graphname]
 
-        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + version.replace('.','_'),
+        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.version.replace('.','_'),
                '-jar', self.jarLocation + '/gsql_client.jar']  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
 
         if self.useCert:
