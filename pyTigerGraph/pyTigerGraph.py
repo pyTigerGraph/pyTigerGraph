@@ -30,7 +30,7 @@ class TigerGraphConnection(object):
                                                       Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", useCert=True):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.0", apiToken="", useCert=True):
         """Initiate a connection object.
 
         Arguments
@@ -57,6 +57,7 @@ class TigerGraphConnection(object):
         self.gsPort = str(gsPort)
         self.gsUrl = self.host + ":" + self.gsPort
         self.apiToken = apiToken
+        self.version = version
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug = False
         self.schema = None
@@ -365,6 +366,9 @@ class TigerGraphConnection(object):
             return self.vertexSetToDataFrame(ret, withId, withType)
         return ret
 
+    def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
+        return self.getVertices(vertexType, select="", where="", limit="", sort="", fmt="df", withId=True, withType=False, timeout=0)
+
     def getVerticesById(self, vertexType, vertexIds, fmt="py", withId=True, withType=False):
         """Retrieves vertices of the given vertex type, identified by their ID.
 
@@ -394,6 +398,9 @@ class TigerGraphConnection(object):
         if fmt == "df":
             return self.vertexSetToDataFrame(ret, withId, withType)
         return ret
+
+    def getVertexDataframeById(self, vertexType, vertexIds):
+        return self.getVerticesById(vertexType, vertexIds, fmt="df", withId=True, withType=False)
 
     def getVertexStats(self, vertexTypes, skipNA=False):
         """Returns vertex attribute statistics.
@@ -813,6 +820,9 @@ class TigerGraphConnection(object):
         if fmt == "df":
             return self.edgeSetToDataFrame(ret, withId, withType)
         return ret
+
+    def getEdgesDataframe(self,sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
+        return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, fmt="df", timeout=timeout)
 
     def getEdgesByType(self, edgeType, fmt="py", withId=True, withType=False):
         """Retrieves edges of the given edge type regardless the source vertex.
@@ -1454,11 +1464,9 @@ class TigerGraphConnection(object):
         # Download the gsql_client.jar file
         if self.downloadJar:
             print("Downloading gsql client Jar")
-
-            ver = self.getVer()
             jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/'
-                       + 'com/tigergraph/client/gsql_client/' + ver
-                       + '/gsql_client-' + ver + '.jar')
+                       + 'com/tigergraph/client/gsql_client/' + self.version
+                       + '/gsql_client-' + self.version + '.jar')
             r = requests.get(jar_url)
             open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content)  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
 
@@ -1483,14 +1491,13 @@ class TigerGraphConnection(object):
         - `options`:    A list of strings that will be passed as options the the gsql_client. Use
                         `options=[]` to overide the default graph.
         """
-
         if not self.gsqlInitiated:
             self.initGsql()
 
         if options is None:
             options = ["-g", self.graphname]
 
-        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.getVer().replace('.','_'),
+        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.version.replace('.','_'),
                '-jar', self.jarLocation + '/gsql_client.jar']  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
 
         if self.useCert:

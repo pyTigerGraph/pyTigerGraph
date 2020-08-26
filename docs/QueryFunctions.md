@@ -1,6 +1,8 @@
 ## runInstalledQuery
 `runInstalledQuery(queryName, params=None, timeout=16000, sizeLimit=32000000)`
 
+Sample example: `conn.runInstalledQuery("getUserInfo", {'userID': 'user121'})`
+
 Runs an installed query.
 
 The query must be already created and installed in the graph.
