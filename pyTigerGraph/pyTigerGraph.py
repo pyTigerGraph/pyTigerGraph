@@ -70,7 +70,7 @@ class TigerGraphConnection(object):
     # Private functions ========================================================
 
     def _errorCheck(self, res):
-        """Checks if the JSON document returned by an endpoint has contains error: true; if so, it raises an exception"""
+        """Checks if the JSON document returned by an endpoint has contains error: true; if so, it raises an exception."""
         if "error" in res and res["error"] and res["error"] != "false":  # Endpoint might return string "false" rather than Boolean false
             raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
 
@@ -78,12 +78,12 @@ class TigerGraphConnection(object):
         """Generic REST++ API request
 
         Arguments:
-        - `method`:    HTTP method, currently one of GET, POST, DELETE or PUT
-        - `url`:       Complete REST++ API URL including path and parameters
-        - `authMode`:  Authentication mode, one of 'token' (default) or 'pwd'
-        - `headers`:   Standard HTTP request headers (dict)
-        - `data`:      Request payload, typically a JSON document
-        - `resKey`:    the JSON subdocument to be returned, default is 'result'
+        - `method`:    HTTP method, currently one of GET, POST or DELETE.
+        - `url`:       Complete REST++ API URL including path and parameters.
+        - `authMode`:  Authentication mode, one of 'token' (default) or 'pwd'.
+        - `headers`:   Standard HTTP request headers (dict).
+        - `data`:      Request payload, typically a JSON document.
+        - `resKey`:    the JSON subdocument to be returned, default is 'result'.
         - `skipCheck`: Skip error checking? Some endpoints return error to indicate that the requested action is not applicable; a problem, but not really an error.
         - `params`:    Request URL parameters.
         """
@@ -122,28 +122,28 @@ class TigerGraphConnection(object):
         return res[resKey]
 
     def _get(self, url, authMode="token", headers=None, resKey="results", skipCheck=False, params=None):
-        """Generic GET method
+        """Generic GET method.
 
         For argument details, see `_req`.
         """
         return self._req("GET", url, authMode, headers, None, resKey, skipCheck, params)
 
     def _post(self, url, authMode="token", headers=None, data=None, resKey="results", skipCheck=False, params=None):
-        """Generic GET method
+        """Generic POST method.
 
         For argument details, see `_req`.
         """
         return self._req("POST", url, authMode, headers, data, resKey, skipCheck, params)
 
     def _delete(self, url, authMode="token"):
-        """Generic GET method
+        """Generic DELETE method.
 
         For argument details, see `_req`.
         """
         return self._req("DELETE", url, authMode)
 
     def _upsertAttrs(self, attributes):
-        """Transforms attributes (provided as a table) into a hierarchy as expect by the upsert functions"""
+        """Transforms attributes (provided as a table) into a hierarchy as expect by the upsert functions."""
         if not isinstance(attributes, dict):
             return {}
         vals = {}
@@ -406,8 +406,8 @@ class TigerGraphConnection(object):
         """Returns vertex attribute statistics.
 
         Arguments:
-        vertexTypes -- A single vertex type name or a list of vertex types names or '*' for all vertex types.
-        skipNA      -- Skip those non-applicable vertices that do not have attributes or none of their attributes have statistics gathered.
+        - `vertexTypes`: A single vertex type name or a list of vertex types names or '*' for all vertex types.
+        - `skipNA`:      Skip those non-applicable vertices that do not have attributes or none of their attributes have statistics gathered.
 
         Endpoint:      POST /builtins
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_vertex_attr
@@ -447,7 +447,7 @@ class TigerGraphConnection(object):
         - `limit`:     Maximum number of vertex instances to be returned (after sorting).
                        See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
                        Must be used with `sort`.
-        - `sort`       Comma separated list of attributes the results should be sorted by.
+        - `sort`:      Comma separated list of attributes the results should be sorted by.
                        See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
                        Must be used with `limit`.
         - `permanent`: If true, the deleted vertex IDs can never be inserted back, unless the graph is dropped or the graph store is cleared.
