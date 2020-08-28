@@ -325,15 +325,22 @@ class TigerGraphConnection(object):
         """Retrieves vertices of the given vertex type.
 
         Arguments:
-        - `select`: Comma separated list of vertex attributes to be retrieved or omitted.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-        - `where`:  Comma separated list of conditions that are all applied on each vertex' attributes.
-                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        - `limit`:  Maximum number of vertex instances to be returned (after sorting).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        - `sort`    Comma separated list of attributes the results should be sorted by.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+        - `select`:   Comma separated list of vertex attributes to be retrieved or omitted.
+                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+        - `where`:    Comma separated list of conditions that are all applied on each vertex' attributes.
+                      The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+        - `limit`:    Maximum number of vertex instances to be returned (after sorting).
+                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`      Comma separated list of attributes the results should be sorted by.
+                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+        - `fmt`:      Format of the results:
+                      "py":   Python objects
+                      "json": JSON document
+                      "df":   Pandas DataFrame
+        - `withId`:   (If the output format is "df") should the vertex ID be included in the dataframe?
+        - `withType`: (If the output format is "df") should the vertex type be included in the dataframe?
+        - `timeout`:  Time allowed for successful execution (0 = no limit, default).
 
         NOTE: The primary ID of a vertex instance is NOT an attribute, thus cannot be used in above arguments.
               Use `getVerticesById` if you need to retrieve by vertex ID.
@@ -367,6 +374,10 @@ class TigerGraphConnection(object):
         return ret
 
     def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
+        """Retrieves vertices of the given vertex type and returns them as Pandas DataFrame.
+        
+        For details on arguments see `getVertices` above.
+        """
         return self.getVertices(vertexType, select="", where="", limit="", sort="", fmt="df", withId=True, withType=False, timeout=0)
 
     def getVerticesById(self, vertexType, vertexIds, fmt="py", withId=True, withType=False):
@@ -374,6 +385,13 @@ class TigerGraphConnection(object):
 
         Arguments
         - `vertexIds`: A single vertex ID or a list of vertex IDs.
+        - `fmt`:      Format of the results:
+                      "py":   Python objects
+                      "json": JSON document
+                      "df":   Pandas DataFrame
+        - `withId`:   (If the output format is "df") should the vertex ID be included in the dataframe?
+        - `withType`: (If the output format is "df") should the vertex type be included in the dataframe?
+        - `timeout`:  Time allowed for successful execution (0 = no limit, default).
 
         Endpoint:      GET /graph/{graph_name}/vertices
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
@@ -400,6 +418,10 @@ class TigerGraphConnection(object):
         return ret
 
     def getVertexDataframeById(self, vertexType, vertexIds):
+        """Retrieves vertices of the given vertex type, identified by their ID.
+        
+        For details on arguments see `getVerticesById` above.
+        """
         return self.getVerticesById(vertexType, vertexIds, fmt="df", withId=True, withType=False)
 
     def getVertexStats(self, vertexTypes, skipNA=False):
@@ -541,12 +563,12 @@ class TigerGraphConnection(object):
         - `edgeType`: The name of the edge type.
 
         Returns:
-        - A single source vertex type name string if the edge has a single source vertex type
-        - "*" if the edge can originate from any vertex type (notation used in 2.6.1 and earlier versions)
+        - A single source vertex type name string if the edge has a single source vertex type.
+        - "*" if the edge can originate from any vertex type (notation used in 2.6.1 and earlier versions).
             See https://docs.tigergraph.com/v/2.6/dev/gsql-ref/ddl-and-loading/defining-a-graph-schema#creating-an-edge-from-or-to-any-vertex-type
-        - A set of vertex type name strings (unique values) if the edge has multiple source vertex types (notation used in 3.0 and later versions)
-            Note: Even if the source vertex types were defined as "*", the rest API will list them as pairs (i.e. not as "*" in 2.6.1 and earlier versions),
-                  just like as if there were defined one by one (e.g. `FROM v1, TO v2 | FROM v3, TO v4 | …`)
+        - A set of vertex type name strings (unique values) if the edge has multiple source vertex types (notation used in 3.0 and later versions).
+            Note: Even if the source vertex types were defined as "*", the REST API will list them as pairs (i.e. not as "*" in 2.6.1 and earlier versions),
+                  just like as if there were defined one by one (e.g. `FROM v1, TO v2 | FROM v3, TO v4 | …`).
             Note: The returned set contains all source vertex types, but does not certainly mean that the edge is defined between all source and all target
                   vertex types. You need to look at the individual source/target pairs to find out which combinations are valid/defined.
         """
@@ -574,14 +596,14 @@ class TigerGraphConnection(object):
         - `edgeType`: The name of the edge type.
 
         Returns:
-        - A single source vertex type name string if the edge has a single source vertex type
-        - "*" if the edge can originate from any vertex type (notation used in 2.6.1 and earlier versions)
+        - A single target vertex type name string if the edge has a single target vertex type.
+        - "*" if the edge can end in any vertex type (notation used in 2.6.1 and earlier versions).
             See https://docs.tigergraph.com/v/2.6/dev/gsql-ref/ddl-and-loading/defining-a-graph-schema#creating-an-edge-from-or-to-any-vertex-type
-        - A set of vertex type name strings (unique values) if the edge has multiple source vertex types (notation used in 3.0 and later versions)
-            Note: Even if the source vertex types were defined as "*", the rest API will list them as pairs (i.e. not as "*" in 2.6.1 and earlier versions),
-                  just like as if there were defined one by one (e.g. `FROM v1, TO v2 | FROM v3, TO v4 | …`)
+        - A set of vertex type name strings (unique values) if the edge has multiple target vertex types (notation used in 3.0 and later versions).
+            Note: Even if the target vertex types were defined as "*", the REST API will list them as pairs (i.e. not as "*" in 2.6.1 and earlier versions),
+                  just like as if there were defined one by one (e.g. `FROM v1, TO v2 | FROM v3, TO v4 | …`).
             Note: The returned set contains all target vertex types, but does not certainly mean that the edge is defined between all source and all target
-                  vertex types. You need to look at the individual source/target pairs to find out which combinations are valid/defined.
+                  vertex types. You need to look at the individual source/target pairs to find out which combinations are valid/defined..
         """
         edgeTypeDetails = self.getEdgeType(edgeType)
 
@@ -775,18 +797,25 @@ class TigerGraphConnection(object):
         If `targetVertexType` is specified, then `edgeType` must also be specified.
 
         Arguments:
-        - `select`: Comma separated list of edge attributes to be retrieved or omitted.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
-        - `where`:  Comma separated list of conditions that are all applied on each edge's attributes.
-                    The conditions are in logical conjunction (i.e. they are "AND'ed" together).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
-        - `limit`:  Maximum number of edge instances to be returned (after sorting).
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        - `sort`    Comma separated list of attributes the results should be sorted by.
-                    See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+        - `select`:   Comma separated list of edge attributes to be retrieved or omitted.
+                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#select
+        - `where`:    Comma separated list of conditions that are all applied on each edge's attributes.
+                      The conditions are in logical conjunction (i.e. they are "AND'ed" together).
+                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
+        - `limit`:    Maximum number of edge instances to be returned (after sorting).
+                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
+        - `sort`:     Comma separated list of attributes the results should be sorted by.
+                      See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
+        - `fmt`:      Format of the results:
+                      "py":   Python objects
+                      "json": JSON document
+                      "df":   Pandas DataFrame
+        - `withId`:   (If the output format is "df") should the source and target vertex types and IDs be included in the dataframe?
+        - `withType`: (If the output format is "df") should the edge type be included in the dataframe?
+        - `timeout`:  Time allowed for successful execution (0 = no limit, default).
 
         Endpoint:      GET /graph/{graph_name}/vertices
-        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-vertices
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-graph-graph_name-edges
         """
         # TODO: change sourceVertexId to sourceVertexIds and allow passing both number and list as parameter
         if not sourceVertexType or not sourceVertexId:
@@ -822,15 +851,24 @@ class TigerGraphConnection(object):
         return ret
 
     def getEdgesDataframe(self,sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
+        """Retrieves edges of the given edge type originating from a specific source vertex.
+        
+        For details on arguments see `getEdges` above.
+        """
         return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, fmt="df", timeout=timeout)
 
     def getEdgesByType(self, edgeType, fmt="py", withId=True, withType=False):
         """Retrieves edges of the given edge type regardless the source vertex.
 
-        Note: Edge attributes are not currently returned.
-
         Arguments:
         - `edgeType`: The name of the edge type.
+        - `fmt`:      Format of the results:
+                      "py":   Python objects
+                      "json": JSON document
+                      "df":   Pandas DataFrame
+        - `withId`:   (If the output format is "df") should the source and target vertex types and IDs be included in the dataframe?
+        - `withType`: (If the output format is "df") should the edge type be included in the dataframe?
+        - `timeout`:  Time allowed for successful execution (0 = no limit, default).
 
         TODO: add limit parameter
         """
@@ -877,12 +915,14 @@ class TigerGraphConnection(object):
             return self.edgeSetToDataFrame(ret, withId, withType)
         return ret
 
+    # TODO: getEdgesDataframeByType
+
     def getEdgeStats(self, edgeTypes, skipNA=False):
         """Returns edge attribute statistics.
 
         Arguments:
-        - `edgeTypes`: A single edge type name or a list of edges types names or '*' for all edges types
-        - `skipNA`:    Skip those edges that do not have attributes or none of their attributes have statistics gathered
+        - `edgeTypes`: A single edge type name or a list of edges types names or '*' for all edges types.
+        - `skipNA`:    Skip those edges that do not have attributes or none of their attributes have statistics gathered.
 
         Endpoint:      POST /builtins
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#stat_edge_attr
