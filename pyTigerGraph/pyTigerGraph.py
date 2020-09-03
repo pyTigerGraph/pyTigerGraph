@@ -30,7 +30,7 @@ class TigerGraphConnection(object):
                                                       Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.0", apiToken="", useCert=True):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.0", apiToken="", useCert=True, certPath=None):
         """Initiate a connection object.
 
         Arguments
@@ -66,6 +66,7 @@ class TigerGraphConnection(object):
         self.downloadJar = True
         self.useCert = useCert
         self.gsqlInitiated = False
+        self.certPath = certPath
 
     # Private functions ========================================================
 
@@ -103,8 +104,11 @@ class TigerGraphConnection(object):
             _data = data
         else:
             _data = None
-
-        res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params)
+        
+        if self.useCert == True and self.certPath != None:
+            res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params, verify=self.certPath)
+        else:
+            res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params)
 
         if self.debug:
             print(res.url)
