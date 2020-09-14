@@ -6,6 +6,7 @@ import time
 import pandas as pd
 import os
 import subprocess
+import shutil
 
 
 class TigerGraphException(Exception):
@@ -23,11 +24,11 @@ class TigerGraphConnection(object):
     """Python wrapper for TigerGraph's REST++ and GSQL APIs
 
     Common arguments used in methods:
-    vertexType, sourceVertexType, targetVertexType -- The name of a vertex type in the graph.
-                                                      Use `getVertexTypes()` to fetch the list of vertex types currently in the graph.
-    vertexId, sourceVertexId, targetVertexId       -- The PRIMARY_ID of a vertex instance (of the appropriate data type).
-    edgeType                                       -- The name of the edge type in the graph.
-                                                      Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
+    `vertexType`, `sourceVertexType`, `targetVertexType` -- The name of a vertex type in the graph.
+                                                            Use `getVertexTypes()` to fetch the list of vertex types currently in the graph.
+    `vertexId`, `sourceVertexId`, `targetVertexId`       -- The PRIMARY_ID of a vertex instance (of the appropriate data type).
+    `edgeType`                                           -- The name of the edge type in the graph.
+                                                            Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
     def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.0", apiToken="", useCert=True, certPath=None):
@@ -63,7 +64,6 @@ class TigerGraphConnection(object):
         self.schema = None
         self.ttkGetEF = None  # TODO: this needs to be rethought, or at least renamed
         self.downloadCert = useCert
-        self.downloadJar = True
         self.useCert = useCert
         self.gsqlInitiated = False
         self.certPath = certPath
@@ -104,7 +104,7 @@ class TigerGraphConnection(object):
             _data = data
         else:
             _data = None
-        
+
         if self.useCert == True and self.certPath != None:
             res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params, verify=self.certPath)
         else:
@@ -226,7 +226,6 @@ class TigerGraphConnection(object):
         """Returns the details of the specified vertex type.
 
         Arguments:
-        - `vertexType`: The name of of the vertex type.
         - `force`: If `True`, forces the retrieval the schema details again, otherwise returns a cached copy of vertex type details (if they were already fetched previously).
         """
         for vt in self.getSchema(force=force)["VertexTypes"]:
@@ -238,7 +237,7 @@ class TigerGraphConnection(object):
         """Returns the number of vertices.
 
         Uses:
-        - If `vertexType` = "*": vertex count of all vertex types (`where` cannot be specified in this case)
+        - If `vertexType` is "*": vertex count of all vertex types (`where` cannot be specified in this case)
         - If `vertexType` is specified only: vertex count of the given type
         - If `vertexType` and `where` are specified: vertex count of the given type after filtered by `where` condition(s)
 
@@ -339,7 +338,7 @@ class TigerGraphConnection(object):
         - `sort`      Comma separated list of attributes the results should be sorted by.
                       See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
         - `fmt`:      Format of the results:
-                      "py":   Python objects
+                      "py":   Python objects (default)
                       "json": JSON document
                       "df":   Pandas DataFrame
         - `withId`:   (If the output format is "df") should the vertex ID be included in the dataframe?
@@ -379,7 +378,7 @@ class TigerGraphConnection(object):
 
     def getVertexDataframe(self, vertexType, select="", where="", limit="", sort="", timeout=0):
         """Retrieves vertices of the given vertex type and returns them as Pandas DataFrame.
-        
+
         For details on arguments see `getVertices` above.
         """
         return self.getVertices(vertexType, select="", where="", limit="", sort="", fmt="df", withId=True, withType=False, timeout=0)
@@ -390,7 +389,7 @@ class TigerGraphConnection(object):
         Arguments
         - `vertexIds`: A single vertex ID or a list of vertex IDs.
         - `fmt`:      Format of the results:
-                      "py":   Python objects
+                      "py":   Python objects (default)
                       "json": JSON document
                       "df":   Pandas DataFrame
         - `withId`:   (If the output format is "df") should the vertex ID be included in the dataframe?
@@ -423,7 +422,7 @@ class TigerGraphConnection(object):
 
     def getVertexDataframeById(self, vertexType, vertexIds):
         """Retrieves vertices of the given vertex type, identified by their ID.
-        
+
         For details on arguments see `getVerticesById` above.
         """
         return self.getVerticesById(vertexType, vertexIds, fmt="df", withId=True, withType=False)
@@ -811,7 +810,7 @@ class TigerGraphConnection(object):
         - `sort`:     Comma separated list of attributes the results should be sorted by.
                       See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
         - `fmt`:      Format of the results:
-                      "py":   Python objects
+                      "py":   Python objects (default)
                       "json": JSON document
                       "df":   Pandas DataFrame
         - `withId`:   (If the output format is "df") should the source and target vertex types and IDs be included in the dataframe?
@@ -856,7 +855,7 @@ class TigerGraphConnection(object):
 
     def getEdgesDataframe(self,sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
         """Retrieves edges of the given edge type originating from a specific source vertex.
-        
+
         For details on arguments see `getEdges` above.
         """
         return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select, where, limit, sort, fmt="df", timeout=timeout)
@@ -867,7 +866,7 @@ class TigerGraphConnection(object):
         Arguments:
         - `edgeType`: The name of the edge type.
         - `fmt`:      Format of the results:
-                      "py":   Python objects
+                      "py":   Python objects (default)
                       "json": JSON document
                       "df":   Pandas DataFrame
         - `withId`:   (If the output format is "df") should the source and target vertex types and IDs be included in the dataframe?
@@ -1065,35 +1064,27 @@ class TigerGraphConnection(object):
         vs = {}
         es = {}
         ou = []
+        
         # Outermost data type is a list
-        i = 0
         for o1 in output:
-            # Next level data type is dictionary
+            print("=> o1: " + str(o1))
+            # Next level data type is dictionary that could be vertex sets, edge sets or generic output (of simple or complex data types)
             for o2 in o1:
-                o3 = o1[o2]
-                if not isinstance(o3, list):
-                    if not graphOnly:  # Vertices and edges are coming in lists; but complex data types too, so more check are needed later
-                        ou.append({o2: o3})
-                else:
-                    ox = o3[0]
-                    if not isinstance(ox, dict):
-                        ou.append({o2: o3})
-                    else:
-                        if "v_type" in ox:
-                            for o4 in o3:
-                                vt = o4["v_type"]
-                                if vt not in vs:
-                                    vs[vt] = []
-                                vs[vt].append(o4)
-                        elif "e_type" in ox:
-                            for o4 in o3:
-                                et = o4["e_type"]
-                                if et not in es:
-                                    es[et] = []
-                                es[et].append(o4)
-                        elif not graphOnly:
-                            ou.append({o3: ox})
-            i += 1
+                _o2 = o1[o2]
+                print("===> _o2: " + str(_o2))
+                if isinstance(_o2, list):  # Is it an array?
+                    print("===> _o2: array")
+                    for o3 in _o2:  # Iterate through the array
+                        print("=====> o3: " + str(o3))
+                        if "v_type" in o3:  # It's a vertex!
+                            None
+                        elif "e_type" in o3:  # It's an edge!
+                            None
+                        else:  # It's a ... something else
+                            ou.append({"label": o2, "value": _o2})
+                else:  # It's a ... something else
+                    ou.append({"label": o2, "value": _o2})
+                    
         ret = {"Vertices": vs, "Edges": es}
         if not graphOnly:
             ret["Output"] = ou
@@ -1103,11 +1094,11 @@ class TigerGraphConnection(object):
 
     def vertexSetToDataFrame(self, vertexSet, withId=True, withType=False):
         """Converts a vertex set to Pandas DataFrame.
-        
+
         Vertex sets are used for both the input and output of `SELECT` statements. They contain instances of vertices of the same type.
         For each vertex instance the vertex ID, the vertex type and the (optional) attributes are present (under `v_id`, `v_type` and `attributes` keys, respectively).
         See example in `edgeSetToDataFrame`.
-        
+
         A vertex set has this structure:
         [
             {
@@ -1122,7 +1113,7 @@ class TigerGraphConnection(object):
             },
                 ⋮
         ]
-        
+
         See: https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-statements#vertex-set-variable-declaration-and-assignment
         """
         df = pd.DataFrame(vertexSet)
@@ -1140,7 +1131,7 @@ class TigerGraphConnection(object):
         Edge sets contain instances of the same edge type. Edge sets are not generated "naturally" like vertex sets, you need to collect edges in (global) accumulators,
             e.g. in case you want to visualise them in GraphStudio or by other tools.
         Example:
-        
+
             SetAccum<EDGE> @@edges;
             start = {Country.*};
             result =
@@ -1302,7 +1293,7 @@ class TigerGraphConnection(object):
                  Raises exception if specified token does not exists.
 
         Note:
-        - New expiration timestamp will be now + lifetime seconds, _not_ current expiration timestamp + lifetime seconds.
+        - New expiration timestamp will be `now + lifetime` seconds, _not_ `current expiration timestamp + lifetime` seconds.
         - Expiration timestamp's time zone might be different from your computer's local time zone.
 
         Endpoint:      PUT /requesttoken
@@ -1362,9 +1353,9 @@ class TigerGraphConnection(object):
         """Lists the REST++ endpoints and their parameters.
 
         Arguments:
-        - `builtin -- TigerGraph provided REST++ endpoints.
-        - `dymamic -- Endpoints for user installed queries.
-        - `static  -- Static endpoints.
+        - `builtin`: List TigerGraph provided REST++ endpoints.
+        - `dymamic`: List endpoints generated for user installed queries.
+        - `static`:  List static endpoints.
 
         If none of the above arguments are specified, all endpoints are listed
 
@@ -1452,7 +1443,7 @@ class TigerGraphConnection(object):
         return components
 
     def getVer(self, component="product", full=False):
-        """Gets the version information of specific component
+        """Gets the version information of specific component.
 
         Arguments:
         - `component`: One of TigerGraph's components (e.g. product, gpe, gse).
@@ -1497,30 +1488,37 @@ class TigerGraphConnection(object):
         self.certLocation = os.path.expanduser(certLocation)
         self.url = self.gsUrl.replace("https://", "").replace("http://", "")  # Getting URL with gsql port w/o https://
 
-        # Check if java runtime is installed.
-        if subprocess.run(['which', 'java']).returncode != 0:
-            raise TigerGraphException("Could not find java runtime. Please download and install from https://www.oracle.com/java/technologies/javase-downloads.html", None)
+        # Check if Java runtime is installed.
+        if not shutil.which("java"):
+            raise TigerGraphException("Could not find Java runtime. Please download and install from https://www.oracle.com/java/technologies/javase-downloads.html", None)
 
         # Create a directory for the jar file if it does not exist.
         if not os.path.exists(self.jarLocation):
+            if self.debug:
+                print("Jar location not found, creating")
             os.mkdir(self.jarLocation)
 
-        # Download the gsql_client.jar file
-        if self.downloadJar:
-            print("Downloading gsql client Jar")
+        # Download the gsql_client.jar file if not yet available locally
+        self.version = self.getVer()
+        self.jarName = os.path.join(self.jarLocation, 'gsql_client-' + self.version + ".jar")
+        if not os.path.exists(self.jarName):
+            if self.debug:
+                print("Jar not found, downloading to " + self.jarName)
             jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/'
                        + 'com/tigergraph/client/gsql_client/' + self.version
                        + '/gsql_client-' + self.version + '.jar')
             r = requests.get(jar_url)
-            open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content)  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
+            open(self.jarName, 'wb').write(r.content)
 
         if self.downloadCert:  # HTTP/HTTPS
+            if self.debug:
+                print("Downloading SSL certificate")
+            # TODO: Windows support
 
             # Check if openssl is installed.
-            if subprocess.run(['which', 'openssl']).returncode != 0:
+            if not shutil.which('openssl'):
                 raise TigerGraphException("Could not find openssl. Please install.", None)
 
-            print("Downloading SSL Certificate")
             os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation)  # TODO: Python-native SSL?
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
@@ -1533,7 +1531,7 @@ class TigerGraphConnection(object):
         Arguments:
         - `query`:      The text of the query to run as one string.
         - `options`:    A list of strings that will be passed as options the the gsql_client. Use
-                        `options=[]` to overide the default graph.
+                        `options=[]` to override the default graph.
         """
         if not self.gsqlInitiated:
             self.initGsql()
@@ -1542,7 +1540,7 @@ class TigerGraphConnection(object):
             options = ["-g", self.graphname]
 
         cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.version.replace('.','_'),
-               '-jar', self.jarLocation + '/gsql_client.jar']  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
+               '-jar', self.jarName]
 
         if self.useCert:
             cmd += ['-cacert', self.certLocation]
