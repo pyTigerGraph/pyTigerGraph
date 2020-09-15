@@ -31,7 +31,7 @@ class TigerGraphConnection(object):
                                                             Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.0", apiToken="", useCert=True, certPath=None):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", useCert=False, certPath=None):
         """Initiate a connection object.
 
         Arguments
@@ -58,13 +58,17 @@ class TigerGraphConnection(object):
         self.gsPort = str(gsPort)
         self.gsUrl = self.host + ":" + self.gsPort
         self.apiToken = apiToken
-        self.version = version
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug = False
         self.schema = None
         self.ttkGetEF = None  # TODO: this needs to be rethought, or at least renamed
+        self.version = ""
         self.downloadCert = useCert
         self.useCert = useCert
+        self.certLocation = ""
+        self.jarLocation = ""
+        self.jarName = ""
+        self.url = ""
         self.gsqlInitiated = False
         self.certPath = certPath
 
@@ -105,7 +109,7 @@ class TigerGraphConnection(object):
         else:
             _data = None
 
-        if self.useCert == True and self.certPath != None:
+        if self.useCert and self.certPath is not None:
             res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params, verify=self.certPath)
         else:
             res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params)
@@ -381,7 +385,7 @@ class TigerGraphConnection(object):
 
         For details on arguments see `getVertices` above.
         """
-        return self.getVertices(vertexType, select="", where="", limit="", sort="", fmt="df", withId=True, withType=False, timeout=0)
+        return self.getVertices(vertexType, select=select, where=where, limit=limit, sort=sort, fmt="df", withId=True, withType=False, timeout=timeout)
 
     def getVerticesById(self, vertexType, vertexIds, fmt="py", withId=True, withType=False):
         """Retrieves vertices of the given vertex type, identified by their ID.
@@ -449,7 +453,7 @@ class TigerGraphConnection(object):
         ret = {}
         for vt in vts:
             data = '{"function":"stat_vertex_attr","type":"' + vt + '"}'
-            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data, resKey=None, skipCheck=True)
+            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data, resKey="", skipCheck=True)
             if res["error"]:
                 if "stat_vertex_attr is skipped" in res["message"]:
                     if not skipNA:
@@ -853,7 +857,7 @@ class TigerGraphConnection(object):
             return self.edgeSetToDataFrame(ret, withId, withType)
         return ret
 
-    def getEdgesDataframe(self,sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
+    def getEdgesDataframe(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0):
         """Retrieves edges of the given edge type originating from a specific source vertex.
 
         For details on arguments see `getEdges` above.
@@ -894,17 +898,17 @@ class TigerGraphConnection(object):
             ret = self.runInstalledQuery("ttk_getEdgesFrom", {"edgeType": edgeType, "sourceVertexType": sourceVertexType})
         else:  # If installed version is not available, use interpreted version. Always available, but couldn't return attributes before v3.0.
             queryText = \
-            'INTERPRET QUERY () FOR GRAPH $graph { \
-                SetAccum<EDGE> @@edges; \
-                start = {ANY}; \
-                res = \
-                    SELECT s \
-                    FROM   start:s-(:e)->ANY:t \
-                    WHERE  e.type == "$edgeType" \
-                       AND s.type == "$sourceEdgeType" \
-                    ACCUM  @@edges += e; \
-                PRINT @@edges AS edges; \
-            }'
+                'INTERPRET QUERY () FOR GRAPH $graph { \
+                    SetAccum<EDGE> @@edges; \
+                    start = {ANY}; \
+                    res = \
+                        SELECT s \
+                        FROM   start:s-(:e)->ANY:t \
+                        WHERE  e.type == "$edgeType" \
+                           AND s.type == "$sourceEdgeType" \
+                        ACCUM  @@edges += e; \
+                    PRINT @@edges AS edges; \
+             }'
 
             queryText = queryText.replace("$graph",          self.graphname) \
                                  .replace('$sourceEdgeType', sourceVertexType) \
@@ -942,7 +946,7 @@ class TigerGraphConnection(object):
         ret = {}
         for et in ets:
             data = '{"function":"stat_edge_attr","type":"' + et + '","from_type":"*","to_type":"*"}'
-            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data, resKey=None, skipCheck=True)
+            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data, resKey="", skipCheck=True)
             if res["error"]:
                 if "stat_edge_attr is skiped" in res["message"]:
                     if not skipNA:
@@ -1063,12 +1067,17 @@ class TigerGraphConnection(object):
         """
 
         def attCopy(src, trg):
+            """Copies the attributes of a vertex or edge into another vertex or edge, respectively."""
             srca = src["attributes"]
             trga = trg["attributes"]
             for att in srca:
                 trga[att] = srca[att]
 
         def addOccurrences(obj, src):
+            """Counts and lists te occurrences of a vertex or edge.
+            A given vertex or edge can appear multiple times (in different vertex or edge sets) in the output of a query.
+            Each output has a label (either the variable name or an alias used in the PRINT statement), `x_sources` contains a list of these labels.
+            """
             if "x_occurrences" in obj:
                 obj["x_occurrences"] += 1
             else:
@@ -1122,7 +1131,7 @@ class TigerGraphConnection(object):
                                 es[eType] = etm
 
                             # Then handle the edge itself
-                            eId = o3["from_type"] + "(" + o3["from_id"] + ")->" + o3["to_type"] + "(" + o3["to_id"] + ")";
+                            eId = o3["from_type"] + "(" + o3["from_id"] + ")->" + o3["to_type"] + "(" + o3["to_id"] + ")"
                             o3["e_id"] = eId
 
                             # Add reverse edge name, if applicable
@@ -1138,7 +1147,7 @@ class TigerGraphConnection(object):
                             else:  # No, add it
                                 addOccurrences(o3, o2)
                                 etm[eId] = o3
-                                    
+
                         else:  # It's a ... something else
                             ou.append({"label": o2, "value": _o2})
                 else:  # It's a ... something else
@@ -1261,9 +1270,7 @@ class TigerGraphConnection(object):
 
         return self.upsertVertices(vertexType=vertexType, vertices=json_up)
 
-    def upsertEdgeDataFrame(
-        self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None,
-        attributes=None):
+    def upsertEdgeDataFrame(self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None, attributes=None):
         """Upserts edges from a Pandas DataFrame.
 
         Arguments:
@@ -1297,10 +1304,10 @@ class TigerGraphConnection(object):
             )
 
         return self.upsertEdges(
-            sourceVertexType = sourceVertexType,
-            edgeType = edgeType,
-            targetVertexType = targetVertexType,
-            edges = json_up
+            sourceVertexType=sourceVertexType,
+            edgeType=edgeType,
+            targetVertexType=targetVertexType,
+            edges=json_up
         )
 
     # Token management =========================================================
@@ -1431,20 +1438,20 @@ class TigerGraphConnection(object):
         url = self.restppUrl + "/endpoints/" + self.graphname + "?"
         if bui:
             eps = {}
-            res = self._get(url + "builtin=true", resKey=None)
+            res = self._get(url + "builtin=true", resKey="")
             for ep in res:
                 if not re.search(" /graph/", ep) or re.search(" /graph/{graph_name}/", ep):
                     eps[ep] = res[ep]
             ret.update(eps)
         if dyn:
             eps = {}
-            res = self._get(url + "dynamic=true", resKey=None)
+            res = self._get(url + "dynamic=true", resKey="")
             for ep in res:
                 if re.search("^GET /query/" + self.graphname, ep):
                     eps[ep] = res[ep]
             ret.update(eps)
         if sta:
-            ret.update(self._get(url + "static=true", resKey=None))
+            ret.update(self._get(url + "static=true", resKey=""))
         return ret
 
     def getInstalledQueries(self, fmt="py"):
@@ -1477,8 +1484,8 @@ class TigerGraphConnection(object):
         if not segment or type(segment) != "int":
             segment = 10
         else:
-            segment = max(min(segment,0),100)
-        return self._get(self.restppUrl + "/statistics/" + self.graphname + "?seconds=" + str(seconds) + "&segment=" + str(segment), resKey=None)
+            segment = max(min(segment, 0), 100)
+        return self._get(self.restppUrl + "/statistics/" + self.graphname + "?seconds=" + str(seconds) + "&segment=" + str(segment), resKey="")
 
     def getVersion(self, raw=False):
         """Retrieves the git versions of all components of the system.
@@ -1526,7 +1533,7 @@ class TigerGraphConnection(object):
 
         In case of evaluation/trial deployment, an information message and -1 remaining days are returned.
         """
-        res = self._get(self.restppUrl + "/showlicenseinfo", resKey=None, skipCheck=True)
+        res = self._get(self.restppUrl + "/showlicenseinfo", resKey="", skipCheck=True)
         ret = {}
         if not res["error"]:
             ret["message"]        = res["message"]
@@ -1542,6 +1549,12 @@ class TigerGraphConnection(object):
     # GSQL support =================================================
 
     def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt"):
+        """Initialises the GSQL functionality, downloads the appropriate GSQL client JAR (if not available already) and an SSL certification.
+
+        Arguments:
+        - `jarLocation`: The folder/directory where the GSQL client JAR(s) will be stored.
+        - `certLocation`: The folder/directory _and_ the name of the SSL certification file.
+        """
 
         self.jarLocation = os.path.expanduser(jarLocation)
         self.certLocation = os.path.expanduser(certLocation)
@@ -1578,7 +1591,7 @@ class TigerGraphConnection(object):
             if not shutil.which('openssl'):
                 raise TigerGraphException("Could not find openssl. Please install.", None)
 
-            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation)  # TODO: Python-native SSL?
+            os.system("openssl s_client -connect " + self.url + " < /dev/null 2> /dev/null | openssl x509 -text > " + self.certLocation)  # TODO: Python-native SSL?
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
 
@@ -1598,7 +1611,7 @@ class TigerGraphConnection(object):
         if options is None:
             options = ["-g", self.graphname]
 
-        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.version.replace('.','_'),
+        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.version.replace('.', '_'),
                '-jar', self.jarName]
 
         if self.useCert:
@@ -1617,7 +1630,7 @@ class TigerGraphConnection(object):
         self.stderr = comp.stderr.decode()
 
         try:
-            json_string = re.search('(\{|\[).*$', self.stdout.replace('\n',''))[0]
+            json_string = re.search('(\{|\[).*$', self.stdout.replace('\n', ''))[0]
             json_object = json.loads(json_string)
         except:
             return self.stdout
@@ -1630,7 +1643,7 @@ class TigerGraphConnection(object):
 
         response = self.gsql("CREATE SECRET " + alias)
         try:
-            secret = re.search('The secret\: (\w*)', response.replace('\n',''))[1]
+            secret = re.search('The secret\: (\w*)', response.replace('\n', ''))[1]
             return secret
         except:
             return None
