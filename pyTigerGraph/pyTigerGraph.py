@@ -1061,30 +1061,89 @@ class TigerGraphConnection(object):
             containing keys for each vertex and edge types found, and the instances of those vertex and edge types. "Output" is a list of
             dictionaries containing the key/value pairs of any other output.
         """
+
+        def attCopy(src, trg):
+            srca = src["attributes"]
+            trga = trg["attributes"]
+            for att in srca:
+                trga[att] = srca[att]
+
+        def addOccurrences(obj, src):
+            if "x_occurrences" in obj:
+                obj["x_occurrences"] += 1
+            else:
+                obj["x_occurrences"] = 1
+            if "x_sources" in obj:
+                obj["x_sources"].append(src)
+            else:
+                obj["x_sources"] = [src]
+
         vs = {}
         es = {}
         ou = []
-        
+
         # Outermost data type is a list
         for o1 in output:
-            print("=> o1: " + str(o1))
             # Next level data type is dictionary that could be vertex sets, edge sets or generic output (of simple or complex data types)
             for o2 in o1:
                 _o2 = o1[o2]
-                print("===> _o2: " + str(_o2))
-                if isinstance(_o2, list):  # Is it an array?
-                    print("===> _o2: array")
+                if isinstance(_o2, list) and len(_o2) > 0 and isinstance(_o2[0], dict):  # Is it an array of dictionaries?
                     for o3 in _o2:  # Iterate through the array
-                        print("=====> o3: " + str(o3))
                         if "v_type" in o3:  # It's a vertex!
-                            None
+
+                            # Handle vertex type first
+                            vType = o3["v_type"]
+                            vtm = {}
+                            if vType in vs:  # Do we have this type of vertices in our list (which is a dictionary, really)?
+                                vtm = vs[vType]
+                            else:  # No, let's create a dictionary for them and add to the list
+                                vtm = {}
+                                vs[vType] = vtm
+
+                            # Then handle the vertex itself
+                            vId = o3["v_id"]
+                            if vId in vtm:  # Do we have this specific vertex (identified by the ID) in our list?
+                                tmp = vtm[vId]
+                                attCopy(o3, tmp)
+                                addOccurrences(tmp, o2)
+                            else:  # No, add it
+                                addOccurrences(o3, o2)
+                                vtm[vId] = o3
+
                         elif "e_type" in o3:  # It's an edge!
-                            None
+
+                            # Handle edge type first
+                            eType = o3["e_type"]
+                            etm = {}
+                            if eType in es:  # Do we have this type of edges in our list (which is a dictionary, really)?
+                                etm = es[eType]
+                            else:  # No, let's create a dictionary for them and add to the list
+                                etm = {}
+                                es[eType] = etm
+
+                            # Then handle the edge itself
+                            eId = o3["from_type"] + "(" + o3["from_id"] + ")->" + o3["to_type"] + "(" + o3["to_id"] + ")";
+                            o3["e_id"] = eId
+
+                            # Add reverse edge name, if applicable
+                            if self.isDirected(eType):
+                                rev = self.getReverseEdge(eType)
+                                if rev:
+                                    o3["reverse_edge"] = rev
+
+                            if eId in etm:  # Do we have this specific edge (identified by the composite ID) in our list?
+                                tmp = etm[eId]
+                                attCopy(o3, tmp)
+                                addOccurrences(tmp, o2)
+                            else:  # No, add it
+                                addOccurrences(o3, o2)
+                                etm[eId] = o3
+                                    
                         else:  # It's a ... something else
                             ou.append({"label": o2, "value": _o2})
                 else:  # It's a ... something else
                     ou.append({"label": o2, "value": _o2})
-                    
+
         ret = {"Vertices": vs, "Edges": es}
         if not graphOnly:
             ret["Output"] = ou
