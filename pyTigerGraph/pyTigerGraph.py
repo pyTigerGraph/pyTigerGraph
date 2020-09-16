@@ -173,13 +173,222 @@ class TigerGraphConnection(object):
         Endpoint:      GET /gsqlserver/gsql/udtlist
         Documentation: Not documented publicly
         """
-        return self._get(self.gsUrl + "/gsqlserver/gsql/udtlist?graph=" + self.graphname, authMode="pwd")
+        res = self._get(self.gsUrl + "/gsqlserver/gsql/udtlist?graph=" + self.graphname, authMode="pwd")
+        for u in res:
+            u["Name"] = u["name"]
+            u.pop("name")
+            u["Fields"] = u["fields"]
+            u.pop("fields")
+        self.schema["UDTs"] = res
+    
+    def _getSchemaLs(self):
 
-    def getSchema(self, udts=True, force=False):
+        res = self.gsql('ls')
+
+        for objType in ["VertexTypes", "EdgeTypes", "Indexes", "Queries", "LoadingJobs", "DataSources", "Graphs"]:
+            if not objType in self.schema:
+                self.schema[objType] = []
+            
+        qpatt = re.compile("[\s\S\n]+CREATE", re.MULTILINE)
+
+        res = res.split("\n")
+        i = 0
+        while i < len(res):
+            l = res[i]
+            # Processing vertices
+            if l.startswith("  - VERTEX"):
+                vs = self.schema["VertexTypes"]
+                vtName = l[11:l.find("(")]
+                for v in vs:
+                    if v["Name"] == vtName:
+                        v["Statement"] = "CREATE " + l[4:]
+                        break
+
+            # Processing edges
+            elif l.startswith("  - DIRECTED") or l.startswith("  - UNDIRECTED"):
+                es = self.schema["EdgeTypes"]
+                etName = l[l.find("EDGE") + 5:l.find("(")]
+                for e in es:
+                    if e["Name"] == etName:
+                        e["Statement"] = "CREATE " + l[4:]
+                        break
+
+            # Processing indices (or indexes)
+            elif l.startswith("Indexes:"):
+                i += 1
+                l = res[i]
+                idxs = self.schema["Indexes"]
+                while l != "":
+                    l2 = l[4:].split(":")
+                    l21 = l2[1]
+                    idx = {"Name": l2[0], "Vertex": l2[1][0:l21.find("(")], "Attribute": l21[l21.find("(")+1:l21.find(")")]}
+                    idxs.append(idx)
+                    i = i + 1
+                    l = res[i]
+
+            # Processing loading jobs
+            elif res[i].startswith("  - CREATE LOADING JOB"):
+                txt = ""
+                tmp = l[4:]
+                txt += tmp + "\n"
+                jobName = tmp.split(" ")[3]
+                i += 1
+                l = res[i]
+                while not (l.startswith("  - CREATE") or l.startswith("Queries")):
+                    txt += l[4:] + "\n"
+                    i += 1
+                    l = res[i]
+                txt = txt.rstrip(" \n")
+                i -= 1
+                self.schema["LoadingJobs"].append({"Name": jobName, "Statement": txt})
+
+            # Processing queries
+            elif l.startswith("Queries:"):
+                i += 1
+                l = res[i]
+                while l != "":
+                    qName = l[4:l.find("(")]
+                    dep = l.endswith('(deprecated)')
+                    txt = self.gsql("SHOW QUERY " + qName).rstrip(" \n")
+                    txt = re.sub(qpatt, "CREATE", txt)
+                    qs = self.schema["Queries"]
+                    found = False
+                    for q in qs:
+                        if q["Name"] == qName:
+                            q["Statement"] = txt
+                            q["Deprecated"] = dep
+                            found = True
+                            break
+                    if not found:  # Most likely the query is created but not installed
+                        qs.append({"Name": qName, "Statement": txt, "Deprecated": dep})
+                    i = i + 1
+                    l = res[i]
+
+            # Processing UDTs
+            elif l.startswith("User defined tuples:"):
+                i += 1
+                l = res[i]
+                while l != "":
+                    udtName = l[4:l.find("(")].rstrip()
+                    us = self.schema["UDTs"]
+                    for u in us:
+                        if u["Name"] == udtName:
+                            u["Statement"] = "TYPEDEF TUPLE <" + l[l.find("(")+1:-1] + "> " + udtName
+                            break
+                    i = i + 1
+                    l = res[i]
+
+            # Processing data sources
+            elif l.startswith("Data Sources:"):
+                i += 1
+                l = res[i]
+                while l != "":
+                    dsDetails = l[4:].split()
+                    ds = {"Name": dsDetails[1], "Type": dsDetails[0], "Details": dsDetails[2]}
+                    ds["Statement"] = [
+                        "CREATE DATA_SOURCE " + dsDetails[0].upper() + " " + dsDetails[1] + ' = "' + dsDetails[2].lstrip("(").rstrip(")").replace('"', "'") + '"',
+                        "GRANT DATA_SOURCE " + dsDetails[1] + " TO GRAPH " + self.graphname
+                    ]
+                    self.schema["DataSources"].append(ds)
+                    i = i + 1
+                    l = res[i]
+
+            # Processing graphs (actually, only one graph should be listed)
+            elif l.startswith("  - Graph"):
+                gName = l[10:l.find("(")]
+                self.schema["Graphs"].append({"Name": gName, "Statement": "CREATE GRAPH " + l[10:].replace(":v","").replace(":e",""),"Text": l[10:]})
+
+            # Ignoring the rest (schema change jobs, labels, comments, empty lines, etc.)
+            else:
+                pass
+            i += 1
+
+    def _getQueries(self):
+        """ Get query metadata from REST++ endpoint.
+    
+        It will not return data for queries that are not (yet) installed.
+        """
+        qs = self.schema["Queries"]
+        eps = self.getEndpoints(dynamic=True)
+        for ep in eps:
+            e = eps[ep]
+            params = e["parameters"]
+            qName = params["query"]["default"]
+            query = {}
+            for q in qs:
+                if q["Name"] == qName:
+                    query = q
+                    found = True
+                    break
+            if not found:  # Most likely the query is created but not installed
+                query = {"Name": qName}
+                qs.append(q)
+            params.pop("query")
+            query["Parameters"] = params
+            query["Endpoint"] = ep.split(" ")[1]
+            query["Method"] = ep.split(" ")[0]
+
+    def _getUsers(self):
+        us = []
+        res = self.gsql("SHOW USER")
+        res = res.split("\n")
+        i = 0
+        while i < len(res):
+            l = res[i]
+            if "- Name:" in l:
+                if "tigergraph" in l:
+                    i += 1
+                    l = res[i]
+                    while l != "":
+                        i += 1
+                        l = res[i]
+                else:
+                    uName = l[10:]
+                    roles = []
+                    i += 1
+                    l = res[i]
+                    while l != "":
+                        if "- GraphName: " + self.graphname in l:
+                            i += 1
+                            l = res[i]
+                            roles = l[l.find(":") + 2:].split(", ")
+                        i += 1
+                        l = res[i]
+                    us.append({"Name": uName, "Roles": roles})
+            i += 1
+        self.schema["Users"] = us
+
+    def _getGroups(self):
+        gs = []
+        res = self.gsql("SHOW GROUP")
+        res = res.split("\n")
+        i = 0
+        while i < len(res):
+            l = res[i]
+            if "- Name:" in l:
+                gName = l[10:]
+                roles = []
+                rule = ""
+                i += 1
+                l = res[i]
+                while l != "":
+                    if  "- GraphName: " + self.graphname in l:
+                        i += 1
+                        l = res[i]
+                        roles = l[l.find(":") + 2:].split(", ")
+                    elif "- Rule: " in l:
+                        rule = l[l.find(":") + 2:]  
+                    i += 1
+                    l = res[i]
+                gs.append({"Name": gName, "Roles": roles, "Rule": rule})
+            i += 1
+        self.schema["Groups"] = gs
+
+    def getSchema(self, full=True, force=False):
         """Retrieves the schema (all vertex and edge type and - if not disabled - the User Defined Type details) of the graph.
 
         Arguments:
-        - `udts`: If `True`, calls `_getUDTs()`, i.e. includes User Defined Types in the schema details.
+        - `full`:  If `True`, metadata for all kinds of graph objects are retrieved, not just for vertices and edges.
         - `force`: If `True`, retrieves the schema details again, otherwise returns a cached copy of the schema details (if they were already fetched previously).
 
         Endpoint:      GET /gsqlserver/gsql/schema
@@ -187,8 +396,16 @@ class TigerGraphConnection(object):
         """
         if not self.schema or force:
             self.schema = self._get(self.gsUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname, authMode="pwd")
-        if udts and ("UDTs" not in self.schema or force):
-            self.schema["UDTs"] = self._getUDTs()
+        if full:
+            if "UDTs" not in self.schema or force:
+                self._getUDTs()
+            if "Queries" not in self.schema or force:
+                self._getSchemaLs()
+                self._getQueries()
+            if "Users" not in self.schema or force:
+                self._getUsers()
+            if "Groups" not in self.schema or force:
+                self._getGroups()
         return self.schema
 
     def getUDTs(self):
