@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 import pandas as pd
 import os
+import sys
 import subprocess
 import shutil
 
@@ -61,6 +62,7 @@ class TigerGraphConnection(object):
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug = False
         self.schema = None
+        self.tgVersion = ""
         self.ttkGetEF = None  # TODO: this needs to be rethought, or at least renamed
 
         # GSQL client related variables
@@ -72,7 +74,7 @@ class TigerGraphConnection(object):
         self.jarLocation = ""
         self.jarName = ""
         self.url = ""
-        self.version = ""
+        self.gsqlVersion = ""
 
     # Private functions ========================================================
 
@@ -1658,6 +1660,9 @@ class TigerGraphConnection(object):
 
         Get the full list of components using `getVersion`.
         """
+        if self.tgVersion:  # Return cached value
+            return self.tgVersion
+
         ret = ""
         for v in self.getVersion():
             if v["name"] == component:
@@ -1666,7 +1671,10 @@ class TigerGraphConnection(object):
             if full:
                 return ret
             ret = re.search("_.+_", ret)
-            return ret.group().strip("_")
+            ret = ret.group().strip("_")
+            if component == "product":
+                self.tgVersion = ret  # Cache value if component was "product"
+            return ret
         else:
             raise TigerGraphException("\"" + component + "\" is not a valid component.", None)
 
@@ -1690,39 +1698,68 @@ class TigerGraphConnection(object):
 
     # GSQL support =================================================
 
-    def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt"):
+    def initGsql(self, jarLocation="", certLocation="", version=""):
         """Initialises the GSQL functionality, downloads the appropriate GSQL client JAR (if not available already) and an SSL certification.
 
         Arguments:
-        - `jarLocation`: The folder/directory where the GSQL client JAR(s) will be stored.
+        - `jarLocation`:  The folder/directory where the GSQL client JAR(s) will be stored.
         - `certLocation`: The folder/directory _and_ the name of the SSL certification file.
+        - `gsqlVersion`:      Alternative GSQL client gsqlVersion to be used. Format: x.y.z (positive integer values).
+                          If the given gsqlVersion of GSQL client JAR is not available at https://bintray.com/tigergraphecosys/tgjars/gsql_client then
+                          manually specify the next higher gsqlVersion number available.
         """
 
+        # Setting platform specific defaults if params are not specified
+        if not jarLocation:
+            if sys.platform.startswith("win"):
+                jarLocation = "%userprofile%\\.gsql"
+            else:
+                jarLocation = "~/.gsql"
+        if not certLocation:
+            certLocation = os.path.join(jarLocation, "my-cert.txt")
+
+        # Computing absolute paths
         self.jarLocation = os.path.expanduser(jarLocation)
         self.certLocation = os.path.expanduser(certLocation)
-        self.url = self.gsUrl.replace("https://", "").replace("http://", "")  # Getting URL with gsql port w/o https://
+        if self.debug:
+            print("JAR location: " + self.jarLocation)
+            print("SSL certificate: " + self.certLocation)
+
+        # Getting TigerGraph URL with GSQL port w/o http[s]://
+        self.url = self.gsUrl.replace("https://", "").replace("http://", "")
 
         # Check if Java runtime is installed.
         if not shutil.which("java"):
             raise TigerGraphException("Could not find Java runtime. Please download and install from https://www.oracle.com/java/technologies/javase-downloads.html", None)
 
-        # Create a directory for the jar file if it does not exist.
+        # Create a directory for the JAR file if it does not exist.
         if not os.path.exists(self.jarLocation):
             if self.debug:
                 print("Jar location not found, creating")
             os.mkdir(self.jarLocation)
 
         # Download the gsql_client.jar file if not yet available locally
-        self.version = self.getVer()
-        self.jarName = os.path.join(self.jarLocation, 'gsql_client-' + self.version + ".jar")
+        if version:
+            self.gsqlVersion = version
+            if self.debug:
+                print("Using gsqlVersion " + self.gsqlVersion + " instead of " + self.getVer())
+        else:
+            self.gsqlVersion = self.getVer()
+        self.jarName = os.path.join(self.jarLocation, 'gsql_client-' + self.gsqlVersion + ".jar")
         if not os.path.exists(self.jarName):
             if self.debug:
                 print("Jar not found, downloading to " + self.jarName)
             jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/'
-                       + 'com/tigergraph/client/gsql_client/' + self.version
-                       + '/gsql_client-' + self.version + '.jar')
-            r = requests.get(jar_url)
-            open(self.jarName, 'wb').write(r.content)
+                       + 'com/tigergraph/client/gsql_client/' + self.gsqlVersion
+                       + '/gsql_client-' + self.gsqlVersion + '.jar')
+            res = requests.get(jar_url)
+            if res.status_code == 404:
+                if self.debug:
+                    print(jar_url)
+                raise TigerGraphException("GSQL client v" + self.gsqlVersion + " could not be found. Check https://bintray.com/tigergraphecosys/tgjars/gsql_client for available versions.", res.status_code)
+            if res.status_code != 200:  # The client JAR was not successfully downloaded for whatever other reasons
+                res.raise_for_status()
+            open(self.jarName, 'wb').write(res.content)
 
         if self.useCert:  # HTTP/HTTPS
             if self.debug:
@@ -1753,7 +1790,7 @@ class TigerGraphConnection(object):
         if options is None:
             options = ["-g", self.graphname]
 
-        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.version.replace('.', '_'),
+        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.gsqlVersion.replace('.', '_'),
                '-jar', self.jarName]
 
         if self.useCert:
