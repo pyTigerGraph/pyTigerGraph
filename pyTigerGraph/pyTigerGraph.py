@@ -67,8 +67,8 @@ class TigerGraphConnection(object):
         self.gsqlInitiated = False
         self.useCert = useCert
         self.certPath = certPath
-        # Below variables are set during GSQL init 
-        self.certLocation = ""  
+        # Below variables are set during GSQL init
+        self.certLocation = ""
         self.jarLocation = ""
         self.jarName = ""
         self.url = ""
@@ -1052,7 +1052,7 @@ class TigerGraphConnection(object):
             }
 
         Use `$graphname` in the `FOR GRAPH` clause to avoid hard-coding it; it will be replaced by the actual graph name. E.g.
-        
+
             INTERPRET QUERY (INT a) FOR GRAPH $graphname {
                 PRINT a;
             }
@@ -1192,10 +1192,10 @@ class TigerGraphConnection(object):
         return ret
 
     # Path-finding algorithms ==================================================
-    
+
     def _preparePathParams(self, sourceVertices, targetVertices, maxLength=None, vertexFilters=None, edgeFilters=None, allShortestPaths=False):
         """ Prepares the input parameters by transforming them to the format expected by the path algorithms.
-        
+
         Arguments:
         - `sourceVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
         - `targetVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the target vertices of the shortest paths sought.
@@ -1204,8 +1204,8 @@ class TigerGraphConnection(object):
         - `edgeFilters`:      An optional list of (edgeType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
         - `allShortestPaths`: If true, the endpoint will return all shortest paths between the source and target.
                               Default is false, meaning that the endpoint will return only one path.
-        
-        See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding for information on filters.        
+
+        See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding for information on filters.
         """
 
         def parseVertices(vertices):
@@ -1223,7 +1223,7 @@ class TigerGraphConnection(object):
                     print("Invalid vertex type or value: " + str(v))
             print(ret)
             return ret
-        
+
         def parseFilters(filters):
             ret = []
             if not isinstance(filters, list):
@@ -1239,8 +1239,8 @@ class TigerGraphConnection(object):
                     print("Invalid filter type or value: " + str(f))
             print(ret)
             return ret
-                    
-        
+
+
         # Assembling the input payload
         if not sourceVertices or not targetVertices:
             return None  # Should allow TigerGraph to return error instead of handling missing parameters here?
@@ -1260,7 +1260,7 @@ class TigerGraphConnection(object):
 
     def shortestPath(self, sourceVertices, targetVertices, maxLength=None, vertexFilters=None, edgeFilters=None, allShortestPaths=False):
         """Find the shortest path (or all shortest paths) between the source and target vertex sets.
-        
+
         Arguments:
         - `sourceVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
         - `targetVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the target vertices of the shortest paths sought.
@@ -1269,40 +1269,40 @@ class TigerGraphConnection(object):
         - `edgeFilters`:      An optional list of (edgeType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
         - `allShortestPaths`: If true, the endpoint will return all shortest paths between the source and target.
                               Default is false, meaning that the endpoint will return only one path.
-        
+
         See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding for information on filters.
-        
+
         Endpoint:      POST /shortestpath/{graphName}
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-shortestpath-graphname-shortest-path-search
         """
         data = self._preparePathParams(sourceVertices, targetVertices, maxLength, vertexFilters, edgeFilters, allShortestPaths)
         return self._post(self.restppUrl + "/shortestpath/" + self.graphname, data=data)
-    
+
     def allPaths(self, sourceVertices, targetVertices, maxLength, vertexFilters=None, edgeFilters=None):
         """Find all possible paths up to a given maximum path length between the source and target vertex sets.
-        
+
         Arguments:
         - `sourceVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
         - `targetVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the target vertices of the shortest paths sought.
         - `maxLength`:        The maximum length of the paths.
         - `vertexFilters`:    An optional list of (vertexType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
         - `edgeFilters`:      An optional list of (edgeType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
-        
+
         See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding for information on filters.
-        
+
         Endpoint:      POST /allpaths/{graphName}
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-allpaths-graphname-all-paths-search
         """
         data = self._preparePathParams(sourceVertices, targetVertices, maxLength, vertexFilters, edgeFilters)
         return self._post(self.restppUrl + "/allpaths/" + self.graphname, data=data)
-    
+
     # Pandas DataFrame support =================================================
 
     def vertexSetToDataFrame(self, vertexSet, withId=True, withType=False):
         """Converts a vertex set to Pandas DataFrame.
 
         Arguments:
-        - `vertexSet`: A vertex set (a list of vertices of the same vertex type). 
+        - `vertexSet`: A vertex set (a list of vertices of the same vertex type).
         - `withId`:    Add a column with vertex IDs to the DataFrame.
         - `withType`:  Add a column with vertex type to the DataFrame.
 
@@ -1340,7 +1340,7 @@ class TigerGraphConnection(object):
         """Converts an edge set to Pandas DataFrame
 
         Arguments:
-        - `edgeSet`:  An edge set (a list of edges of the same edge type). 
+        - `edgeSet`:  An edge set (a list of edges of the same edge type).
         - `withId`:   Add a column with edge IDs to the DataFrame.
                       Note: As edges do not have internal ID, this column will contain a generated composite ID, a combination of source and target vertex types
                             and IDs (specifically: [<source vertex ID>, <source vertex ID>, <target vertex type>, <target vertex ID>]).
