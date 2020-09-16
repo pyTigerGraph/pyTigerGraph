@@ -1704,10 +1704,7 @@ class TigerGraphConnection(object):
 
         # Setting platform specific defaults if params are not specified
         if not jarLocation:
-            if sys.platform.startswith("win"):
-                jarLocation = "%userprofile%\\.gsql"
-            else:
-                jarLocation = "~/.gsql"
+            jarLocation = os.path.join("~", ".gsql") 
         if not certLocation:
             certLocation = os.path.join(jarLocation, "my-cert.txt")
 
