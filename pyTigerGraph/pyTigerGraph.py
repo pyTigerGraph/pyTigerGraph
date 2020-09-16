@@ -5,7 +5,6 @@ from datetime import datetime
 import time
 import pandas as pd
 import os
-import sys
 import subprocess
 import shutil
 
@@ -1704,7 +1703,7 @@ class TigerGraphConnection(object):
 
         # Setting platform specific defaults if params are not specified
         if not jarLocation:
-            jarLocation = os.path.join("~", ".gsql") 
+            jarLocation = os.path.join("~", ".gsql")
         if not certLocation:
             certLocation = os.path.join(jarLocation, "my-cert.txt")
 
