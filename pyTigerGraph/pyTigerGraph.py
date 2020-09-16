@@ -62,7 +62,6 @@ class TigerGraphConnection(object):
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug = False
         self.schema = None
-        self.tgVersion = ""
         self.ttkGetEF = None  # TODO: this needs to be rethought, or at least renamed
 
         # GSQL client related variables
@@ -1660,9 +1659,6 @@ class TigerGraphConnection(object):
 
         Get the full list of components using `getVersion`.
         """
-        if self.tgVersion:  # Return cached value
-            return self.tgVersion
-
         ret = ""
         for v in self.getVersion():
             if v["name"] == component:
@@ -1671,10 +1667,7 @@ class TigerGraphConnection(object):
             if full:
                 return ret
             ret = re.search("_.+_", ret)
-            ret = ret.group().strip("_")
-            if component == "product":
-                self.tgVersion = ret  # Cache value if component was "product"
-            return ret
+            return ret.group().strip("_")
         else:
             raise TigerGraphException("\"" + component + "\" is not a valid component.", None)
 
@@ -1742,7 +1735,7 @@ class TigerGraphConnection(object):
         if version:
             self.gsqlVersion = version
             if self.debug:
-                print("Using gsqlVersion " + self.gsqlVersion + " instead of " + self.getVer())
+                print("Using version " + self.gsqlVersion + " instead of " + self.getVer())
         else:
             self.gsqlVersion = self.getVer()
         self.jarName = os.path.join(self.jarLocation, 'gsql_client-' + self.gsqlVersion + ".jar")
