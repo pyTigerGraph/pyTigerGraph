@@ -62,15 +62,17 @@ class TigerGraphConnection(object):
         self.debug = False
         self.schema = None
         self.ttkGetEF = None  # TODO: this needs to be rethought, or at least renamed
-        self.version = ""
-        self.downloadCert = useCert
+
+        # GSQL client related variables
+        self.gsqlInitiated = False
         self.useCert = useCert
-        self.certLocation = ""
+        self.certPath = certPath
+        # Below variables are set during GSQL init 
+        self.certLocation = ""  
         self.jarLocation = ""
         self.jarName = ""
         self.url = ""
-        self.gsqlInitiated = False
-        self.certPath = certPath
+        self.version = ""
 
     # Private functions ========================================================
 
@@ -93,7 +95,7 @@ class TigerGraphConnection(object):
         - `params`:    Request URL parameters.
         """
         if self.debug:
-            print(method + " " + url + (" => " + data if data else ""))
+            print(method + " " + url + (" => " + str(data) if data else ""))
         if authMode == "pwd":
             _auth = (self.username, self.password)
         else:
@@ -1007,7 +1009,18 @@ class TigerGraphConnection(object):
 
     # Query related functions ==================================================
 
-    def runInstalledQuery(self, queryName, params=None, timeout=16000, sizeLimit=32000000):
+    def getInstalledQueries(self, fmt="py"):
+        """
+        Returns installed queries.
+        """
+        ret = self.getEndpoints(dynamic=True)
+        if fmt == "json":
+            return json.dumps(ret)
+        if fmt == "df":
+            return pd.DataFrame(ret).T
+        return ret
+
+    def runInstalledQuery(self, queryName, params=None, timeout=None, sizeLimit=None):
         """Runs an installed query.
 
         The query must be already created and installed in the graph.
@@ -1015,26 +1028,41 @@ class TigerGraphConnection(object):
 
         Arguments:
         - `params`:    A string of param1=value1&param2=value2 format or a dictionary.
-        - `timeout`:   Maximum duration for successful query execution.
+        - `timeout`:   Maximum duration for successful query execution (in milliseconds).
+                       See https://docs.tigergraph.com/dev/restpp-api/restpp-requests#gsql-query-timeout
         - `sizeLimit`: Maximum size of response (in bytes).
+                       See https://docs.tigergraph.com/dev/restpp-api/restpp-requests#request-body-size
 
         Endpoint:      POST /query/{graph_name}/<query_name>
         Documentation: https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query
         """
-        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
+        headers = {}
+        if timeout:
+            headers["GSQL-TIMEOUT"] = str(timeout)
+        if sizeLimit:
+            headers["RESPONSE-LIMIT"] = str(sizeLimit)
+        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers=headers)
 
-    def runInterpretedQuery(self, queryText, params=None):
+    def runInterpretedQuery(self, queryText, params=None, timeout=None, sizeLimit=None):
         """Runs an interpreted query.
 
         You must provide the query text in this format:
             INTERPRET QUERY (<params>) FOR GRAPH <graph_name> {
                <statements>
-            }'
+            }
 
-        Use `$graphname` in the `FOR GRAPH` clause to avoid hard-coding it; it will be replaced by the actual graph name.
+        Use `$graphname` in the `FOR GRAPH` clause to avoid hard-coding it; it will be replaced by the actual graph name. E.g.
+        
+            INTERPRET QUERY (INT a) FOR GRAPH $graphname {
+                PRINT a;
+            }
 
         Arguments:
         - `params`:    A string of param1=value1&param2=value2 format or a dictionary.
+        - `timeout`:   Maximum duration for successful query execution (in milliseconds).
+                       See https://docs.tigergraph.com/dev/restpp-api/restpp-requests#gsql-query-timeout
+        - `sizeLimit`: Maximum size of response (in bytes).
+                       See https://docs.tigergraph.com/dev/restpp-api/restpp-requests#request-body-size
 
         Endpoint:      POST /gsqlserver/interpreted_query
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query
@@ -1042,7 +1070,12 @@ class TigerGraphConnection(object):
         queryText = queryText.replace("$graphname", self.graphname)
         if self.debug:
             print(queryText)
-        return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
+        headers = {}
+        if timeout:
+            headers["GSQL-TIMEOUT"] = str(timeout)
+        if sizeLimit:
+            headers["RESPONSE-LIMIT"] = str(sizeLimit)
+        return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd", headers=headers)
 
     def parseQueryOutput(self, output, graphOnly=True):
         """Parses query output and separates vertex and edge data (and optionally other output) for easier use.
@@ -1061,8 +1094,8 @@ class TigerGraphConnection(object):
         - `graphOnly`: Should output be restricted to vertices and edges (True, default) or should any other output (e.g. values of
                        variables or accumulators, or plain text printed) be captured as well.
 
-        Returns: A dictionary with two (or three) keys: "Vertices", "Edges" and optionally "Output". First two refer to another dictionary
-            containing keys for each vertex and edge types found, and the instances of those vertex and edge types. "Output" is a list of
+        Returns: A dictionary with two (or three) keys: "vertices", "edges" and optionally "output". First two refer to another dictionary
+            containing keys for each vertex and edge types found, and the instances of those vertex and edge types. "output" is a list of
             dictionaries containing the key/value pairs of any other output.
         """
 
@@ -1153,15 +1186,125 @@ class TigerGraphConnection(object):
                 else:  # It's a ... something else
                     ou.append({"label": o2, "value": _o2})
 
-        ret = {"Vertices": vs, "Edges": es}
+        ret = {"vertices": vs, "edges": es}
         if not graphOnly:
-            ret["Output"] = ou
+            ret["output"] = ou
         return ret
 
+    # Path-finding algorithms ==================================================
+    
+    def _preparePathParams(self, sourceVertices, targetVertices, maxLength=None, vertexFilters=None, edgeFilters=None, allShortestPaths=False):
+        """ Prepares the input parameters by transforming them to the format expected by the path algorithms.
+        
+        Arguments:
+        - `sourceVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
+        - `targetVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the target vertices of the shortest paths sought.
+        - `maxLength`:        The maximum length of a shortest path. Optional, default is 6.
+        - `vertexFilters`:    An optional list of (vertexType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
+        - `edgeFilters`:      An optional list of (edgeType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
+        - `allShortestPaths`: If true, the endpoint will return all shortest paths between the source and target.
+                              Default is false, meaning that the endpoint will return only one path.
+        
+        See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding for information on filters.        
+        """
+
+        def parseVertices(vertices):
+            ret = []
+            if not isinstance(vertices, list):
+                vertices = [vertices]
+            for v in vertices:
+                if isinstance(v, tuple):
+                    tmp = {"type": v[0], "id": v[1]}
+                    ret.append(tmp)
+                elif isinstance(v, dict) and "v_type" in v and "v_id" in v:
+                    tmp = {"type": v["v_type"], "id": v["v_id"]}
+                    ret.append(tmp)
+                elif self.debug:
+                    print("Invalid vertex type or value: " + str(v))
+            print(ret)
+            return ret
+        
+        def parseFilters(filters):
+            ret = []
+            if not isinstance(filters, list):
+                filters = [filters]
+            for f in filters:
+                if isinstance(f, tuple):
+                    tmp = {"type": f[0], "condition": f[1]}
+                    ret.append(tmp)
+                elif isinstance(f, dict) and "type" in f and "condition" in f:
+                    tmp = {"type": f["type"], "condition": f["condition"]}
+                    ret.append(tmp)
+                elif self.debug:
+                    print("Invalid filter type or value: " + str(f))
+            print(ret)
+            return ret
+                    
+        
+        # Assembling the input payload
+        if not sourceVertices or not targetVertices:
+            return None  # Should allow TigerGraph to return error instead of handling missing parameters here?
+        data = {}
+        data["sources"] = parseVertices(sourceVertices)
+        data["targets"] = parseVertices(targetVertices)
+        if vertexFilters:
+            data["vertexFilters"] = parseFilters(vertexFilters)
+        if edgeFilters:
+            data["edgeFilters"] = parseFilters(edgeFilters)
+        if maxLength:
+            data["maxLength"] = maxLength
+        if allShortestPaths:
+            data["allShortestPaths"] = True
+
+        return json.dumps(data)
+
+    def shortestPath(self, sourceVertices, targetVertices, maxLength=None, vertexFilters=None, edgeFilters=None, allShortestPaths=False):
+        """Find the shortest path (or all shortest paths) between the source and target vertex sets.
+        
+        Arguments:
+        - `sourceVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
+        - `targetVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the target vertices of the shortest paths sought.
+        - `maxLength`:        The maximum length of a shortest path. Optional, default is 6.
+        - `vertexFilters`:    An optional list of (vertexType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
+        - `edgeFilters`:      An optional list of (edgeType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
+        - `allShortestPaths`: If true, the endpoint will return all shortest paths between the source and target.
+                              Default is false, meaning that the endpoint will return only one path.
+        
+        See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding for information on filters.
+        
+        Endpoint:      POST /shortestpath/{graphName}
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-shortestpath-graphname-shortest-path-search
+        """
+        data = self._preparePathParams(sourceVertices, targetVertices, maxLength, vertexFilters, edgeFilters, allShortestPaths)
+        return self._post(self.restppUrl + "/shortestpath/" + self.graphname, data=data)
+    
+    def allPaths(self, sourceVertices, targetVertices, maxLength, vertexFilters=None, edgeFilters=None):
+        """Find all possible paths up to a given maximum path length between the source and target vertex sets.
+        
+        Arguments:
+        - `sourceVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
+        - `targetVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the target vertices of the shortest paths sought.
+        - `maxLength`:        The maximum length of the paths.
+        - `vertexFilters`:    An optional list of (vertexType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
+        - `edgeFilters`:      An optional list of (edgeType, condition) tuples or {"type": <str>, "condition": <str>} dictionaries.
+        
+        See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding for information on filters.
+        
+        Endpoint:      POST /allpaths/{graphName}
+        Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-allpaths-graphname-all-paths-search
+        """
+        data = self._preparePathParams(sourceVertices, targetVertices, maxLength, vertexFilters, edgeFilters)
+        return self._post(self.restppUrl + "/allpaths/" + self.graphname, data=data)
+    
     # Pandas DataFrame support =================================================
 
     def vertexSetToDataFrame(self, vertexSet, withId=True, withType=False):
         """Converts a vertex set to Pandas DataFrame.
+
+        Arguments:
+        - `vertexSet`: A vertex set (a list of vertices of the same vertex type). 
+        - `withId`:    Add a column with vertex IDs to the DataFrame.
+        - `withType`:  Add a column with vertex type to the DataFrame.
 
         Vertex sets are used for both the input and output of `SELECT` statements. They contain instances of vertices of the same type.
         For each vertex instance the vertex ID, the vertex type and the (optional) attributes are present (under `v_id`, `v_type` and `attributes` keys, respectively).
@@ -1195,6 +1338,16 @@ class TigerGraphConnection(object):
 
     def edgeSetToDataFrame(self, edgeSet, withId=True, withType=False):
         """Converts an edge set to Pandas DataFrame
+
+        Arguments:
+        - `edgeSet`:  An edge set (a list of edges of the same edge type). 
+        - `withId`:   Add a column with edge IDs to the DataFrame.
+                      Note: As edges do not have internal ID, this column will contain a generated composite ID, a combination of source and target vertex types
+                            and IDs (specifically: [<source vertex ID>, <source vertex ID>, <target vertex type>, <target vertex ID>]).
+                            This is unique within the vertex type, but not guaranteed to be globally (i.e. within the whole graph) unique. To get a globally
+                            unique edge id, the edge type needs to be added to the above combination (see `withType` below).
+        - `withType`: Add a column with edge type to the DataFrame.
+                      Note: The value of this column should be combined with the value of ID column to get a globally unique edge ID.
 
         Edge sets contain instances of the same edge type. Edge sets are not generated "naturally" like vertex sets, you need to collect edges in (global) accumulators,
             e.g. in case you want to visualise them in GraphStudio or by other tools.
@@ -1454,17 +1607,6 @@ class TigerGraphConnection(object):
             ret.update(self._get(url + "static=true", resKey=""))
         return ret
 
-    def getInstalledQueries(self, fmt="py"):
-        """
-        Returns installed queries.
-        """
-        ret = self.getEndpoints(dynamic=True)
-        if fmt == "json":
-            return json.dumps(ret)
-        if fmt == "df":
-            return pd.DataFrame(ret).T
-        return ret
-
     def getStatistics(self, seconds=10, segment=10):
         """Retrieves real-time query performance statistics over the given time period.
 
@@ -1582,14 +1724,14 @@ class TigerGraphConnection(object):
             r = requests.get(jar_url)
             open(self.jarName, 'wb').write(r.content)
 
-        if self.downloadCert:  # HTTP/HTTPS
+        if self.useCert:  # HTTP/HTTPS
             if self.debug:
                 print("Downloading SSL certificate")
             # TODO: Windows support
 
-            # Check if openssl is installed.
+            # Check if OpenSSL is installed.
             if not shutil.which('openssl'):
-                raise TigerGraphException("Could not find openssl. Please install.", None)
+                raise TigerGraphException("Could not find OpenSSL. Please install.", None)
 
             os.system("openssl s_client -connect " + self.url + " < /dev/null 2> /dev/null | openssl x509 -text > " + self.certLocation)  # TODO: Python-native SSL?
             if os.stat(self.certLocation).st_size == 0:
