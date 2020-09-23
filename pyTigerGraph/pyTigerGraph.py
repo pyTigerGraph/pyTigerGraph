@@ -1495,7 +1495,7 @@ class TigerGraphConnection(object):
 
     def initGsql(self, certLocation="~/.gsql/my-cert.txt"): #, jarLocation="~/.gsql"
 
-        # self.jarLocation = os.path.expanduser(jarLocation)
+        
         self.certLocation = os.path.expanduser(certLocation)
         self.url = self.gsUrl.replace("https://", "").replace("http://", "")  # Getting URL with gsql port w/o https://
 
@@ -1505,19 +1505,21 @@ class TigerGraphConnection(object):
             # Check if openssl is installed.
             if subprocess.run(['which', 'openssl']).returncode != 0:
                 raise TigerGraphException("Could not find openssl. Please install.", None)
-
+            print(self.host)
             print("Downloading SSL Certificate")
-            os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation)  # TODO: Python-native SSL?
+            os.system("openssl s_client -connect "+self.host+":443 < /dev/null 2> /dev/null | openssl x509 -text  | sed -n -e '/BEGIN\ CERTIFICATE/,/END\ CERTIFICATE/ p' > "+self.certLocation)  # TODO: Python-native SSL?
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
         
         try:
             if self.downloadCert: 
-                self.Client = GSQL_Client(self.host, version=self.version,username=self.username,password=self.password, cacert=self.certPath)
+                
+                if not(self.certPath):
+                    self.certPath = "~/.gsql/my-cert.txt"
+                self.Client = GSQL_Client(self.host, version=self.version,username=self.username,password=self.password, cacert=os.path.expanduser(self.certPath))
             else:
                 self.Client = GSQL_Client(self.host, version=self.version,username=self.username,password=self.password)
             self.Client.login()
-            print("Logged in ")
             self.gsqlInitiated = True
         except Exception as e:  # Work on Failure Reason 
             print(e)
@@ -1544,7 +1546,7 @@ class TigerGraphConnection(object):
             return secret
         except:
             return None
-    
+
     # TODO: showSecret()
 
 # EOF
