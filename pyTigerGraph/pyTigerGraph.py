@@ -6,6 +6,8 @@ import time
 import pandas as pd
 import os
 import subprocess
+# Added pyTigerDriver Client
+from pyTigerDriver  import GSQL_Client 
 
 
 class TigerGraphException(Exception):
@@ -63,11 +65,11 @@ class TigerGraphConnection(object):
         self.schema = None
         self.ttkGetEF = None  # TODO: this needs to be rethought, or at least renamed
         self.downloadCert = useCert
-        self.downloadJar = True
+        self.downloadJar = False
         self.useCert = useCert
         self.gsqlInitiated = False
         self.certPath = certPath
-
+        self.Client = None
     # Private functions ========================================================
 
     def _errorCheck(self, res):
@@ -1491,29 +1493,13 @@ class TigerGraphConnection(object):
 
     # GSQL support =================================================
 
-    def initGsql(self, jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt"):
+    def initGsql(self, certLocation="~/.gsql/my-cert.txt"): #, jarLocation="~/.gsql"
 
-        self.jarLocation = os.path.expanduser(jarLocation)
+        # self.jarLocation = os.path.expanduser(jarLocation)
         self.certLocation = os.path.expanduser(certLocation)
         self.url = self.gsUrl.replace("https://", "").replace("http://", "")  # Getting URL with gsql port w/o https://
 
-        # Check if java runtime is installed.
-        if subprocess.run(['which', 'java']).returncode != 0:
-            raise TigerGraphException("Could not find java runtime. Please download and install from https://www.oracle.com/java/technologies/javase-downloads.html", None)
-
-        # Create a directory for the jar file if it does not exist.
-        if not os.path.exists(self.jarLocation):
-            os.mkdir(self.jarLocation)
-
-        # Download the gsql_client.jar file
-        if self.downloadJar:
-            print("Downloading gsql client Jar")
-            jar_url = ('https://bintray.com/api/ui/download/tigergraphecosys/tgjars/'
-                       + 'com/tigergraph/client/gsql_client/' + self.version
-                       + '/gsql_client-' + self.version + '.jar')
-            r = requests.get(jar_url)
-            open(self.jarLocation + '/gsql_client.jar', 'wb').write(r.content)  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
-
+ 
         if self.downloadCert:  # HTTP/HTTPS
 
             # Check if openssl is installed.
@@ -1524,8 +1510,17 @@ class TigerGraphConnection(object):
             os.system("openssl s_client -connect "+self.url+" < /dev/null 2> /dev/null | openssl x509 -text > "+self.certLocation)  # TODO: Python-native SSL?
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
-
-        self.gsqlInitiated = True
+        
+        try:
+            if self.downloadCert: 
+                self.Client = GSQL_Client(self.host, version=self.version,username=self.username,password=self.password, cacert=self.certPath)
+            else:
+                self.Client = GSQL_Client(self.host, version=self.version,username=self.username,password=self.password)
+            self.Client.login()
+            print("Logged in ")
+            self.gsqlInitiated = True
+        except Exception as e:  # Work on Failure Reason 
+            print(e)
 
     def gsql(self, query, options=None):
         """Runs a GSQL query and process the output.
@@ -1537,35 +1532,7 @@ class TigerGraphConnection(object):
         """
         if not self.gsqlInitiated:
             self.initGsql()
-
-        if options is None:
-            options = ["-g", self.graphname]
-
-        cmd = ['java', '-DGSQL_CLIENT_VERSION=v' + self.version.replace('.','_'),
-               '-jar', self.jarLocation + '/gsql_client.jar']  # TODO: save jar with version number to avoid unnecessary downloads when switching between versions
-
-        if self.useCert:
-            cmd += ['-cacert', self.certLocation]
-
-        cmd += [
-            '-u', self.username,
-            '-p', self.password,
-            '-ip', self.url]
-
-        comp = subprocess.run(cmd + options + [query],
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.PIPE)
-
-        self.stdout = comp.stdout.decode()
-        self.stderr = comp.stderr.decode()
-
-        try:
-            json_string = re.search('(\{|\[).*$', self.stdout.replace('\n',''))[0]
-            json_object = json.loads(json_string)
-        except:
-            return self.stdout
-        else:
-            return json_object
+        return self.Client.query(query)
 
     def createSecret(self, alias=""):
         if not self.gsqlInitiated:
@@ -1577,7 +1544,7 @@ class TigerGraphConnection(object):
             return secret
         except:
             return None
-
+    
     # TODO: showSecret()
 
 # EOF
