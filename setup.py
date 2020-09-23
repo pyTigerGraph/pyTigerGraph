@@ -17,6 +17,7 @@ setup(
   download_url = 'https://github.com/parkererickson/pyTigerGraph/archive/v_01.tar.gz',    # I explain this later on
   keywords = ['TigerGraph', 'Graph Database'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
+          'pyTigerDriver',
           'validators',
           'requests',
           'pandas'],
