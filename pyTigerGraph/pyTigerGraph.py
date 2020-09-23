@@ -1505,8 +1505,7 @@ class TigerGraphConnection(object):
             # Check if openssl is installed.
             if subprocess.run(['which', 'openssl']).returncode != 0:
                 raise TigerGraphException("Could not find openssl. Please install.", None)
-            print(self.host)
-            print("Downloading SSL Certificate")
+            print('\x1b[6;30;42m' + "Downloading SSL Certificate"+ '\x1b[0m')
             os.system("openssl s_client -connect "+self.host+":443 < /dev/null 2> /dev/null | openssl x509 -text  | sed -n -e '/BEGIN\ CERTIFICATE/,/END\ CERTIFICATE/ p' > "+self.certLocation)  # TODO: Python-native SSL?
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
@@ -1521,9 +1520,10 @@ class TigerGraphConnection(object):
                 self.Client = GSQL_Client(self.host, version=self.version,username=self.username,password=self.password)
             self.Client.login()
             self.gsqlInitiated = True
-        except Exception as e:  # Work on Failure Reason 
-            print(e)
-
+            return True
+        except Exception as e: 
+            print("Connection Failed check your Username/Password")
+            self.gsqlInitiated = False
     def gsql(self, query, options=None):
         """Runs a GSQL query and process the output.
 
@@ -1533,8 +1533,15 @@ class TigerGraphConnection(object):
                         `options=[]` to overide the default graph.
         """
         if not self.gsqlInitiated:
-            self.initGsql()
-        return self.Client.query(query)
+            gsql_ok = self.initGsql()
+        if gsql_ok:
+            return self.Client.query(query)
+        else:
+            print("Couldn't Initialize the client see Above Error")
+            exit(0)
+
+        return 
+
 
     def createSecret(self, alias=""):
         if not self.gsqlInitiated:
