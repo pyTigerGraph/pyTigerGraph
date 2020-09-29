@@ -6,7 +6,7 @@ import time
 import pandas as pd
 import os
 import subprocess
-
+import urllib.parse 
 
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
@@ -1018,7 +1018,15 @@ class TigerGraphConnection(object):
         Endpoint:      POST /query/{graph_name}/<query_name>
         Documentation: https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query
         """
-        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
+        query1 = ""
+        for param in params.keys():
+            if " " in params[param]:
+                params[param] = urllib.parse.quote(params[param])  # ' ' ==> %20 HTML Format
+            query1+= param+"="+params[param] +"&"
+        if query1[-1] == "&":
+            query1 = query1[:-1]
+        
+        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName +"?"+query1, headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
 
     def runInterpretedQuery(self, queryText, params=None):
         """Runs an interpreted query.

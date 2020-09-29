@@ -9,3 +9,4 @@ build/
 site/
 .DS_Store
 pyTigerGraph.egg-info
+tests1.py
