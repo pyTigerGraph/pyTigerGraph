@@ -1269,7 +1269,7 @@ class TigerGraphConnection(object):
         
         return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName + "?" + query1, headers=headers)
 
-    def runInterpretedQuery(self, queryText, params=None):
+    def runInterpretedQuery(self, queryText, params=None, timeout=None, sizeLimit=None):
         """Runs an interpreted query.
 
         You must provide the query text in this format:
