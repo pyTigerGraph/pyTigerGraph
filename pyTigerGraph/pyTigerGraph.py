@@ -6,8 +6,8 @@ import time
 import pandas as pd
 import os
 import subprocess
+import urllib.parse 
 import shutil
-
 
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
@@ -1258,9 +1258,18 @@ class TigerGraphConnection(object):
             headers["GSQL-TIMEOUT"] = str(timeout)
         if sizeLimit:
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
-        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers=headers)
 
-    def runInterpretedQuery(self, queryText, params=None, timeout=None, sizeLimit=None):
+        query1 = ""
+        for param in params.keys():
+            if " " in params[param]:
+                params[param] = urllib.parse.quote(params[param])  # ' ' ==> %20 HTML Format
+            query1 += param + "=" + params[param] + "&"
+        if query1[-1] == "&":
+            query1 = query1[:-1]
+        
+        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName + "?" + query1, headers=headers)
+
+    def runInterpretedQuery(self, queryText, params=None):
         """Runs an interpreted query.
 
         You must provide the query text in this format:
