@@ -20,6 +20,8 @@ For example, in case of using a local virtual machine with the ports mapped:
 conn = tg.TigerGraphConnection(host="localhost", restppPort=25900, gsPort=25240, graphname="MyGraph", username="tigergraph", password="tigergraph", apiToken="2aa016d747ede9gg6da3drslm98srfoj")
 ```
 
+For more details on establishing a connection, read the [Getting Started](https://pytigergraph.github.io/pyTigerGraph/GettingStarted/) page.
+
 ## Example Projects
 
 - [Connecting to TigerGraph Database with pyTigerGraph](https://colab.research.google.com/drive/1sYv3Jvc6KYsqC4D-Rxkvjh4iPnrp4rg7)

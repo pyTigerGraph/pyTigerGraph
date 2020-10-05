@@ -1,3 +1,5 @@
+# Other Functions
+
 ## echo
 `echo()`
 
@@ -54,3 +56,8 @@ Get the full list of components using [`getVersion`](#getVersion).
 Returns the expiration date and remaining days of the license.
 
 In case of evaluation/trial deployment, an information message and -1 remaining days are returned.
+
+## createSecret
+`conn.createSecret(alias="")`
+
+Returns a secret key. Takes in a string as an argument if you want to use an alias while generating the key.
