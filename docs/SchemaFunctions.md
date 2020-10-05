@@ -1,9 +1,14 @@
 ## getSchema
-`getSchema(udts=True)`
+`getSchema(full=True)`
 
-Retrieves the schema (all vertex and edge type and - if not disabled - the User Defined Type details) of the graph.
+Retrieves the schema metadata of the graph.
 
-TigerGraph Documentation: [GET /gsqlserver/gsql/schema](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema)
+Arguments:
+- `full`: If `False`, returns metadata of vertices and edges only. If `True`, it will additionaly return additional info on veertices and egdes, plus info on UDTs, indices, loading jobs, queries, data sources, users and their roles, and proxy groups. The database user's privileges control how much data is returned for each object types.
+
+This functions uses the [GSQL Submodule](Gsql.md) is `full` is `True`.
+
+Documentation: [GET /gsqlserver/gsql/schema](https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema)
 
 ## getUDTs
 `getUDTs()`
