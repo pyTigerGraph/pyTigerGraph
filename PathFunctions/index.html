@@ -13,7 +13,7 @@
     
     
       
-        <title>Schema Functions - pyTigerGraph</title>
+        <title>Path Finding Algorithms - pyTigerGraph</title>
       
     
     
@@ -58,7 +58,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getschema" class="md-skip">
+        <a href="#path-finding-algorithms" class="md-skip">
           Skip to content
         </a>
       
@@ -85,7 +85,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Schema Functions
+              Path Finding Algorithms
             
           </span>
         </div>
@@ -192,12 +192,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
     
     <label class="md-nav__link" for="nav-2">
       User Guide
@@ -239,12 +237,10 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-3" type="checkbox" id="nav-2-3" checked>
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-3" type="checkbox" id="nav-2-3">
     
     <label class="md-nav__link" for="nav-2-3">
       Core Functions
@@ -274,66 +270,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Schema Functions
-        <span class="md-nav__icon md-icon"></span>
-      </label>
-    
-    <a href="./" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../SchemaFunctions/" class="md-nav__link">
       Schema Functions
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#getschema" class="md-nav__link">
-    getSchema
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getudts" class="md-nav__link">
-    getUDTs
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getudt" class="md-nav__link">
-    getUDT
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#upsertdata" class="md-nav__link">
-    upsertData
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -469,6 +410,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -477,29 +420,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#getschema" class="md-nav__link">
-    getSchema
+  <a href="#shortestpath" class="md-nav__link">
+    shortestPath
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#getudts" class="md-nav__link">
-    getUDTs
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getudt" class="md-nav__link">
-    getUDT
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#upsertdata" class="md-nav__link">
-    upsertData
+  <a href="#allpaths" class="md-nav__link">
+    allPaths
   </a>
   
 </li>
@@ -516,30 +445,35 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/pyTigerGraph/pyTigerGraph/edit/master/docs/SchemaFunctions.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/pyTigerGraph/pyTigerGraph/edit/master/docs/PathFunctions.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                  <h1>Schema Functions</h1>
-                
-                <h2 id="getschema">getSchema</h2>
-<p><code>getSchema(full=True)</code></p>
-<p>Retrieves the schema metadata of the graph.</p>
+                <h1 id="path-finding-algorithms">Path Finding Algorithms</h1>
+<h2 id="shortestpath">shortestPath</h2>
+<p><code>shortestPath(sourceVertices, targetVertices, maxLength=None, vertexFilters=None, edgeFilters=None, allShortestPaths=False)</code></p>
+<p>Find the shortest path (or all shortest paths) between the source and target vertex sets.</p>
 <p>Arguments:
-- <code>full</code>: If <code>False</code>, returns metadata of vertices and edges only. If <code>True</code>, it will additionaly return additional info on veertices and egdes, plus info on UDTs, indices, loading jobs, queries, data sources, users and their roles, and proxy groups. The database user's privileges control how much data is returned for each object types.</p>
-<p>This functions uses the <a href="../Gsql/">GSQL Submodule</a> is <code>full</code> is <code>True</code>.</p>
-<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema">GET /gsqlserver/gsql/schema</a></p>
-<h2 id="getudts">getUDTs</h2>
-<p><code>getUDTs()</code></p>
-<p>Returns the list of User Defined Types (names only).</p>
-<h2 id="getudt">getUDT</h2>
-<p><code>getUDT(udtName)</code></p>
-<p>Returns the details of a specific User Defined Type.</p>
-<h2 id="upsertdata">upsertData</h2>
-<p><code>upsertData(data)</code></p>
-<p>Upserts data (vertices and edges) from a JSON document or equivalent object structure.</p>
-<p>TigerGraph Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">POST /graph</a></p>
+- <code>sourceVertices</code>:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
+- <code>targetVertices</code>:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the target vertices of the shortest paths sought.
+- <code>maxLength</code>:        The maximum length of a shortest path. Optional, default is 6.
+- <code>vertexFilters</code>:    An optional list of (vertexType, condition) tuples or {"type": &lt;str&gt;, "condition": &lt;str&gt;} dictionaries.
+- <code>edgeFilters</code>:      An optional list of (edgeType, condition) tuples or {"type": &lt;str&gt;, "condition": &lt;str&gt;} dictionaries.
+- <code>allShortestPaths</code>: If true, the endpoint will return all shortest paths between the source and target.  Default is false, meaning that the endpoint will return only one path.</p>
+<p>See <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding">more</a> information on filters.</p>
+<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-shortestpath-graphname-shortest-path-search">POST /shortestpath/{graphName}</a></p>
+<h2 id="allpaths">allPaths</h2>
+<p><code>allPaths(sourceVertices, targetVertices, maxLength, vertexFilters=None, edgeFilters=None)</code></p>
+<p>Find all possible paths up to a given maximum path length between the source and target vertex sets.</p>
+<p>Arguments:
+- <code>sourceVertices</code>:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
+- <code>targetVertices</code>:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the target vertices of the shortest paths sought.
+- <code>maxLength</code>:        The maximum length of the paths.
+- <code>vertexFilters</code>:    An optional list of (vertexType, condition) tuples or {"type": &lt;str&gt;, "condition": &lt;str&gt;} dictionaries.
+- <code>edgeFilters</code>:      An optional list of (edgeType, condition) tuples or {"type": &lt;str&gt;, "condition": &lt;str&gt;} dictionaries.</p>
+<p>See <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding">more</a> information on filters.</p>
+<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-allpaths-graphname-all-paths-search">POST /allpaths/{graphName}</a></p>
                 
               
               
@@ -554,41 +488,6 @@
       
         
 <footer class="md-footer">
-  
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
-        
-          <a href="../Functions/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-footer-nav__button md-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-            </div>
-            <div class="md-footer-nav__title">
-              <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Previous
-                </span>
-                Overview
-              </div>
-            </div>
-          </a>
-        
-        
-          <a href="../VertexFunctions/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-footer-nav__title">
-              <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                Vertex Functions
-              </div>
-            </div>
-            <div class="md-footer-nav__button md-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    </div>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

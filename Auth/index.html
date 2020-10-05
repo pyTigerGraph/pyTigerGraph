@@ -57,6 +57,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#authentication" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -228,6 +233,8 @@
   <li class="md-nav__item md-nav__item--active">
     
     <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
     
     
     <a href="./" class="md-nav__link md-nav__link--active">
@@ -407,6 +414,21 @@
               </div>
             
             
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
           
           <div class="md-content">
             <article class="md-content__inner md-typeset">
@@ -417,17 +439,14 @@
                   </a>
                 
                 
-                  <h1>Authentication</h1>
-                
-                <p>If <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#enabling-and-using-user-authentication">user authentication</a> is enabled
-in the TigerGraph database, then <code>username</code> and <code>password</code> need to be specified when the connection is established.
-If you already have an API authorization token, specify that one as well. Alternatively, if you know a
-<a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret">secret</a> (created previously in the database),
-you can request a token via the <a href="#getToken">getToken</a> function and use it during the session.</p>
-<p>If user authentication is not enabled, then username, password and authorization token are not used (i.e. the database is insecure). This is only acceptable in case of development
-or study environments.</p>
-<p>The username and password default to the TigerGraph default username and password, which are <em>tigergraph</em>.
-If user authentication is enabled, the tigergraph user's password can't be tigergraph, so a different one must be selected.
+                <h1 id="authentication">Authentication</h1>
+<p>If <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#gsql-authentication">GSQL authentication</a> is enabled
+in the TigerGraph database, then <code>username</code> and <code>password</code> need to be specified when the connection is established.</p>
+<p>If <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication">REST++ authentication</a> is enabled, and you already have an API authorization token, specify that one as well. Alternatively, if you posess a
+<a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#managing-credentials">secret</a> (created previously in the database),
+you can request a token via the <a href="#getToken">getToken</a> function and use it during the session. See <a href="../TokenManagement/">Token Management</a> for more details.</p>
+<p>When <a href="../GettingStarted/">establising a connection</a> the username and password default to the TigerGraph default username and password, which are <em>tigergraph</em>.
+If user authentication is to e enabled, the <em>tigergraph</em> user's password must be changed.
 Furthermore, it is recommended not to use the <em>tigergraph</em> user for anything other than system administration.
 Instead, <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#creating-and-managing-users">create additional users</a> and
 grant them the <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#roles-and-privileges">appropriate privileges through roles</a>,

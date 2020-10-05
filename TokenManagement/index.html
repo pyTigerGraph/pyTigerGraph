@@ -58,7 +58,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#gettoken" class="md-skip">
+        <a href="#token-management" class="md-skip">
           Skip to content
         </a>
       
@@ -329,6 +329,8 @@
     
     <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
     
+      
+    
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
         API Tokens
@@ -342,6 +344,8 @@
       
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
+  
+    
   
   
     <label class="md-nav__title" for="__toc">
@@ -462,6 +466,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -507,15 +513,19 @@
                   </a>
                 
                 
-                  <h1>API Tokens</h1>
-                
-                <h2 id="gettoken">getToken</h2>
+                <h1 id="token-management">Token Management</h1>
+<p>If <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication">REST++ authentication is enabled</a>, you must provide an authentication token with all request that access the REST++ endpoints. A token can be requested via the <a href="#gettoken">getToken</a> function, which requires a secret. A secret can be created using the <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#managing-credentials"><code>CREATE SECRET</code></a> statement in GSQL or by the <code>createSecret()</code> function of pyTigerGraph.</p>
+<p><strong>Notes</strong>:
+- If REST++ authentication is <em>not</em> enabled, then you do not need to provide a token (if you do, it will be ignored) and the functions below will raise exception.
+- You might not have the privilege to create secrets and thus you might need to request one first from the administrator of the TigerGraph instance.
+- Some pyTigerGraph functions communicate with the database through GraphStudio endpoints that use username/password based authentication, so you need to provide these independently from the token when you <a href="../GettingStarted/">establish the connection</a> to the database. For more info see <a href="../Auth/">Authentication</a>.</p>
+<h2 id="gettoken">getToken</h2>
 <p><code>getToken(secret, setToken=True, lifetime=None)</code></p>
 <p>Requests an authorisation token.</p>
 <p>This function returns a token only if <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication">REST++ authentication is enabled</a>.
 If not, an exception will be raised.</p>
 <p>Arguments:
-- <code>secret</code>: The secret (string) generated in GSQL using <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret"><code>CREATE SECRET</code></a>.
+- <code>secret</code>: The secret (string) generated in GSQL using <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#managing-credentials"><code>CREATE SECRET</code></a>.
 - <code>setToken</code>: Set the connection's API token to the new value (default: <code>True</code>).
 - <code>lifetime</code>: Duration of token validity (in secs, default 30 days = 2,592,000 secs).</p>
 <p>Returns a tuple of <code>(&lt;new_token&gt;, &lt;exporation_timestamp_unixtime&gt;, &lt;expiration_timestamp_ISO8601&gt;)</code>. Return value can be ignored.</p>
@@ -527,7 +537,7 @@ If not, an exception will be raised.</p>
 <p>This function works only if <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication">REST++ authentication is enabled</a>.
 If not, an exception will be raised.</p>
 <p>Arguments:
-- <code>secret</code>: The secret (string) generated in GSQL using <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret"><code>CREATE SECRET</code></a>.
+- <code>secret</code>: The secret (string) generated in GSQL using <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#managing-credentials"><code>CREATE SECRET</code></a>.
 - <code>token</code>: The token requested earlier. If not specified, refreshes current connection's token.
 - <code>lifetime</code>: Duration of token validity (in secs, default 30 days = 2,592,000 secs).</p>
 <p>Returns a tuple of <code>(&lt;token&gt;, &lt;exporation_timestamp_unixtime&gt;, &lt;expiration_timestamp_ISO8601&gt;)</code>. Return value can be ignored.
@@ -542,7 +552,7 @@ Raises exception if specified token does not exists.</p>
 <p>This function works only if <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#rest-authentication">REST++ authentication is enabled</a>.
 If not, an exception will be raised.</p>
 <p>Arguments:
-- <code>secret</code>: The secret (string) generated in GSQL using <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret"><code>CREATE SECRET</code></a>.
+- <code>secret</code>: The secret (string) generated in GSQL using <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#managing-credentials"><code>CREATE SECRET</code></a>.
 - <code>token</code>: The token requested earlier. If not specified, deletes current connection's token, so be careful.
 - <code>skipNA</code>: Don't raise exception if specified token does not exist.</p>
 <p>Returns <code>True</code> if deletion was successful or token did not exist but <code>skipNA</code> was <code>True</code>; raises exception otherwise.</p>

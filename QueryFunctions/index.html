@@ -58,7 +58,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#runinstalledquery" class="md-skip">
+        <a href="#query-functions" class="md-skip">
           Skip to content
         </a>
       
@@ -317,6 +317,8 @@
     
     <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
     
+      
+    
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
         Query Functions
@@ -331,12 +333,21 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getinstalledqueries" class="md-nav__link">
+    getInstalledQueries
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#runinstalledquery" class="md-nav__link">
@@ -348,6 +359,13 @@
         <li class="md-nav__item">
   <a href="#runinterpretedquery" class="md-nav__link">
     runInterpretedQuery
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parsequeryoutput" class="md-nav__link">
+    parseQueryOutput
   </a>
   
 </li>
@@ -455,12 +473,21 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getinstalledqueries" class="md-nav__link">
+    getInstalledQueries
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#runinstalledquery" class="md-nav__link">
@@ -472,6 +499,13 @@
         <li class="md-nav__item">
   <a href="#runinterpretedquery" class="md-nav__link">
     runInterpretedQuery
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parsequeryoutput" class="md-nav__link">
+    parseQueryOutput
   </a>
   
 </li>
@@ -493,21 +527,28 @@
                   </a>
                 
                 
-                  <h1>Query Functions</h1>
-                
-                <h2 id="runinstalledquery">runInstalledQuery</h2>
-<p><code>runInstalledQuery(queryName, params=None, timeout=16000, sizeLimit=32000000)</code></p>
-<p>Sample example: <code>conn.runInstalledQuery("getUserInfo", {'userID': 'user121'})</code></p>
+                <h1 id="query-functions">Query Functions</h1>
+<h2 id="getinstalledqueries">getInstalledQueries</h2>
+<p><code>getInstalledQueries(fmt="py")</code></p>
+<p>Returns a list of installed queries.</p>
+<p>Arguments:
+- <code>fmt</code>: Format of the results:
+  - "py":   Python objects (default)
+  - "json": JSON document
+  - "df":   Pandas DataFrame</p>
+<h2 id="runinstalledquery">runInstalledQuery</h2>
+<p><code>runInstalledQuery(queryName, params=None, timeout=None, sizeLimit=None)</code></p>
 <p>Runs an installed query.</p>
 <p>The query must be already created and installed in the graph.
 Use <a href="#getEndpoints"><code>getEndpoints(dynamic=True)</code></a> or GraphStudio to find out the generated endpoint URL of the query, but only the query name needs to be specified here.</p>
 <p>Arguments:
 - <code>params</code>:    A string of <code>param1=value1&amp;param2=value2</code> format or a dictionary.
-- <code>timeout</code>:   Maximum duration for successful query execution.
-- <code>sizeLimit</code>: Maximum size of response (in bytes).</p>
+- <code>timeout</code>:   <a href="https://docs.tigergraph.com/dev/restpp-api/restpp-requests#gsql-query-timeout">Maximum duration</a> for successful query execution (in ms). Default: 16s.
+- <code>sizeLimit</code>: <a href="https://docs.tigergraph.com/dev/restpp-api/restpp-requests#response-size">Maximum size</a> of response (in bytes).</p>
 <p>Documentation: <a href="https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query">POST /query/{graph_name}/<query_name></a></p>
+<p>Example: <code>conn.runInstalledQuery("getUserInfo", {"userID": "user121"})</code></p>
 <h2 id="runinterpretedquery">runInterpretedQuery</h2>
-<p><code>runInterpretedQuery(queryText, params=None)</code></p>
+<p><code>runInterpretedQuery(queryText, params=None, timeout=None, sizeLimit=None)</code></p>
 <p>Runs an interpreted query.</p>
 <p>You must provide the query text in this format:</p>
 <pre><code>INTERPRET QUERY (&lt;params&gt;) FOR GRAPH &lt;graph_name&gt; {
@@ -516,8 +557,22 @@ Use <a href="#getEndpoints"><code>getEndpoints(dynamic=True)</code></a> or Graph
 </code></pre>
 
 <p>Arguments:
-- <code>params</code>:    A string of <code>param1=value1&amp;param2=value2</code> format or a dictionary.</p>
+- <code>params</code>:    A string of <code>param1=value1&amp;param2=value2</code> format or a dictionary.
+- <code>timeout</code>:   <a href="https://docs.tigergraph.com/dev/restpp-api/restpp-requests#gsql-query-timeout">Maximum duration</a> for successful query execution (in ms).  Default: 16s.
+- <code>sizeLimit</code>: <a href="https://docs.tigergraph.com/dev/restpp-api/restpp-requests#response-size">Maximum size</a> of response (in bytes).</p>
 <p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query">POST /gsqlserver/interpreted_query</a></p>
+<h2 id="parsequeryoutput">parseQueryOutput</h2>
+<p><code>parseQueryOutput(output, graphOnly=True)</code></p>
+<p>Parses query output and separates vertex and edge data (and optionally other output) for easier use.</p>
+<ul>
+<li>The JSON output from a query can contain a mixture of results: vertex sets (the output of a <code>SELECT</code> statement), edge sets (e.g. collected in a global accumulator), printout of global and local variables and accumulators, including complex types (LIST, MAP, etc.). The type of the various output entries is not explicit, you need to inspect the content to find out what it is actually.</li>
+<li>This function "cleans" this output, separating and collecting vertices and edges in an easy to access way. It can also collect other output or ignore it.</li>
+<li>The output of this function can be used e.g. with the <code>vertexSetToDataFrame()</code> and <code>edgeSetToDataFrame()</code> functions or (after some transformation) to pass a subgraph to a visualisation component.</li>
+</ul>
+<p>Arguments:
+- <code>output</code>:    The data structure returned by <code>runInstalledQuery()</code> or <code>runInterpretedQuery()</code>
+- <code>graphOnly</code>: Should output be restricted to vertices and edges (True, default) or should any other output (e.g. values of variables or accumulators, or plain text printed) be captured as well.</p>
+<p>Returns: A dictionary with two (or three) keys: "vertices", "edges" and optionally "output". First two refer to another dictionary containing keys for each vertex and edge types found, and the instances of those vertex and edge types. "output" is a list of dictionaries containing the key/value pairs of any other output.</p>
                 
               
               

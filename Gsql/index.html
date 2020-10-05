@@ -394,13 +394,6 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
-    Getting Started
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#gsql" class="md-nav__link">
     gsql
   </a>
@@ -408,22 +401,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#createsecret" class="md-nav__link">
-    createSecret
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#initgsql" class="md-nav__link">
     initGsql
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#downloadjar-and-downloadcert" class="md-nav__link">
-    downloadJar and downloadCert
   </a>
   
 </li>
@@ -488,13 +467,6 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
-    Getting Started
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#gsql" class="md-nav__link">
     gsql
   </a>
@@ -502,22 +474,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#createsecret" class="md-nav__link">
-    createSecret
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#initgsql" class="md-nav__link">
     initGsql
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#downloadjar-and-downloadcert" class="md-nav__link">
-    downloadJar and downloadCert
   </a>
   
 </li>
@@ -540,44 +498,32 @@
                 
                 
                 <h1 id="gsql-submodule">GSQL Submodule</h1>
-<p>The GSQL submodule is integrated into TigerGraphConnection anf gets loaded the first time you execute one of its functions. It provides GSQL shell functionality, allowing you to create and execute queries, loading tasks, and authentication tasks. Java must be installed on the system. OpenSSL is also used, but you can provide your own certificate if OpenSSL is not installed on your system (see initGsql).</p>
-<h2 id="getting-started">Getting Started</h2>
-<p>First, you will need to create a TigerGraphConnection:</p>
-<pre><code class="python">import pyTigerGraph as tg 
-
-conn = tg.TigerGraphConnection(
-    host=&quot;your.server.ip.address&quot;, 
-    graphname=&quot;social&quot;, 
-    password=&quot;yourpassword&quot;, 
-    version=&quot;3.0.0&quot;, 
-    #useCert=False
-)
-</code></pre>
-
-<p>When using a non-secure conncetion, for example to TigerGraph Developer, you must uncomment the <code>useCert=False</code> option.</p>
-<p>You can now initilize and test your connction by issuing any GSQL command like:</p>
+<p>pyTigerGraph uses the <a href="https://docs.tigergraph.com/dev/using-a-remote-gsql-client">GSQL command line client</a> to enable sending arbitrary GSQL statements to the database. This enables you to execute operations that are currently not available through REST API endpoints.</p>
+<ul>
+<li>The client is implemented in Java and distributed as a <code>.jar</code> archive. The client is downloaded on demand to the machine running your pyTigerGraph application; so you need to ensure that your code can access the <a href="https://bintray.com/tigergraphecosys/tgjars/gsql_client">download location</a> and can save the <code>.jar</code> file locally. Furthermore, Java 8+ JRE must be installed and accessible on the machine.</li>
+<li>The <code>.jar</code> file is downloaded only if it's not yet available locally, i.e. it is downloaded only once for each database version accessed. Thus, you will potentially have multiple versions of the <code>.jar</code> file downloaded.</li>
+<li>The name pattern of the <code>.jar</code> file is <code>gsql_client-x.y.z.jar</code>, e.g. <code>gsql_client-2.6.2.jar</code> or <code>gsql_client-3.0.0.jar</code>.</li>
+<li>The default location where the <code>.jar</code> file is saved locally is <code>~/.gsql</code> (which on Windows is <code>\Users\&lt;username&gt;\.gsql</code>). This can be changed using the <code>initGsql()</code> function's <code>jarLocation</code> parameter. The <code>initGsql()</code> needs to be called before any function that depends on the GSQL functionality (e.g. <code>gsql()</code> and <code>getSchema()</code>) is invoked. </li>
+<li>Generally, the version of the database and the GSQL client must match. pyTigerGraph can query the version number of the database, and requests the appropriate client from the download location. In rare cases (when the changes/fixes do not impact the GSQL functionality) no new GSQL client version is released when a new version of the database is shipped. In these cases an appropriate GSQL client version needs to be manually specified via the <code>gsqlVersion</code> parameter (typically the latest available version that is lesser than the database version). You can check the list of available GSQL clients at the <a href="https://bintray.com/tigergraphecosys/tgjars/gsql_client">download location</a>.</li>
+<li><span style="color:red"><strong>NOTE:</strong></span> The intention is to replace the current functionality that uses the GSQL client with one that natively (i.e. using Python code only) communicates with the database. This is a short term plan, so look for changes in this are when you upgrade pyTgigerGraph (altough backward compatibility will be maintained).</li>
+</ul>
+<p>First, you will need to <a href="../GettingStarted/">create a <code>TigerGraphConnection</code></a>.</p>
+<p>You can then initialize and test your connection by issuing any GSQL command like:</p>
 <pre><code class="python">print(conn.gsql('ls', options=[]))
 </code></pre>
 
 <p>See the <a href="https://github.com/pyTigerGraph/pyTigerGraph/blob/master/examples/GSQL101%20-%20PyTigerGraph.ipynb">GSQL101 notebook</a> for more examples.</p>
 <h2 id="gsql">gsql</h2>
-<p><code>conn.gsql(query, options=None)</code>
-Runs a GSQL query and process the output.</p>
+<p><code>conn.gsql(query, options=None)</code></p>
+<p>Runs a GSQL query and processes the output.</p>
 <p>Arguments:
-    - <code>query</code>:      The text of the query to run as one string. 
-    - <code>options</code>:    A list of strings that will be passed as options the the gsql_client. A <code>None</code> gets replaced with
-                <code>['g', self.graphname]</code> causeing the queries to run on the default graph. Use <code>options=[]</code> to
-            overide the default graph and submit to the global enviroment instead.</p>
-<p>Once you have a TigerGraphConnection set up, you can use the <code>gsql()</code> method to send any GSQL query. By default, all commands are run using the graph that was passed in with the TigerGraphConnection. This is done using the gsql_client command line options. You can customize these command line options via the <code>options</code> argument, which takes in a list of strings. If you wish to run a query globaly simply pass <code>options=[]</code>.</p>
+- <code>query</code>: The text of the query to run as one string. 
+- <code>options</code>: A list of strings that will be passed as options the the GSQL client. A <code>None</code> gets replaced with <code>['g', self.graphname]</code> causing the queries to run on the default graph. Use <code>options=[]</code> to overide the default graph and submit to the global graph instead.</p>
 <p>When the query resonse is a JSON formatted string the return value of <code>gsql()</code> would be a processed JSON object, otherwise the response text is returned as is.</p>
-<h2 id="createsecret">createSecret</h2>
-<p><code>conn.createSecret(alias="")</code>
-Returns a secret key. Takes in a string as an argument if you want to use an alias while generating the key.</p>
 <h2 id="initgsql">initGsql</h2>
-<p>```conn.initGsql(jarLocation="~/.gsql", certLocation="~/.gsql/my-cert.txt")
-This commnad allows you to initiate the gsql submodule ahead of the first call to any other gsql submodule command. This allows you to customize the location at which the gsql_client.jar and the certificate will be stored.</p>
-<h2 id="downloadjar-and-downloadcert">downloadJar and downloadCert</h2>
-<p>Use <code>conn.downloadJar=False</code> and <code>conn.downloadCert=Flase</code> to prevent the downloads. This must be set before runing <code>initGsql</code>. Mostly this is useful when working with a user supplied <code>gsql_client.jar</code> file or certificate. </p>
+<p><code>conn.initGsql(jarLocation="", certLocation="")</code></p>
+<p>This function allows you to initiate the GSQL submodule ahead of the first call to any other GSQL submodule command. With it you to customize the location at which the GSQL client <code>.jar</code> and the SSL certificate will be stored.</p>
+<p>If the defaults (as shown above) are appropriate, you do not need to use this function.</p>
                 
               
               
