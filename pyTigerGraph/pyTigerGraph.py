@@ -1258,16 +1258,18 @@ class TigerGraphConnection(object):
             headers["GSQL-TIMEOUT"] = str(timeout)
         if sizeLimit:
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
+        if isinstance(params, dict):
+            query1 = ""
+            for param in params.keys():
+                if " " in params[param]:
+                    params[param] = urllib.parse.quote(params[param])  # ' ' ==> %20 HTML Format
+                query1 += param + "=" + params[param] + "&"
+            if query1[-1] == "&":
+                query1 = query1[:-1]
+            return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName + "?" + query1, headers=headers)
 
-        query1 = ""
-        for param in params.keys():
-            if " " in params[param]:
-                params[param] = urllib.parse.quote(params[param])  # ' ' ==> %20 HTML Format
-            query1 += param + "=" + params[param] + "&"
-        if query1[-1] == "&":
-            query1 = query1[:-1]
-        
-        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName + "?" + query1, headers=headers)
+        else:
+            return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
 
     def runInterpretedQuery(self, queryText, params=None, timeout=None, sizeLimit=None):
         """Runs an interpreted query.
