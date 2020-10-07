@@ -6,8 +6,9 @@ import time
 import pandas as pd
 import os
 import subprocess
-import urllib.parse 
+import urllib.parse
 import shutil
+
 
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
@@ -31,22 +32,27 @@ class TigerGraphConnection(object):
                                                             Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", useCert=False, certPath=None):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", apiToken="", gsqlVersion="", useCert=False, certPath=None):
         """Initiate a connection object.
 
         Arguments
-
-        - `host`:              The ip address of the TigerGraph server.
+        - `host`:              The IP address or hostname of the TigerGraph server, including the scheme (`http` or `https`).
         - `graphname`:         The default graph for running queries.
         - `username`:          The username on the TigerGraph server.
         - `password`:          The password for that user.
         - `restppPort`:        The post for REST++ queries.
         - `gsPort`:            The port of all other queries.
-        - `apiToken`:          A token to use when making queries.
-        - `useCert`:           True if we need to use a certificate because the server is secure (such as on TigerGraph
-                               Cloud). This needs to be False when connecting to an unsecure server such as TigerGraph Developer.
+        - `apiToken`:          A token to use when making queries. Ignored if REST++ authentication is not enabled.
+        - `gsqlVersion`:       The version of GSQL client to be used. Default to database version.
+                               pyTigerGraph can detect the version from the database, but in rare cases (when the changes/fixes do not impact
+                               the GSQL functionality) no new GSQL version is released
+                               when a new version of the database is shipper. In these cases an appropriate GSQL client version needs to be
+                               manually specified (typically the latest available version lesser than the database version).
+                               You can check the list of available GSQL clients at https://bintray.com/tigergraphecosys/tgjars/gsql_client
+        - `useCert`:           True if you need to use a certificate because the server is secure (such as on TigerGraph
+                               Cloud). This needs to be False when connecting to an unsecure server such as a TigerGraph Developer instance.
                                When True the certificate would be downloaded when it is first needed.
-                               on the first GSQL command.
+        - `certPath`:          The location/directory _and_ the name of the SSL certification file where the certification should be stored.
         """
 
         self.host = host
@@ -67,17 +73,21 @@ class TigerGraphConnection(object):
         self.gsqlInitiated = False
         self.useCert = useCert
         self.certPath = certPath
+        self.gsqlVersion = gsqlVersion
         # Below variables are set during GSQL init
         self.certLocation = ""
         self.jarLocation = ""
         self.jarName = ""
         self.url = ""
-        self.gsqlVersion = ""
 
     # Private functions ========================================================
 
     def _errorCheck(self, res):
-        """Checks if the JSON document returned by an endpoint has contains error: true; if so, it raises an exception."""
+        """Checks if the JSON document returned by an endpoint has contains error: true; if so, it raises an exception.
+        
+        Arguments
+        - `res`:  The JSON document returned by an endpoint
+        """
         if "error" in res and res["error"] and res["error"] != "false":  # Endpoint might return string "false" rather than Boolean false
             raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
 
@@ -180,15 +190,15 @@ class TigerGraphConnection(object):
             u["Fields"] = u["fields"]
             u.pop("fields")
         self.schema["UDTs"] = res
-    
+
     def _getSchemaLs(self):
 
         res = self.gsql('ls')
 
         for objType in ["VertexTypes", "EdgeTypes", "Indexes", "Queries", "LoadingJobs", "DataSources", "Graphs"]:
-            if not objType in self.schema:
+            if objType not in self.schema:
                 self.schema[objType] = []
-            
+
         qpatt = re.compile("[\s\S\n]+CREATE", re.MULTILINE)
 
         res = res.split("\n")
@@ -303,9 +313,11 @@ class TigerGraphConnection(object):
                 pass
             i += 1
 
+    # TODO: GET /gsqlserver/gsql/queryinfo
+    #       https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-gsqlserver-gsql-queryinfo-get-query-metadata 
     def _getQueries(self):
         """ Get query metadata from REST++ endpoint.
-    
+
         It will not return data for queries that are not (yet) installed.
         """
         qs = self.schema["Queries"]
@@ -315,14 +327,16 @@ class TigerGraphConnection(object):
             params = e["parameters"]
             qName = params["query"]["default"]
             query = {}
+            found = False
+            # Do we have this query already on our list?
             for q in qs:
                 if q["Name"] == qName:
                     query = q
                     found = True
                     break
-            if not found:  # Most likely the query is created but not installed
+            if not found:  # Most likely the query is created but not installed; add to our list
                 query = {"Name": qName}
-                qs.append(q)
+                qs.append(query)
             params.pop("query")
             query["Parameters"] = params
             query["Endpoint"] = ep.split(" ")[1]
@@ -377,7 +391,7 @@ class TigerGraphConnection(object):
                         l = res[i]
                         roles = l[l.find(":") + 2:].split(", ")
                     elif "- Rule: " in l:
-                        rule = l[l.find(":") + 2:]  
+                        rule = l[l.find(":") + 2:]
                     i += 1
                     l = res[i]
                 gs.append({"Name": gName, "Roles": roles, "Rule": rule})
@@ -430,6 +444,8 @@ class TigerGraphConnection(object):
         """
         if not isinstance(data, str):
             data = json.dumps(data)
+        if self.debug:
+            print(data)
         return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]
 
     # Vertex related functions =================================================
@@ -558,7 +574,7 @@ class TigerGraphConnection(object):
                       See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#filter
         - `limit`:    Maximum number of vertex instances to be returned (after sorting).
                       See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#limit
-        - `sort`      Comma separated list of attributes the results should be sorted by.
+        - `sort`:     Comma separated list of attributes the results should be sorted by.
                       See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#sort
         - `fmt`:      Format of the results:
                       "py":   Python objects (default)
@@ -1228,7 +1244,13 @@ class TigerGraphConnection(object):
 
     def getInstalledQueries(self, fmt="py"):
         """
-        Returns installed queries.
+        Returns a list of installed queries.
+        
+        Arguments:
+        - `fmt`:      Format of the results:
+                      "py":   Python objects (default)
+                      "json": JSON document
+                      "df":   Pandas DataFrame
         """
         ret = self.getEndpoints(dynamic=True)
         if fmt == "json":
@@ -1304,6 +1326,9 @@ class TigerGraphConnection(object):
         if sizeLimit:
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd", headers=headers)
+
+    # TODO: GET /showprocesslist/{graph_name}
+    #       https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-running-queries-showprocesslist-graph_name
 
     def parseQueryOutput(self, output, graphOnly=True):
         """Parses query output and separates vertex and edge data (and optionally other output) for easier use.
@@ -1422,7 +1447,7 @@ class TigerGraphConnection(object):
     # Path-finding algorithms ==================================================
 
     def _preparePathParams(self, sourceVertices, targetVertices, maxLength=None, vertexFilters=None, edgeFilters=None, allShortestPaths=False):
-        """ Prepares the input parameters by transforming them to the format expected by the path algorithms.
+        """Prepares the input parameters by transforming them to the format expected by the path algorithms.
 
         Arguments:
         - `sourceVertices`:   A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples; the source vertices of the shortest paths sought.
@@ -1437,6 +1462,7 @@ class TigerGraphConnection(object):
         """
 
         def parseVertices(vertices):
+            """Parses vertex input parameters and converts it to the format required by the path finding endpoints"""
             ret = []
             if not isinstance(vertices, list):
                 vertices = [vertices]
@@ -1453,6 +1479,7 @@ class TigerGraphConnection(object):
             return ret
 
         def parseFilters(filters):
+            """Parses filter input parameters and converts it to the format required by the path finding endpoints"""
             ret = []
             if not isinstance(filters, list):
                 filters = [filters]
@@ -1467,7 +1494,6 @@ class TigerGraphConnection(object):
                     print("Invalid filter type or value: " + str(f))
             print(ret)
             return ret
-
 
         # Assembling the input payload
         if not sourceVertices or not targetVertices:
@@ -1565,13 +1591,13 @@ class TigerGraphConnection(object):
         return pd.concat(cols, axis=1)
 
     def edgeSetToDataFrame(self, edgeSet, withId=True, withType=False):
-        """Converts an edge set to Pandas DataFrame
+        """Converts an edge set to Pandas DataFrame.
 
         Arguments:
         - `edgeSet`:  An edge set (a list of edges of the same edge type).
         - `withId`:   Add a column with edge IDs to the DataFrame.
                       Note: As edges do not have internal ID, this column will contain a generated composite ID, a combination of source and target vertex types
-                            and IDs (specifically: [<source vertex ID>, <source vertex ID>, <target vertex type>, <target vertex ID>]).
+                            and IDs (specifically: [<source vertex type>, <source vertex ID>, <target vertex type>, <target vertex ID>]).
                             This is unique within the vertex type, but not guaranteed to be globally (i.e. within the whole graph) unique. To get a globally
                             unique edge id, the edge type needs to be added to the above combination (see `withType` below).
         - `withType`: Add a column with edge type to the DataFrame.
@@ -1701,7 +1727,7 @@ class TigerGraphConnection(object):
 
         Arguments:
         - `secret`:   The secret (string) generated in GSQL using `CREATE SECRET`.
-                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
+                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#managing-credentials
         - `setToken`: Set the connection's API token to the new value (default: true).
         - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs).
 
@@ -1731,7 +1757,7 @@ class TigerGraphConnection(object):
 
         Arguments:
         - `secret`:   The secret (string) generated in GSQL using `CREATE SECRET`.
-                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
+                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#managing-credentials
         - `token`:    The token requested earlier. If not specified, refreshes current connection's token.
         - `lifetime`: Duration of token validity (in secs, default 30 days = 2,592,000 secs) from current system timestamp.
 
@@ -1764,7 +1790,7 @@ class TigerGraphConnection(object):
 
         Arguments:
         - `secret`:   The secret (string) generated in GSQL using `CREATE SECRET`.
-                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#create-show-drop-secret
+                      See https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#managing-credentials
         - `token`:    The token requested earlier. If not specified, deletes current connection's token, so be careful.
         - `skipNA`:   Don't raise exception if specified token does not exist.
 
@@ -1918,7 +1944,7 @@ class TigerGraphConnection(object):
 
     # GSQL support =================================================
 
-    def initGsql(self, jarLocation="", certLocation="", version=""):
+    def initGsql(self, jarLocation="", certLocation=""):
         """Initialises the GSQL functionality, downloads the appropriate GSQL client JAR (if not available already) and an SSL certification.
 
         Arguments:
@@ -1956,8 +1982,7 @@ class TigerGraphConnection(object):
             os.mkdir(self.jarLocation)
 
         # Download the gsql_client.jar file if not yet available locally
-        if version:
-            self.gsqlVersion = version
+        if self.gsqlVersion:
             if self.debug:
                 print("Using version " + self.gsqlVersion + " instead of " + self.getVer())
         else:
@@ -2034,6 +2059,7 @@ class TigerGraphConnection(object):
             return json_object
 
     def createSecret(self, alias=""):
+        """Issues a `CREATE SECRET` GSQL statement and returns the secret generated by that statement."""
         if not self.gsqlInitiated:
             self.initGsql()
 
