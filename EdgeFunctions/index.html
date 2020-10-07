@@ -629,13 +629,11 @@ See documentation of <code>getEdgeCountFrom</code> above for more details.</p>
 - If edge is not yet present in graph, it will be created (see special case below).
 - If it's already in the graph, it is updated with the values specified in the request. An optional <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">operator</a> controls how the attributes are updated.</p>
 <p>The <code>attributes</code> argument is expected to be a dictionary in this format:</p>
-<pre><code class="python">{&lt;attribute_name&gt;, &lt;attribute_value&gt;|(&lt;attribute_name&gt;, &lt;operator&gt;), …}
+<pre><code class="language-python">{&lt;attribute_name&gt;, &lt;attribute_value&gt;|(&lt;attribute_name&gt;, &lt;operator&gt;), …}
 </code></pre>
-
 <p>Example:</p>
-<pre><code class="python">{&quot;visits&quot;: (1482, &quot;+&quot;), &quot;max_duration&quot;: (371, &quot;max&quot;)}
+<pre><code class="language-python">{&quot;visits&quot;: (1482, &quot;+&quot;), &quot;max_duration&quot;: (371, &quot;max&quot;)}
 </code></pre>
-
 <p>Returns a single number of accepted (successfully upserted) edges (0 or 1).</p>
 <p>Note: If operator is "vertex_must_exist" then edge will only be created if both vertex exists in graph.
       Otherwise missing vertices are created with the new edge.</p>
@@ -645,19 +643,17 @@ See documentation of <code>getEdgeCountFrom</code> above for more details.</p>
 <p>Upserts multiple edges (of the same type).</p>
 <p>See the description of <code>upsertEdge</code> for generic information.</p>
 <p>The <code>edges</code> argument is expected to be a list in of tuples in this format:</p>
-<pre><code class="python">[
+<pre><code class="language-python">[
   (&lt;source_vertex_id&gt;, &lt;target_vertex_id&gt;, {&lt;attribute_name&gt;: &lt;attribute_value&gt;|(&lt;attribute_name&gt;, &lt;operator&gt;), …})
   ⋮
 ]
 </code></pre>
-
 <p>Example:</p>
-<pre><code class="python">[
+<pre><code class="language-python">[
   (17, &quot;home_page&quot;, {&quot;visits&quot;: (35, &quot;+&quot;), &quot;max_duration&quot;: (93, &quot;max&quot;)}),
   (42, &quot;search&quot;, {&quot;visits&quot;: (17, &quot;+&quot;), &quot;max_duration&quot;: (41, &quot;max&quot;)}),
 ]
 </code></pre>
-
 <p>Returns a single number of accepted (successfully upserted) edges (0 or positive integer).</p>
 <p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">POST /graph</a></p>
 <h2 id="getedges">getEdges</h2>

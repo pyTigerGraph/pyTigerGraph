@@ -452,20 +452,18 @@ Instead, <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-mana
 grant them the <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#roles-and-privileges">appropriate privileges through roles</a>,
 then use those users to access the database.</p>
 <p>It is recommended to not push any form of authentication information to version control software. Because of this, we recommend to create a <code>cfg.py</code> file that looks like this:</p>
-<pre><code class="python">secret = &quot;YOUR_SECRET_HERE&quot;
+<pre><code class="language-python">secret = &quot;YOUR_SECRET_HERE&quot;
 token = &quot;&quot;
 password = &quot;YOUR_PASSWORD_HERE&quot;
 </code></pre>
-
 <p>You can then import this config file into your Python applications, and add <code>cfg.py</code> to your <code>.gitignore</code>. To create a connection to your database, simply:</p>
-<pre><code class="python">import pyTigerGraph as tg 
+<pre><code class="language-python">import pyTigerGraph as tg 
 import cfg
 
 cfg.token = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quot;&lt;graph_name&gt;&quot;).getToken(cfg.secret, &quot;&lt;token_lifetime&gt;&quot;)[0]
 
 conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quot;&lt;graph_name&gt;&quot;, password=cfg.password, apiToken=cfg.token)
 </code></pre>
-
 <p>Substitute the hostname and graph name with the correct credentials, as well as the desired lifetime of the API token fetched.</p>
                 
               

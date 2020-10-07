@@ -500,13 +500,11 @@
                 <h1 id="getting-started">Getting Started</h1>
 <h2 id="establishing-the-connection-to-a-tigergraph-database">Establishing the connection to a TigerGraph database</h2>
 <p>First, import pyTigerGraph:</p>
-<pre><code class="py">import pyTigerGraph as tg
+<pre><code class="language-py">import pyTigerGraph as tg
 </code></pre>
-
 <p>The functionality of pyTigerGraph is implemented by the <code>TigerGraphConnection</code> class. To establish the connection, instantiate the class:</p>
 <pre><code>conn = tg.TigerGraphConnection(&lt;parameters&gt;)
 </code></pre>
-
 <p>The constuctor has following parameters:
 - <code>host</code>:              The IP address or hostname of the TigerGraph server, including the scheme (<code>http</code> or <code>https</code>). Default: <em>http://localhost</em>.
 - <code>graphname</code>:         The default graph for running queries. Default: <em>MyGraph</em>.

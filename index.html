@@ -515,18 +515,16 @@
 <p>To download pyTigerGraph, simply run:
 <code>pip3 install pyTigerGraph</code>
 Once the package installs, you can import it and instantiate a connection to your database:</p>
-<pre><code class="py">import pyTigerGraph as tg
+<pre><code class="language-py">import pyTigerGraph as tg
 
 conn = tg.TigerGraphConnection(host=&quot;&lt;hostname&gt;&quot;, graphname=&quot;&lt;graph_name&gt;&quot;, username=&quot;&lt;username&gt;&quot;, password=&quot;&lt;password&gt;&quot;, apiToken=&quot;&lt;api_token&gt;&quot;)
 </code></pre>
-
 <p>If your database is not using the standard ports (or they are mapped), you can use the following arguments to specify those:
 - restppPort (default 9000): <a href="https://docs.tigergraph.com/dev/restpp-api/restpp-requests">REST++ API port</a>
 - gsPort (default: 14240): <a href="https://docs.tigergraph.com/ui/graphstudio/overview#TigerGraphGraphStudioUIGuide-GraphStudioOn-Premises">GraphStudio port</a></p>
 <p>For example, in case of using a local virtual machine with the ports mapped:</p>
-<pre><code class="py">conn = tg.TigerGraphConnection(host=&quot;localhost&quot;, restppPort=25900, gsPort=25240, graphname=&quot;MyGraph&quot;, username=&quot;tigergraph&quot;, password=&quot;tigergraph&quot;, apiToken=&quot;2aa016d747ede9gg6da3drslm98srfoj&quot;)
+<pre><code class="language-py">conn = tg.TigerGraphConnection(host=&quot;localhost&quot;, restppPort=25900, gsPort=25240, graphname=&quot;MyGraph&quot;, username=&quot;tigergraph&quot;, password=&quot;tigergraph&quot;, apiToken=&quot;2aa016d747ede9gg6da3drslm98srfoj&quot;)
 </code></pre>
-
 <p>For more details on establishing a connection, read the <a href="GettingStarted/">Getting Started</a> page.</p>
 <h2 id="example-projects">Example Projects</h2>
 <ul>

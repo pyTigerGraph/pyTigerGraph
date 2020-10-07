@@ -634,13 +634,11 @@
 - If vertex is not yet present in graph, it will be created.
 - If it's already in the graph, its attributes are updated with the values specified in the request. An optional <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">operator</a> controls how the attributes are updated.</p>
 <p>The <code>attributes</code> argument is expected to be a dictionary in this format:</p>
-<pre><code class="python">{&lt;attribute_name&gt;, &lt;attribute_value&gt;|(&lt;attribute_name&gt;, &lt;operator&gt;), …}
+<pre><code class="language-python">{&lt;attribute_name&gt;, &lt;attribute_value&gt;|(&lt;attribute_name&gt;, &lt;operator&gt;), …}
 </code></pre>
-
 <p>Example:</p>
-<pre><code class="python">{&quot;name&quot;: &quot;Thorin&quot;, &quot;points&quot;: (10, &quot;+&quot;), &quot;bestScore&quot;: (67, &quot;max&quot;)}
+<pre><code class="language-python">{&quot;name&quot;: &quot;Thorin&quot;, &quot;points&quot;: (10, &quot;+&quot;), &quot;bestScore&quot;: (67, &quot;max&quot;)}
 </code></pre>
-
 <p>Returns a single number of accepted (successfully upserted) vertices (0 or 1).</p>
 <p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">POST /graph</a></p>
 <h2 id="upsertvertices">upsertVertices</h2>
@@ -648,19 +646,17 @@
 <p>Upserts multiple vertices (of the same type).</p>
 <p>See the description of <code>upsertVertex</code> for generic information.</p>
 <p>The <code>vertices</code> argument is expected to be a list of tuples in this format:</p>
-<pre><code class="python">[
+<pre><code class="language-python">[
   (&lt;vertex_id&gt;, {&lt;attribute_name&gt;, &lt;attribute_value&gt;|(&lt;attribute_name&gt;, &lt;operator&gt;), …}),
   ⋮
 ]
 </code></pre>
-
 <p>Example:</p>
-<pre><code class="python">[
+<pre><code class="language-python">[
    (2, {&quot;name&quot;: &quot;Balin&quot;, &quot;points&quot;: (10, &quot;+&quot;), &quot;bestScore&quot;: (67, &quot;max&quot;)}),
    (3, {&quot;name&quot;: &quot;Dwalin&quot;, &quot;points&quot;: (7, &quot;+&quot;), &quot;bestScore&quot;: (35, &quot;max&quot;)}),
 ]
 </code></pre>
-
 <p>Returns a single number of accepted (successfully upserted) vertices (0 or positive integer).</p>
 <p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">POST /graph</a></p>
 <h2 id="getvertices">getVertices</h2>

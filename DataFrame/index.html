@@ -638,7 +638,6 @@ See example in <code>edgeSetToDataFrame</code>.</p>
         ⋮
 ]
 </code></pre>
-
 <p>See: https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-statements#vertex-set-variable-declaration-and-assignment</p>
 <h2 id="getedgesdataframe">getEdgesDataframe</h2>
 <p><code>getEdgesDataframe(sourceVertexType, sourceVerticies, edgeType=None, targetVertexType=None, targetVertexId=None, select="", where="", limit="", sort="", timeout=0)</code></p>
@@ -683,7 +682,6 @@ result =
     ACCUM  @@edges += e;
 PRINT start, result, @@edges;
 </code></pre>
-
 <p>The <code>@@edges</code> is an edge set.  It contains for each edge instance the source and target vertex type and ID, the edge type, an directedness indicator and the (optional) attributes.</p>
 <p>Note: <code>start</code> and <code>result</code> are vertex sets.</p>
 <p>An edge set has this structure:</p>
@@ -705,7 +703,6 @@ PRINT start, result, @@edges;
         ⋮
 ]
 </code></pre>
-
 <h2 id="getinstalledqueriesdataframe">getInstalledQueriesDataframe</h2>
 <p><code>getInstalledQueriesDataframe()</code></p>
 <p>Returns dataframe of all installed queries, does not take any arguments.</p>
