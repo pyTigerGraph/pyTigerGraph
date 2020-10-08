@@ -1283,7 +1283,7 @@ class TigerGraphConnection(object):
         if isinstance(params, dict):
             query1 = ""
             for param in params.keys():
-                if isinstance(param, str):
+                if isinstance(params[param], str):
                     if " " in params[param]:
                         params[param] = urllib.parse.quote(params[param])  # ' ' ==> %20 HTML Format
                 query1 += param + "=" + params[param] + "&"
