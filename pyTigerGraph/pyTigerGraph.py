@@ -1283,8 +1283,9 @@ class TigerGraphConnection(object):
         if isinstance(params, dict):
             query1 = ""
             for param in params.keys():
-                if " " in params[param]:
-                    params[param] = urllib.parse.quote(params[param])  # ' ' ==> %20 HTML Format
+                if isinstance(param, str):
+                    if " " in params[param]:
+                        params[param] = urllib.parse.quote(params[param])  # ' ' ==> %20 HTML Format
                 query1 += param + "=" + params[param] + "&"
             if query1[-1] == "&":
                 query1 = query1[:-1]
