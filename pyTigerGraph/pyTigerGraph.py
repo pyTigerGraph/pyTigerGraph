@@ -7,7 +7,7 @@ import pandas as pd
 import os
 import subprocess
 # Added pyTigerDriver Client
-from pyTigerDriver  import GSQL_Client 
+from pyTigerDriver import GSQL_Client
 
 
 class TigerGraphException(Exception):
@@ -25,11 +25,15 @@ class TigerGraphConnection(object):
     """Python wrapper for TigerGraph's REST++ and GSQL APIs
 
     Common arguments used in methods:
-    vertexType, sourceVertexType, targetVertexType -- The name of a vertex type in the graph.
-                                                      Use `getVertexTypes()` to fetch the list of vertex types currently in the graph.
-    vertexId, sourceVertexId, targetVertexId       -- The PRIMARY_ID of a vertex instance (of the appropriate data type).
-    edgeType                                       -- The name of the edge type in the graph.
-                                                      Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
+    vertexType, sourceVertexType, targetVertexType
+    -- The name of a vertex type in the graph.
+
+    Use `getVertexTypes()` to fetch the list of vertex types currently in the graph.
+    vertexId, sourceVertexId, targetVertexId
+    -- The PRIMARY_ID of a vertex instance (of the appropriate data type).
+    edgeType
+    -- The name of the edge type in the graph.
+    Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
     def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.0", apiToken="", useCert=True, certPath=None):
@@ -87,7 +91,9 @@ class TigerGraphConnection(object):
         - `headers`:   Standard HTTP request headers (dict).
         - `data`:      Request payload, typically a JSON document.
         - `resKey`:    the JSON subdocument to be returned, default is 'result'.
-        - `skipCheck`: Skip error checking? Some endpoints return error to indicate that the requested action is not applicable; a problem, but not really an error.
+        - `skipCheck`: Skip error checking? Some endpoints return error
+        to indicate that the requested action is not applicable;
+        a problem, but not really an error.
         - `params`:    Request URL parameters.
         """
         if self.debug:

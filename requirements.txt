@@ -1,0 +1,6 @@
+pyTigerDriver
+validators
+requests
+pandas
+flake8
+pytest
