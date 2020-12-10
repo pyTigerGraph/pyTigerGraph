@@ -1521,7 +1521,8 @@ class TigerGraphConnection(object):
                 certcontent.write(Res)
                 certcontent.close()
             except:
-                os.mkdir(self.certLocation)
+                from os.path import expanduser
+                os.mkdir(expanduser("~/.gsql"))
                 certcontent = open(self.certLocation, 'w')
                 certcontent.write(Res)
                 certcontent.close()
@@ -1551,8 +1552,8 @@ class TigerGraphConnection(object):
                         `options=[]` to overide the default graph.
         """
         if not self.gsqlInitiated:
-            gsql_ok = self.initGsql()
-        if gsql_ok:
+            self.gsqlInitiated = self.initGsql()
+        if self.gsqlInitiated:
             return self.Client.query(query)
         else:
             print("Couldn't Initialize the client see Above Error")
