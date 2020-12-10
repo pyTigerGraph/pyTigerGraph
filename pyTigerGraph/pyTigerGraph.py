@@ -36,7 +36,7 @@ class TigerGraphConnection(object):
     Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.0", apiToken="", useCert=True, certPath=None):
+    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph", restppPort="9000", gsPort="14240", version="3.0.5", apiToken="", useCert=True, certPath=None):
         """Initiate a connection object.
 
         Arguments
@@ -1501,34 +1501,46 @@ class TigerGraphConnection(object):
 
     def initGsql(self, certLocation="~/.gsql/my-cert.txt"): #, jarLocation="~/.gsql"
 
-        
+
         self.certLocation = os.path.expanduser(certLocation)
         self.url = self.gsUrl.replace("https://", "").replace("http://", "")  # Getting URL with gsql port w/o https://
+        sslhost = self.url.split(":")[0]
 
- 
         if self.downloadCert:  # HTTP/HTTPS
 
             # Check if openssl is installed.
-            if subprocess.run(['which', 'openssl']).returncode != 0:
-                raise TigerGraphException("Could not find openssl. Please install.", None)
-            print('\x1b[6;30;42m' + "Downloading SSL Certificate"+ '\x1b[0m')
-            os.system("openssl s_client -connect "+self.host+":443 < /dev/null 2> /dev/null | openssl x509 -text  | sed -n -e '/BEGIN\ CERTIFICATE/,/END\ CERTIFICATE/ p' > "+self.certLocation)  # TODO: Python-native SSL?
+            #if subprocess.run(['which', 'openssl']).returncode != 0:
+            #    raise TigerGraphException("Could not find openssl. Please install.", None)
+            #print('\x1b[6;30;42m' + "Downloading SSL Certificate"+ '\x1b[0m')
+            # os.system("openssl s_client -connect "+self.host+r":443 < /dev/null 2> /dev/null | openssl x509 -text  | sed -n -e '/BEGIN\ CERTIFICATE/,/END\ CERTIFICATE/ p' > "+self.certLocation)  # TODO: Python-native SSL?
+            import ssl
+            Res = ssl.get_server_certificate((sslhost, 443))
+            # print(Res)
+            try:
+                certcontent = open(self.certLocation,'w')
+                certcontent.write(Res)
+                certcontent.close()
+            except:
+                os.mkdir(self.certLocation)
+                certcontent = open(self.certLocation, 'w')
+                certcontent.write(Res)
+                certcontent.close()
             if os.stat(self.certLocation).st_size == 0:
                 raise TigerGraphException("Certificate download failed. Please check that the server is online.", None)
         
         try:
-            if self.downloadCert: 
-                
+
+            if self.downloadCert:
                 if not(self.certPath):
                     self.certPath = "~/.gsql/my-cert.txt"
-                self.Client = GSQL_Client(self.host, version=self.version,username=self.username,password=self.password, cacert=os.path.expanduser(self.certPath))
+                self.Client = GSQL_Client(sslhost, version=self.version,username=self.username,password=self.password, cacert=os.path.expanduser(self.certPath))
             else:
-                self.Client = GSQL_Client(self.host, version=self.version,username=self.username,password=self.password)
+                self.Client = GSQL_Client(sslhost, version=self.version,username=self.username,password=self.password)
             self.Client.login()
             self.gsqlInitiated = True
             return True
         except Exception as e: 
-            print("Connection Failed check your Username/Password")
+            print("Connection Failed check your Username/Password {}".format(e))
             self.gsqlInitiated = False
     def gsql(self, query, options=None):
         """Runs a GSQL query and process the output.
@@ -1555,7 +1567,7 @@ class TigerGraphConnection(object):
 
         response = self.gsql("CREATE SECRET " + alias)
         try:
-            secret = re.search('The secret\: (\w*)', response.replace('\n',''))[1]
+            secret = re.search(r'The secret\: (\w*)', response.replace('\n',''))[1]
             return secret
         except:
             return None
