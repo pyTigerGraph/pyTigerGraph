@@ -1567,10 +1567,11 @@ class TigerGraphConnection(object):
             self.initGsql()
 
         response = self.gsql("CREATE SECRET " + alias)
+
         try:
-            secret = re.search(r'The secret\: (\w*)', response.replace('\n',''))[1]
+            secret = str(response[0].split('The secret: ')[1]).split(' ')[0]
             return secret
-        except:
+        except Exception as e: #noqa
             return None
 
     # TODO: showSecret()
