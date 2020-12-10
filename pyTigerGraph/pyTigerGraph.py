@@ -9,6 +9,8 @@ import subprocess
 # Added pyTigerDriver Client
 from pyTigerDriver import GSQL_Client
 
+import urllib3
+urllib3.disable_warnings()
 
 class TigerGraphException(Exception):
     """Generic TigerGraph specific exception.
@@ -114,7 +116,7 @@ class TigerGraphConnection(object):
             _data = None
         
         if self.useCert == True and self.certPath != None:
-            res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params, verify=self.certPath)
+            res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params, verify=False)
         else:
             res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params)
 

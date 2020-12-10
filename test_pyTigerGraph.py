@@ -16,7 +16,7 @@ class TestpyTigerGraph:
         ''', options=[])
         conn.gsql('''CREATE GRAPH TestGraph(Test)''', options=[])
         conn.graphname = "TestGraph"
-        conn.apiToken = conn.getToken(conn.createSecret())
+        # conn.apiToken = conn.getToken(conn.createSecret())
         val = conn.getStatistics()
         # Drops the graph created
         conn.gsql('''
@@ -33,7 +33,7 @@ class TestpyTigerGraph:
         ''', options=[])
         conn.gsql('''CREATE GRAPH TestGraph(Test)''', options=[])
         conn.graphname = "TestGraph"
-        conn.apiToken = conn.getToken(conn.createSecret())
+        # conn.apiToken = conn.getToken(conn.createSecret())
         val = conn.runInterpretedQuery('''
             INTERPRET QUERY () FOR GRAPH TestGraph {
                 Seed = {Test.*};
@@ -55,7 +55,7 @@ class TestpyTigerGraph:
         ''', options=[])
         conn.gsql('''CREATE GRAPH TestGraph(Test)''', options=[])
         conn.graphname = "TestGraph"
-        conn.apiToken = conn.getToken(conn.createSecret())
+        # conn.apiToken = conn.getToken(conn.createSecret())
         val = conn.getInstalledQueries()
         # Drops the graph created
         conn.gsql('''
@@ -72,7 +72,7 @@ class TestpyTigerGraph:
         ''', options=[])
         conn.gsql('''CREATE GRAPH TestGraph(Test)''', options=[])
         conn.graphname = "TestGraph"
-        conn.apiToken = conn.getToken(conn.createSecret())
+        # conn.apiToken = conn.getToken(conn.createSecret())
         conn.gsql('''
             USE GRAPH TestGraph
             CREATE QUERY TestQuery() FOR GRAPH TestGraph {
