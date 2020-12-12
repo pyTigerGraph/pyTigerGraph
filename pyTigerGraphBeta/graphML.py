@@ -26,7 +26,7 @@ class Edge():
 
 class mlGraph():
     def __init__(self, connection):
-        assert isinstance(connection, pyTigerGraph-Beta.TigerGraphConnection), "Must pass in a TigerGraphConnection"
+        assert isinstance(connection, pyTigerGraphBeta.TigerGraphConnection), "Must pass in a TigerGraphConnection"
         self.conn = connection
         self.nodes = {}
         self.edges = []

@@ -1,4 +1,4 @@
-site_name: pyTigerGraph-Beta
+site_name: pyTigerGraphBeta
 nav:
     - 'Home': index.md
     - 'User Guide':
@@ -24,4 +24,4 @@ theme:
 extra_css:
   - stylesheets/extra.css
 
-repo_url: https://github.com/pyTigerGraph-Beta/pyTigerGraph-Beta
+repo_url: https://github.com/zrougamed/pyTigerGraph
