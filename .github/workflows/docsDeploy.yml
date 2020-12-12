@@ -4,7 +4,7 @@ name: Build Documentation using MkDocs
 # events but only for the master branch
 on:
   push:
-    branches: [v1.1]
+    branches: [master]
 
 jobs:
   build:
