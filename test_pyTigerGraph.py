@@ -1,4 +1,4 @@
-import pyTigerGraph as tg
+import pyTigerGraphBeta as tg
 import pytest
 import os
 

@@ -22,7 +22,7 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            flake8 --exclude=venv* --ignore=E501  --statistics pyTigerGraph/pyTigerGraph.py
+            flake8 --exclude=venv* --ignore=E501  --statistics pyTigerGraphBeta/pyTigerGraphBeta.py
             pytest -v
 
 

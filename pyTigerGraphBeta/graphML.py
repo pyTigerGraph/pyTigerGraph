@@ -1,5 +1,5 @@
 import pandas as pd
-import pyTigerGraph
+import pyTigerGraphBeta
 
 class Node():
     def __init__(self, nodeId, nodeNum, nodeType, features):
@@ -26,7 +26,7 @@ class Edge():
 
 class mlGraph():
     def __init__(self, connection):
-        assert isinstance(connection, pyTigerGraph.TigerGraphConnection), "Must pass in a TigerGraphConnection"
+        assert isinstance(connection, pyTigerGraph-Beta.TigerGraphConnection), "Must pass in a TigerGraphConnection"
         self.conn = connection
         self.nodes = {}
         self.edges = []

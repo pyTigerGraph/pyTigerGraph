@@ -4,8 +4,8 @@ with open("README.md", encoding='utf-8') as fh:
     long_description = fh.read()
 
 setup(
-  name = 'pyTigerGraph-Beta',         # How you named your package folder (MyLib)
-  packages = ['pyTigerGraph-Beta'],   # Chose the same as "name"
+  name = 'pyTigerGraphBeta',         # How you named your package folder (MyLib)
+  packages = ['pyTigerGraphBeta'],   # Chose the same as "name"
   version = '0.0.9.2',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Library to connect to TigerGraph databases - Beta Realease',   # Give a short description about your library
