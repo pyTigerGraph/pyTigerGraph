@@ -1,6 +1,8 @@
 pyTigerDriver
 validators
-requests
+requests~=2.25.0
 pandas
 flake8
-pytest
+pytest~=6.1.2
+setuptools~=51.0.0
+urllib3~=1.26.2

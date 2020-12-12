@@ -1,7 +1,9 @@
 import pyTigerGraph as tg
 import pytest
+import os
 
-conn = tg.TigerGraphConnection(host="https://medzrouga.i.tgcloud.io", graphname="MyGraph", username="tigergraph",password="tigergraph", apiToken="3mva82884g93sofo5s8tksrnoo7il9v5")
+conn = tg.TigerGraphConnection(host=os.environ['HOST_TG'], graphname="MyGraph", username="tigergraph",password=os.environ['HOST_PASS'],useCert=False,version="3.1.0")
+
 
 class TestpyTigerGraph:
 
@@ -24,7 +26,7 @@ class TestpyTigerGraph:
         assert val == {}
 
     def testgetVer(self):
-        assert "3.0.5" == conn.getVer()
+        assert "3.1.0" == conn.getVer()
 
     @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
     def test_run_interpreted_query(self):
