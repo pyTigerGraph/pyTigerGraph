@@ -51,6 +51,62 @@ class TestpyTigerGraph:
         # Assert
         assert val == {}
 
+
+    @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+    def testcreateSecret(self):
+        conn.gsql("USE GRAPH MyGraph")
+        secret = conn.createSecret()
+        assert secret != None
+
+    @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+    def testgetVersion(self):
+        conn.gsql("USE GRAPH MyGraph")
+        val = conn.getVersion()
+        assert val[0]["name"] == 'product'
+
+    @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+    def testgetToken(self):
+        token = None
+        try:
+            conn.gsql("USE GRAPH TestGraph")
+            token = conn.getToken(conn.createSecret())
+        except:
+            pass
+
+        assert token != None
+
+    @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+    def testrefreshToken(self):
+        newToken = None
+        try:
+            conn.gsql("USE GRAPH TestGraph")
+            secret = conn.createSecret()
+            token = conn.getToken(secret)
+            newToken = conn.refreshToken(secret)
+        except:
+            pass
+
+        assert newToken != None
+
+    @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+    def testdeleteToken(self):
+        didDelete = False
+        try:
+            conn.gsql("USE GRAPH TestGraph")
+            didDelete = conn.deleteToken(conn.createSecret())
+        except:
+            pass
+
+        assert didDelete != False
+
+    @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
+    def testgetEndpoints(self):
+        conn.gsql("USE GRAPH TestGraph")
+        conn.getToken(conn.createSecret())
+        endpoints = conn.getEndpoints()
+        assert endpoints != {}
+
+
     @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
     def test_run_installed_query(self):
 
@@ -69,6 +125,3 @@ class TestpyTigerGraph:
         conn.gsql("drop all")
         # Assert
         assert val == [{'Seed': []}]
-
-
-

@@ -1556,7 +1556,10 @@ class TigerGraphConnection(object):
         if not self.gsqlInitiated:
             self.gsqlInitiated = self.initGsql()
         if self.gsqlInitiated:
-            return self.Client.query(query)
+            if "\n" in query:
+                return self.Client.run_multiple(query.split("\n"))
+            else:
+                return self.Client.query(query)
         else:
             print("Couldn't Initialize the client see Above Error")
             exit(0)
