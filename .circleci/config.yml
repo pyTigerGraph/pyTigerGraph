@@ -30,4 +30,3 @@ workflows:
   main:
     jobs:
       - build-and-test
-        context: TGDEV # has an env var called MY_ENV_VAR
