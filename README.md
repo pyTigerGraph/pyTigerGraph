@@ -7,7 +7,7 @@ To download pyTigerGraph, simply run:
 ```pip3 install pyTigerGraph```
 Once the package installs, you can import it and instantiate a connection to your database:
 ```py
-import pyTigerGraph as tg
+import pyTigerGraphBeta as tg
 
 conn = tg.TigerGraphConnection(host="<hostname>", graphname="<graph_name>", username="<username>", password="<password>", apiToken="<api_token>")
 ```
