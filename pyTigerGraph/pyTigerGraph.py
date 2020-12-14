@@ -1281,10 +1281,7 @@ class TigerGraphConnection(object):
         if sizeLimit:
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
         if isinstance(params, dict):
-            for param in params.keys():
-                if isinstance(params[param], str):
-                    if " " in params[param]:
-                        params[param] = urllib.parse.quote(params[param])  # ' ' ==> %20 HTML Format
+            params = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
             return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers=headers)
 
         else:
