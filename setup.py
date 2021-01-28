@@ -17,7 +17,7 @@ setup(
   download_url = ' ',    # I explain this later on
   keywords = ['TigerGraph', 'Graph Database'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
-          'pyTigerDriver',
+          'pyTigerDriver==1.0.6',
           'validators',
           'requests',
           'pandas'],

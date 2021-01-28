@@ -1,4 +1,4 @@
-pyTigerDriver=1.0.6
+pyTigerDriver==1.0.6
 validators
 requests~=2.25.0
 pandas
