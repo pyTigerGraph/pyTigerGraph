@@ -124,6 +124,6 @@ class TestpyTigerGraph:
         ''', options=[])
         conn.gsql("INSTALL QUERY TestQuery")
         val = conn.runInstalledQuery("TestQuery")
-        conn.gsql("drop all")
+        conn.gsql("drop TestGraph")
         # Assert
         assert val == [{'Seed': []}]
