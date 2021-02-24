@@ -40,7 +40,7 @@ class TigerGraphConnection(object):
     """
 
     def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph",
-                 restppPort="9000", gsPort="14240", version="3.0.5", apiToken="", useCert=True, certPath=None):
+                 restppPort="9000", gsPort="14240", version="3.1.0", apiToken="", useCert=True, certPath=None):
         """Initiate a connection object.
 
         Arguments
@@ -1611,7 +1611,9 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         if not self.gsqlInitiated:
             self.initGsql()
 
-        response = self.gsql("CREATE SECRET " + alias)
+        response = self.gsql("""
+        USE GRAPH {}
+        CREATE SECRET {}""".format(self.graphname,alias))
 
         try:
             secret = str(response[0].split('The secret: ')[1]).split(' ')[0]
