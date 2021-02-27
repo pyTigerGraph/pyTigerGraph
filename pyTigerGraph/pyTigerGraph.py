@@ -1259,7 +1259,7 @@ class TigerGraphConnection(object):
             return pd.DataFrame(ret).T
         return ret
 
-    def runInstalledQuery(self, queryName, params=None, timeout=None, sizeLimit=None):
+    def runInstalledQuery(self, queryName, params=None, timeout=None, sizeLimit=None, usePost=False):
         """Runs an installed query.
 
         The query must be already created and installed in the graph.
@@ -1271,6 +1271,9 @@ class TigerGraphConnection(object):
                        See https://docs.tigergraph.com/dev/restpp-api/restpp-requests#gsql-query-timeout
         - `sizeLimit`: Maximum size of response (in bytes).
                        See https://docs.tigergraph.com/dev/restpp-api/restpp-requests#request-body-size
+        - `usePost`:   RestPP accepts a maximum URL length of 8192 characters. Use POST if params cause you to
+                       exceed this limit.
+                       See https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query-as-a-rest-endpoint
 
         Endpoint:      POST /query/{graph_name}/<query_name>
         Documentation: https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query
@@ -1282,8 +1285,9 @@ class TigerGraphConnection(object):
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
         if isinstance(params, dict):
             params = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
-            return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers=headers)
 
+        if usePost:
+            return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName, data=params, headers=headers)
         else:
             return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params, headers=headers)
 
