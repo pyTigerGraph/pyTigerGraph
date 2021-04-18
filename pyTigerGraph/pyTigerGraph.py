@@ -1067,7 +1067,8 @@ class TigerGraphConnection(object):
         Documentation: https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query
         """
         if usePost:
-            return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName, data=params, headers=headers)
+            return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName, data=params, 
+                        headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
         else:
             return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params,
                          headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
