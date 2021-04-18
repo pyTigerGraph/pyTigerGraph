@@ -1050,7 +1050,7 @@ class TigerGraphConnection(object):
 
     # Query related functions ==================================================
 
-    def runInstalledQuery(self, queryName, params=None, timeout=16000, sizeLimit=32000000):
+    def runInstalledQuery(self, queryName, params=None, timeout=16000, sizeLimit=32000000, usePost=False):
         """Runs an installed query.
 
         The query must be already created and installed in the graph.
@@ -1060,11 +1060,16 @@ class TigerGraphConnection(object):
         - `params`:    A string of param1=value1&param2=value2 format or a dictionary.
         - `timeout`:   Maximum duration for successful query execution.
         - `sizeLimit`: Maximum size of response (in bytes).
-
+        - `usePost`:   RestPP accepts a maximum URL length of 8192 characters. Use POST if params cause you to
+                       exceed this limit.
+                       See https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query-as-a-rest-endpoint
         Endpoint:      POST /query/{graph_name}/<query_name>
         Documentation: https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query
         """
-        return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params,
+        if usePost:
+            return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName, data=params, headers=headers)
+        else:
+            return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params,
                          headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
 
     def runInterpretedQuery(self, queryText, params=None):
