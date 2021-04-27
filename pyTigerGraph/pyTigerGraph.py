@@ -7,7 +7,6 @@ import pandas as pd
 import os
 # Added pyTigerDriver Client
 from pyTigerDriver import GSQL_Client
-
 import urllib3
 
 urllib3.disable_warnings()
@@ -40,7 +39,7 @@ class TigerGraphConnection(object):
     """
 
     def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph",
-                 restppPort="9000", gsPort="14240", version="3.0.5", apiToken="", useCert=True, certPath=None):
+                 restppPort="9000", gsPort="14240",gsqlVersion="", version="", apiToken="", useCert=True, certPath=None):
         """Initiate a connection object.
 
         Arguments
@@ -67,7 +66,12 @@ class TigerGraphConnection(object):
         self.gsPort = str(gsPort)
         self.gsUrl = self.host + ":" + self.gsPort
         self.apiToken = apiToken
-        self.version = version
+        if gsqlVersion != "":
+            self.version = gsqlVersion
+        elif version != "":
+            self.version = version
+        else:
+            self.version = ""
         self.authHeader = {'Authorization': "Bearer " + self.apiToken}
         self.debug = False
         self.schema = None
@@ -1604,9 +1608,17 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
             self.gsqlInitiated = self.initGsql()
         if self.gsqlInitiated:
             if "\n" not in query:
-                return self.Client.query(query)
+                res = self.Client.query(query)
+                if type(res) == type([]):
+                    return "\n".join(res)
+                else:
+                    return  res
             else:
-                return self.Client.run_multiple(query.split("\n"))
+                res =  self.Client.run_multiple(query.split("\n"))
+                if type(res) == type([]):
+                    return "\n".join(res)
+                else:
+                    return res
         else:
             print("Couldn't Initialize the client see Above Error")
             exit(0)
