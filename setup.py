@@ -6,12 +6,12 @@ with open("README.md", encoding='utf-8') as fh:
 setup(
   name = 'pyTigerGraph',         # How you named your package folder (MyLib)
   packages = ['pyTigerGraph'],   # Chose the same as "name"
-  version = '0.0.9.6.6',      # Start with a small number and increase it with every change you make
+  version = '0.0.9.6.7',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'Library to connect to TigerGraph databases',   # Give a short description about your library
   long_description=long_description,
   long_description_content_type='text/markdown',
-  author = 'Zrouga Mohamed / Jonathan Herke / Parker Erickson / TigerGraph',                   # Type in your name
+  author = 'Zrouga Mohamed / Jonathan Herke / Parker Erickson / Szilard Barany / TigerGraph',                   # Type in your name
   author_email = 'medzrouga@gmail.com',      # Type in your E-Mail
   url = 'https://github.com/pyTigerGraph/pyTigerGraph',   # Provide either the link to your github or to your website
   download_url = '',    # I explain this later on
