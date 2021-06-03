@@ -64,6 +64,7 @@ class TigerGraphConnection(object):
                                Developer.
                                When True the certificate would be downloaded when it is first needed.
                                on the first GSQL command.
+        - `sslPort`:           Configurable port for ssl cert fetching in case of firewall on 443. Will use 14240.
         """
         inputHost = urlparse(host)
         # if inputHost.port not in [gsPort,restppPort,"80","443"] :
