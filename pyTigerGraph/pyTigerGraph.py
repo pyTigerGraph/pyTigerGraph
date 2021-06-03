@@ -44,7 +44,7 @@ class TigerGraphConnection(object):
     Use `getEdgeTypes()` to fetch the list of edge types currently in the graph.
     """
 
-    def __init__(self, host="http://localhost", graphname="MyGraph", username="tigergraph", password="tigergraph",
+    def __init__(self, host="http://127.0.0.1", graphname="MyGraph", username="tigergraph", password="tigergraph",
                  restppPort="9000", gsPort="14240", gsqlVersion="", version="", apiToken="", useCert=True,
                  certPath=None,
                  debug=False):
@@ -70,8 +70,10 @@ class TigerGraphConnection(object):
         #     raise("E-0002: Please verify the Ports configration ")
         if inputHost.scheme not in ["http", "https"]:
             raise ("E-0003: Please verify the host (http/https) schema")
-
-        self.host = "{0}://{1}".format(inputHost.scheme, inputHost.netloc)
+        self.netloc = inputHost.netloc
+        if self.netloc == "localhost":
+            self.netloc = "127.0.0.1"
+        self.host = "{0}://{1}".format(inputHost.scheme, self.netloc)
         self.username = username
         self.password = password
         self.graphname = graphname
