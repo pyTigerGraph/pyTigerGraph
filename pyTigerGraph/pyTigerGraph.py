@@ -449,8 +449,8 @@ class TigerGraphConnection(object):
 
         For details on arguments see `getVertices` above.
         """
-        return self.getVertices(vertexType, select="", where="", limit="", sort="", fmt="df",
-                                withId=True, withType=False, timeout=0)
+        return self.getVertices(vertexType, select=select, where=where, limit=limit, sort=sort, fmt="df",
+                                withId=True, withType=False, timeout=timeout)
 
     def getVerticesById(self, vertexType, vertexIds, fmt="py", withId=True, withType=False):
         """Retrieves vertices of the given vertex type, identified by their ID.
