@@ -10,6 +10,7 @@ from pyTigerDriver import GSQL_Client
 import urllib3
 import sys
 from urllib.parse import urlparse
+import base64
 
 urllib3.disable_warnings()
 
@@ -80,6 +81,9 @@ class TigerGraphConnection(object):
         self.restppPort = str(restppPort)
         self.restppUrl = self.host + ":" + self.restppPort
         self.gsPort = str(gsPort)
+        self.debug = debug
+        if self.debug:
+            print(self.gsPort)
         self.gsUrl = self.host + ":" + self.gsPort
         self.apiToken = apiToken
         if gsqlVersion != "":
@@ -88,8 +92,13 @@ class TigerGraphConnection(object):
             self.version = version
         else:
             self.version = ""
-        self.authHeader = {'Authorization': "Bearer " + self.apiToken}
-        self.debug = debug
+        self.base64_credential = base64.b64encode(
+            "{0}:{1}".format(self.username, self.password).encode("utf-8")).decode("utf-8")
+        if self.apiToken:
+            self.authHeader = {'Authorization': "Bearer " + self.apiToken}
+        else:
+            self.authHeader = {'Authorization': 'Basic {0}'.format(self.base64_credential)}
+
         if not self.debug:
             sys.excepthook = excepthook
             sys.tracebacklimit = None
@@ -137,30 +146,48 @@ class TigerGraphConnection(object):
         a problem, but not really an error.
         - `params`:    Request URL parameters.
         """
-        if self.debug:
-            print(method + " " + url + (" => " + data if data else ""))
+
+        if authMode == "token" and str(self.apiToken) != "" :
+
+            if type(self.apiToken) == type(()):
+                self.apiToken = self.apiToken[0]
+            if self.debug:
+                print(self.apiToken)
+            self.authHeader = {'Authorization': "Bearer " + self.apiToken}
+            _headers = self.authHeader
+        else:
+            self.authHeader = {'Authorization': 'Basic {0}'.format(self.base64_credential)}
+            _headers = self.authHeader
+            authMode = 'pwd'
+
         if authMode == "pwd":
             _auth = (self.username, self.password)
         else:
             _auth = None
-        if authMode == "token":
-            _headers = self.authHeader
-        else:
-            _headers = {}
         if headers:
             _headers.update(headers)
+        # if authMode == 'pwd':
+        #     print(headers)
+            # if "token" in headers:
+            #     del headers["token"]
+        # print(_headers)
         if method == "POST":
             _data = data
         else:
             _data = None
 
         if self.useCert is True and self.certPath is not None:
-            res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params, verify=False)
+            res = requests.request(method, url,  headers=_headers, data=_data, params=params, verify=False) # auth=_auth,
         else:
-            res = requests.request(method, url, auth=_auth, headers=_headers, data=_data, params=params)
-
+            res = requests.request(method, url, headers=_headers, data=_data, params=params) # , auth=_auth
+        if self.debug:
+            print(method + " " + url + (" => " + data if data else ""))
+            print(self.authHeader)
+            print(authMode)
+            # time.sleep(50000)
         if self.debug:
             print(res.url)
+        # print(res.text)
         if res.status_code != 200:
             res.raise_for_status()
         res = json.loads(res.text)
@@ -1310,10 +1337,17 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         """
         res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
             "&lifetime=" + str(lifetime) if lifetime else "")).text)
+        if self.debug:
+            print(res)
         if not res["error"]:
             if setToken:
                 self.apiToken = res["token"]
+                if self.debug:
+                    print(self.apiToken)
                 self.authHeader = {'Authorization': "Bearer " + self.apiToken}
+            else:
+                self.apiToken = None
+                self.authHeader = {'Authorization': 'Basic {0}'.format(self.base64_credential)}
             return res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime(
                 '%Y-%m-%d %H:%M:%S')
         if "Endpoint is not found from url = /requesttoken" in res["message"]:
@@ -1560,10 +1594,12 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
                     self.certPath = "~/.gsql/my-cert.txt"
                 self.Client = GSQL_Client(urlparse(self.host).netloc, version=self.version, username=self.username,
                                           password=self.password,
-                                          cacert=os.path.expanduser(self.certPath))
+                                          cacert=os.path.expanduser(self.certPath),gsPort=self.gsPort,
+                                          restpp=self.restppPort,debug=self.debug)
             else:
                 self.Client = GSQL_Client(urlparse(self.host).netloc, version=self.version, username=self.username,
-                                          password=self.password)
+                                          password=self.password,
+                                          gsPort=self.gsPort,restpp=self.restppPort,debug=self.debug)
             self.Client.login()
             self.gsqlInitiated = True
             return True
