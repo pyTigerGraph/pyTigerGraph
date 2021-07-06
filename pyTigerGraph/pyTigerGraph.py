@@ -48,7 +48,7 @@ class TigerGraphConnection(object):
     def __init__(self, host="http://127.0.0.1", graphname="MyGraph", username="tigergraph", password="tigergraph",
                  restppPort="9000", gsPort="14240", gsqlVersion="", version="", apiToken="", useCert=True,
                  certPath=None,
-                 debug=False):
+                 debug=False, sslPort="443"):
         """Initiate a connection object.
 
         Arguments
@@ -65,6 +65,7 @@ class TigerGraphConnection(object):
                                Developer.
                                When True the certificate would be downloaded when it is first needed.
                                on the first GSQL command.
+        - `sslPort`:           Configurable port for ssl cert fetching in case of firewall on 443. Will use 14240.
         """
         inputHost = urlparse(host)
         # if inputHost.port not in [gsPort,restppPort,"80","443"] :
@@ -114,6 +115,7 @@ class TigerGraphConnection(object):
             self.useCert = True
             self.certPath = certPath
         self.downloadJar = False
+        self.sslPort = sslPort
 
         self.gsqlInitiated = False
 
@@ -1572,7 +1574,7 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         sslhost = self.url.split(":")[0]
         if self.downloadCert:  # HTTP/HTTPS
             import ssl
-            Res = ssl.get_server_certificate((sslhost, 443))
+            Res = ssl.get_server_certificate((sslhost, self.sslPort))
             # print(Res)
             try:
                 certcontent = open(self.certLocation, 'w')
