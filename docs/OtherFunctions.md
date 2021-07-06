@@ -50,8 +50,12 @@ Gets the version information of specific component.
 
 Get the full list of components using [`getVersion`](#getVersion).
 
-## getLicenseInfo
+## getLicenseInfo - DEPRECATED
 `getLicenseInfo()`
+
+**DEPRECATED - Functionality removed from TigerGraph product for any versions >v2.x**
+
+**Manage License on a ≥v3.0 install through [`gadmin license`](https://docs.tigergraph.com/admin/admin-guide/system-management/management-with-gadmin#gadmin-license)** 
 
 Returns the expiration date and remaining days of the license.
 
