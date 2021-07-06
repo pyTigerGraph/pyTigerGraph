@@ -275,6 +275,40 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#connection-clarification" class="md-nav__link">
+    Connection Clarification
+  </a>
+  
+    <nav class="md-nav" aria-label="Connection Clarification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operations-that-do-not-need-a-token" class="md-nav__link">
+    Operations that DO NOT need a Token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operations-that-do-need-a-token" class="md-nav__link">
+    Operations that DO need a Token
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-info" class="md-nav__link">
+    Additional Info
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gsql-101-with-pytigergraph" class="md-nav__link">
     GSQL 101 With pyTigerGraph
   </a>
@@ -505,6 +539,40 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#connection-clarification" class="md-nav__link">
+    Connection Clarification
+  </a>
+  
+    <nav class="md-nav" aria-label="Connection Clarification">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#operations-that-do-not-need-a-token" class="md-nav__link">
+    Operations that DO NOT need a Token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operations-that-do-need-a-token" class="md-nav__link">
+    Operations that DO need a Token
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#additional-info" class="md-nav__link">
+    Additional Info
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#gsql-101-with-pytigergraph" class="md-nav__link">
     GSQL 101 With pyTigerGraph
   </a>
@@ -536,22 +604,35 @@
 <p>The functionality of pyTigerGraph is implemented by the <code>TigerGraphConnection</code> class. To establish the connection, instantiate the class:</p>
 <pre><code>conn = tg.TigerGraphConnection(&lt;parameters&gt;)
 </code></pre>
-<p>The constuctor has following parameters:
-- <code>host</code>:              The IP address or hostname of the TigerGraph server, including the scheme (<code>http</code> or <code>https</code>). Default: <em>http://localhost</em>.
-- <code>graphname</code>:         The default graph for running queries. Default: <em>MyGraph</em>.
-- <code>username</code>:          The username on the TigerGraph server. Default: <em>tigergraph</em>.
-- <code>password</code>:          The password for that user. Default: <em>tigergraph</em>.
-- <code>restppPort</code>:        The post for REST++ queries. Default: <em>9000</em>.
-- <code>gsPort</code>:            The port of all other queries. Default: <em>14240</em>.
-- <code>apiToken</code>:          A token to use when making queries. No default value. Ignored if <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#enabling-and-using-user-authentication">REST++ authentication is not enabled</a>. See notes below. 
-- <code>gsqlVersion</code>:       The version of GSQL client to be used. Default: same as database version. See <a href="Gsql.html">GSQL Submodule</a> for more details.
-- <code>useCert</code>:           True if SSL certificate is required for connection. No default value. See notes below.
-- <code>certPath</code>:          The location/directory <em>and</em> the name of the SSL certification file where the certification should be stored. No default value. See notes below.</p>
-<p><strong>Notes</strong>:
-- As pyTigerGraph is communicating with the TigerGraph database through REST APIs, there is no real "connection". Most (but not all) function of pyTigerGraph sends (one or more) HTTP(s) request to the REST API and processes the data returned (typically a JSON response). Thus there is no "connection" that needs to be opened and then closed down. Instantiating pyTigerGraph simply means to provide the neccesary information to be able to send the requests and receive and response.
-- See the <a href="TokenManagement.html">Token Management</a> page for information on how authentication works and how to retrieve and manage API tokens.
-- If the TigerGraph database uses <a href="https://docs.tigergraph.com/admin/admin-guide/data-encryption/encrypting-connections">encrypted connections</a> (e.g. TigerGraph could instances), then you need to provide an SSL certificate for your connections. In this case you need to specify <code>userCert=True</code> and the location of the SSL certificate in <code>certPath</code>. pyTigerGraph will generate and download a self-signed SSL certificate for you. If <code>userCert=False</code> or <code>certPath</code> is not set, pyTigerGraph will try to connect without certificate. <code>userCert</code> should be <code>False</code> if you connect to an unsecure server such as a TigerGraph Developer instance.
-  -  <span style="color:red"><strong>NOTE:</strong></span> This functionality is not tested and most likely does not work on Windows. We intend to fix this; help is welcome (it seems all contributors are using Macs).</p>
+<p>The constuctor has following parameters:</p>
+<ul>
+<li><code>host</code>:              The IP address or hostname of the TigerGraph server, including the scheme (<code>http</code> or <code>https</code>). Default: <em>http://localhost</em>.</li>
+<li><code>graphname</code>:         The default graph for running queries. Default: <em>MyGraph</em>.</li>
+<li><code>username</code>:          The username on the TigerGraph server. Default: <em>tigergraph</em>.</li>
+<li><code>password</code>:          The password for that user. Default: <em>tigergraph</em>.</li>
+<li><code>restppPort</code>:        The post for REST++ queries. Default: <em>9000</em>.</li>
+<li><code>gsPort</code>:            The port of all other queries. Default: <em>14240</em>.</li>
+<li><code>apiToken</code>:          A token to use when making queries. No default value. Required to upsert or delete data in garph. Ignored if <a href="https://docs.tigergraph.com/admin/admin-guide/user-access-management/user-privileges-and-authentication#enabling-and-using-user-authentication">REST++ authentication is not enabled</a>. See <a href="#additional-info">Additional Info</a> below. </li>
+<li><code>gsqlVersion</code>:       The version of GSQL client to be used. Default: same as database version. See <a href="Gsql.html">GSQL Submodule</a> for more details.</li>
+<li><code>useCert</code>:           True if SSL certificate is required for connection. Default: <em>True</em> See <a href="#additional-info">Additional Info</a> below.</li>
+<li><code>certPath</code>:          The location/directory <em>and</em> the name of the SSL certification file where the certification should be stored. Default: <code>~/.gsql/my-cert.txt</code> See <a href="#additional-info">Additional Info</a> below.</li>
+</ul>
+<h2 id="connection-clarification">Connection Clarification</h2>
+<h3 id="operations-that-do-not-need-a-token">Operations that <strong>DO NOT</strong> need a Token</h3>
+<p>Viewing the schema of your graph using functions such as <code>getSchema</code> and <code>getVertexTypes</code> does not require you to have an authentication token. A token is also not required to run gsql commands through pyTigerGraph.</p>
+<p><strong>Sample Connection</strong></p>
+<p><code>conn = tg.TigerGraphConnection(host='https://pytigergraph-demo.i.tgcloud.io', username='tigergraph' password='password' graphname='DemoGraph')</code></p>
+<h3 id="operations-that-do-need-a-token">Operations that <strong>DO</strong> need a Token</h3>
+<p>A token is required to view or modify any actual DATA in the graph. Examples are: upserting data, deleting edges, and getting stats about any loaded vertices. A token is also required to get version data about the TigerGraph instance.</p>
+<p><strong>Sample Connection</strong></p>
+<p><code>conn = tg.TigerGraphConnection(host='https://pytigergraph-demo.i.tgcloud.io', username='tigergraph' password='password' graphname='DemoGraph', apiToken='av1im8nd2v06clbnb424jj7fp09hp049')</code></p>
+<h2 id="additional-info">Additional Info</h2>
+<ul>
+<li>As pyTigerGraph is communicating with the TigerGraph database through REST APIs, there is no real "connection". Most (but not all) function of pyTigerGraph sends (one or more) HTTP(s) request to the REST API and processes the data returned (typically a JSON response). Thus there is no "connection" that needs to be opened and then closed down. Instantiating pyTigerGraph simply means to provide the neccesary information to be able to send the requests and receive and response.</li>
+<li>See the <a href="TokenManagement.html">Token Management</a> page for information on how authentication works and how to retrieve and manage API tokens.</li>
+<li>If the TigerGraph database uses <a href="https://docs.tigergraph.com/admin/admin-guide/data-encryption/encrypting-connections">encrypted connections</a> (e.g. TigerGraph could instances), then you need to provide an SSL certificate for your connections. In this case you need to specify <code>userCert=True</code> and the location of the SSL certificate in <code>certPath</code>. pyTigerGraph will generate and download a self-signed SSL certificate for you. If <code>userCert=False</code> or <code>certPath</code> is not set, pyTigerGraph will try to connect without certificate. <code>userCert</code> should be <code>False</code> if you connect to an unsecure server such as a TigerGraph Developer instance.</li>
+<li><span style="color:red"><strong>NOTE:</strong></span> This functionality is not tested and most likely does not work on Windows. We intend to fix this; help is welcome (it seems all contributors are using Macs).</li>
+</ul>
 <h2 id="gsql-101-with-pytigergraph">GSQL 101 With pyTigerGraph</h2>
 <p>Checkout <a href="https://github.com/pyTigerGraph/pyTigerGraph/blob/master/examples/GSQL101%20-%20PyTigerGraph.ipynb">this</a> example for completing the GSQL 101 course in a Jupyter Notebook environment. Through this, you will also learn of various pyTigerGraph methods that you can use.</p>
                 
