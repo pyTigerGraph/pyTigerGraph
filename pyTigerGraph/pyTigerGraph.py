@@ -1115,7 +1115,26 @@ class TigerGraphConnection(object):
 
     # Query related functions ==================================================
 
-    def runInstalledQuery(self, queryName, params=None, timeout=16000, sizeLimit=32000000, usePost=False):
+
+    def getInstalledQueries(self, fmt="py"):
+        """
+        Returns a list of installed queries.
+        
+        Arguments:
+        - `fmt`:      Format of the results:
+                      "py":   Python objects (default)
+                      "json": JSON document
+                      "df":   Pandas DataFrame
+        """
+        ret = self.getEndpoints(dynamic=True)
+        if fmt == "json":
+            return json.dumps(ret)
+        if fmt == "df":
+            return pd.DataFrame(ret).T
+        return ret
+
+    def runInstalledQuery(self, queryName, params=None, timeout=None, sizeLimit=None, usePost=False):
+
         """Runs an installed query.
 
         The query must be already created and installed in the graph.
@@ -1125,15 +1144,25 @@ class TigerGraphConnection(object):
         - `params`:    A string of param1=value1&param2=value2 format or a dictionary.
         - `timeout`:   Maximum duration for successful query execution.
         - `sizeLimit`: Maximum size of response (in bytes).
+                       See https://docs.tigergraph.com/dev/restpp-api/restpp-requests#request-body-size
         - `usePost`:   RestPP accepts a maximum URL length of 8192 characters. Use POST if params cause you to
                        exceed this limit.
                        See https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query-as-a-rest-endpoint
+
         Endpoint:      POST /query/{graph_name}/<query_name>
         Documentation: https://docs.tigergraph.com/dev/gsql-ref/querying/query-operations#running-a-query
         """
+        headers = {}
+        if timeout:
+            headers["GSQL-TIMEOUT"] = str(timeout)
+        if sizeLimit:
+            headers["RESPONSE-LIMIT"] = str(sizeLimit)
+        if isinstance(params, dict):
+            params = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
+
         if usePost:
-            return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName, data=params,
-                              headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
+            return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName, data=params, headers=headers)
+
         else:
             return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params,
                              headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
