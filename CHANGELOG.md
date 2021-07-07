@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 * runInstalledQuery(usePost=True) will post params as body 
 
+
+## [0.0.9.6.9] - 2021-06-03
+### Changed
+* Made SSL Port configurable to grab SSL cert from different port in case of firewall on 443
+
+
 ## [0.0.9.6.3] - 2020-12-14
 ### Fixed
 * Fixed (more) runInstalledQuery() params 

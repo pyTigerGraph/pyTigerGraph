@@ -29,8 +29,10 @@ Arguments:
 
 When the query resonse is a JSON formatted string the return value of `gsql()` would be a processed JSON object, otherwise the response text is returned as is.
 
-## initGsql
+## initGsql - OBSOLETE
 `conn.initGsql(jarLocation="", certLocation="")`
+
+**OBSOLETE - GSQL initilization is handled automatically via `gsql` function.**
 
 This function allows you to initiate the GSQL submodule ahead of the first call to any other GSQL submodule command. With it you to customize the location at which the GSQL client `.jar` and the SSL certificate will be stored.
 

@@ -11,12 +11,13 @@ setup(
   description = 'Library to connect to TigerGraph databases',   # Give a short description about your library
   long_description=long_description,
   long_description_content_type='text/markdown',
-  author = 'Parker Erickson / TigerGraph',                   # Type in your name
-  author_email = 'parker.erickson30@gmail.com',      # Type in your E-Mail
-  url = 'https://github.com/parkererickson/pyTigerGraph',   # Provide either the link to your github or to your website
-  download_url = 'https://github.com/parkererickson/pyTigerGraph/archive/v_01.tar.gz',    # I explain this later on
+  author = 'Zrouga Mohamed / Jonathan Herke / Parker Erickson / Szilard Barany / TigerGraph',                   # Type in your name
+  author_email = 'medzrouga@gmail.com',      # Type in your E-Mail
+  url = 'https://github.com/pyTigerGraph/pyTigerGraph',   # Provide either the link to your github or to your website
+  download_url = '',    # I explain this later on
   keywords = ['TigerGraph', 'Graph Database'],   # Keywords that define your package best
   install_requires=[            # I get to this in a second
+          'pyTigerDriver==1.0.13',
           'validators',
           'requests',
           'pandas'],
