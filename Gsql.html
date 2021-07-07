@@ -422,8 +422,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#initgsql" class="md-nav__link">
-    initGsql
+  <a href="#initgsql-obsolete" class="md-nav__link">
+    initGsql - OBSOLETE
   </a>
   
 </li>
@@ -505,8 +505,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#initgsql" class="md-nav__link">
-    initGsql
+  <a href="#initgsql-obsolete" class="md-nav__link">
+    initGsql - OBSOLETE
   </a>
   
 </li>
@@ -550,8 +550,9 @@
 - <code>query</code>: The text of the query to run as one string. 
 - <code>options</code>: A list of strings that will be passed as options the the GSQL client. A <code>None</code> gets replaced with <code>['g', self.graphname]</code> causing the queries to run on the default graph. Use <code>options=[]</code> to overide the default graph and submit to the global graph instead.</p>
 <p>When the query resonse is a JSON formatted string the return value of <code>gsql()</code> would be a processed JSON object, otherwise the response text is returned as is.</p>
-<h2 id="initgsql">initGsql</h2>
+<h2 id="initgsql-obsolete">initGsql - OBSOLETE</h2>
 <p><code>conn.initGsql(jarLocation="", certLocation="")</code></p>
+<p><strong>OBSOLETE - GSQL initilization is handled automatically via <code>gsql</code> function.</strong></p>
 <p>This function allows you to initiate the GSQL submodule ahead of the first call to any other GSQL submodule command. With it you to customize the location at which the GSQL client <code>.jar</code> and the SSL certificate will be stored.</p>
 <p>If the defaults (as shown above) are appropriate, you do not need to use this function.</p>
                 
