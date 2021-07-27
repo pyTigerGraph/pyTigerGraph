@@ -9,6 +9,7 @@ import os
 from pyTigerDriver import GSQL_Client
 import urllib3
 import sys
+import urllib
 from urllib.parse import urlparse
 import base64
 
@@ -208,7 +209,8 @@ class TigerGraphConnection(object):
 
         For argument details, see `_req`.
         """
-        return self._req("GET", url, authMode, headers, None, resKey, skipCheck, params)
+        res = self._req("GET", url, authMode, headers, None, resKey, skipCheck, params)
+        return res
 
     def _post(self, url, authMode="token", headers=None, data=None, resKey="results", skipCheck=False, params=None):
         """Generic POST method.
