@@ -9,19 +9,19 @@
       
       
       
-      <link rel="icon" href="pyTigerGraphLogo-removebg-preview.png">
-      <meta name="generator" content="mkdocs-1.2.1, mkdocs-material-7.1.9">
+      <link rel="icon" href="../pyTigerGraphLogo-removebg-preview.png">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.1">
     
     
       
-        <title>Schema Functions - pyTigerGraph</title>
+        <title>Overview - pyTigerGraph</title>
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ca7ac06f.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.1118c9be.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.f1a3b89f.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ba0d045b.min.css">
         
       
     
@@ -36,7 +36,7 @@
     
     
     
-      <link rel="stylesheet" href="stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     
       
@@ -55,7 +55,7 @@
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
   
     
-    <script>function __prefix(e){return new URL(".",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    <script>function __prefix(e){return new URL("..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -63,7 +63,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getschema" class="md-skip">
+        <a href="#the-functions" class="md-skip">
           Skip to content
         </a>
       
@@ -74,9 +74,9 @@
     
       <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="index.html" title="pyTigerGraph" class="md-header__button md-logo" aria-label="pyTigerGraph" data-md-component="logo">
+    <a href=".." title="pyTigerGraph" class="md-header__button md-logo" aria-label="pyTigerGraph" data-md-component="logo">
       
-  <img src="pyTigerGraphLogo-removebg-preview.png" alt="logo">
+  <img src="../pyTigerGraphLogo-removebg-preview.png" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -92,7 +92,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Schema Functions
+              Overview
             
           </span>
         </div>
@@ -109,14 +109,18 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
       </label>
-      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-      </button>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
@@ -166,9 +170,9 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="index.html" title="pyTigerGraph" class="md-nav__button md-logo" aria-label="pyTigerGraph" data-md-component="logo">
+    <a href=".." title="pyTigerGraph" class="md-nav__button md-logo" aria-label="pyTigerGraph" data-md-component="logo">
       
-  <img src="pyTigerGraphLogo-removebg-preview.png" alt="logo">
+  <img src="../pyTigerGraphLogo-removebg-preview.png" alt="logo">
 
     </a>
     pyTigerGraph
@@ -197,7 +201,7 @@
   
   
     <li class="md-nav__item">
-      <a href="index.html" class="md-nav__link">
+      <a href=".." class="md-nav__link">
         Home
       </a>
     </li>
@@ -235,7 +239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="GettingStarted.html" class="md-nav__link">
+      <a href="../GettingStarted/" class="md-nav__link">
         Getting Started
       </a>
     </li>
@@ -247,7 +251,7 @@
   
   
     <li class="md-nav__item">
-      <a href="Auth.html" class="md-nav__link">
+      <a href="../Auth/" class="md-nav__link">
         Authentication
       </a>
     </li>
@@ -280,18 +284,6 @@
             
   
   
-  
-    <li class="md-nav__item">
-      <a href="Functions.html" class="md-nav__link">
-        Overview
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
     
   
   
@@ -300,59 +292,12 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Schema Functions
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="SchemaFunctions.html" class="md-nav__link md-nav__link--active">
-        Schema Functions
-      </a>
-      
         
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
-        <li class="md-nav__item">
-  <a href="#getschema" class="md-nav__link">
-    getSchema
-  </a>
-  
-</li>
       
-        <li class="md-nav__item">
-  <a href="#getudts" class="md-nav__link">
-    getUDTs
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getudt" class="md-nav__link">
-    getUDT
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#upsertdata" class="md-nav__link">
-    upsertData
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Overview
+      </a>
       
     </li>
   
@@ -363,7 +308,19 @@
   
   
     <li class="md-nav__item">
-      <a href="VertexFunctions.html" class="md-nav__link">
+      <a href="../SchemaFunctions/" class="md-nav__link">
+        Schema Functions
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../VertexFunctions/" class="md-nav__link">
         Vertex Functions
       </a>
     </li>
@@ -375,7 +332,7 @@
   
   
     <li class="md-nav__item">
-      <a href="EdgeFunctions.html" class="md-nav__link">
+      <a href="../EdgeFunctions/" class="md-nav__link">
         Edge Functions
       </a>
     </li>
@@ -387,7 +344,7 @@
   
   
     <li class="md-nav__item">
-      <a href="QueryFunctions.html" class="md-nav__link">
+      <a href="../QueryFunctions/" class="md-nav__link">
         Query Functions
       </a>
     </li>
@@ -399,7 +356,7 @@
   
   
     <li class="md-nav__item">
-      <a href="TokenManagement.html" class="md-nav__link">
+      <a href="../TokenManagement/" class="md-nav__link">
         API Tokens
       </a>
     </li>
@@ -411,7 +368,7 @@
   
   
     <li class="md-nav__item">
-      <a href="OtherFunctions.html" class="md-nav__link">
+      <a href="../OtherFunctions/" class="md-nav__link">
         Other Functions
       </a>
     </li>
@@ -429,7 +386,7 @@
   
   
     <li class="md-nav__item">
-      <a href="DataFrame.html" class="md-nav__link">
+      <a href="../DataFrame/" class="md-nav__link">
         DataFrame Functions
       </a>
     </li>
@@ -441,7 +398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="Gsql.html" class="md-nav__link">
+      <a href="../Gsql/" class="md-nav__link">
         GSQL Functions
       </a>
     </li>
@@ -462,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="CONTRIBUTING.html" class="md-nav__link">
+      <a href="../CONTRIBUTING/" class="md-nav__link">
         Contribute
       </a>
     </li>
@@ -477,7 +434,7 @@
   
   
     <li class="md-nav__item">
-      <a href="license.html" class="md-nav__link">
+      <a href="../license/" class="md-nav__link">
         License
       </a>
     </li>
@@ -500,42 +457,8 @@
   
   
   
+    
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#getschema" class="md-nav__link">
-    getSchema
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getudts" class="md-nav__link">
-    getUDTs
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getudt" class="md-nav__link">
-    getUDT
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#upsertdata" class="md-nav__link">
-    upsertData
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -547,30 +470,110 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/pyTigerGraph/pyTigerGraph/edit/master/docs/SchemaFunctions.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/pyTigerGraph/pyTigerGraph/edit/master/docs/Functions.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                  <h1>Schema Functions</h1>
-                
-                <h2 id="getschema">getSchema</h2>
-<p><code>getSchema(full=True)</code></p>
-<p>Retrieves the schema metadata of the graph.</p>
-<p>Arguments:
-- <code>full</code>: If <code>False</code>, returns metadata of vertices and edges only. If <code>True</code>, it will additionaly return additional info on veertices and egdes, plus info on UDTs, indices, loading jobs, queries, data sources, users and their roles, and proxy groups. The database user's privileges control how much data is returned for each object types.</p>
-<p>This functions uses the <a href="Gsql.html">GSQL Submodule</a> is <code>full</code> is <code>True</code>.</p>
-<p>Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-the-graph-schema-get-gsql-schema">GET /gsqlserver/gsql/schema</a></p>
-<h2 id="getudts">getUDTs</h2>
-<p><code>getUDTs()</code></p>
-<p>Returns the list of User Defined Types (names only).</p>
-<h2 id="getudt">getUDT</h2>
-<p><code>getUDT(udtName)</code></p>
-<p>Returns the details of a specific User Defined Type.</p>
-<h2 id="upsertdata">upsertData</h2>
-<p><code>upsertData(data)</code></p>
-<p>Upserts data (vertices and edges) from a JSON document or equivalent object structure.</p>
-<p>TigerGraph Documentation: <a href="https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-graph-graph_name-upsert-the-given-data">POST /graph</a></p>
+                <h1 id="the-functions">The Functions</h1>
+<p>Common arguments used in methods:
+- <code>vertexType</code>, <code>sourceVertexType</code>, <code>targetVertexType</code>: The name of a vertex type in the graph. Use <a href="#getVertexTypes"><code>getVertexTypes</code></a> to fetch the list of vertex types currently in the graph.
+- <code>vertexId</code>, <code>sourceVertexId</code>, <code>targetVertexId</code>: The primary ID of a vertex instance (of the appropriate data type).
+- <code>edgeType</code>: The name of the edge type in the graph. Use <a href="#getEdgeTypes"><code>getEdgeTypes</code></a> to fetch the list of edge types currently in the graph.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Schema related functions</strong></th>
+<th><strong>Query related functions</strong></th>
+<th><strong>Vertex related functions</strong></th>
+<th><strong>Edge related functions</strong></th>
+<th><strong>Token management</strong></th>
+<th><strong>Other functions</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../SchemaFunctions/#getschema">getSchema</a></td>
+<td><a href="../QueryFunctions/#runInstalledQuery">runInstalledQuery</a></td>
+<td><a href="../VertexFunctions/#getVertexTypes">getVertexTypes</a></td>
+<td><a href="../EdgeFunctions/#getEdgeTypes">getEdgeTypes</a></td>
+<td><a href="../TokenManagement/#getToken">getToken</a></td>
+<td><a href="OtherFunctions#echo">echo</a></td>
+</tr>
+<tr>
+<td><a href="../SchemaFunctions/#getUDTs">getUDTs</a></td>
+<td><a href="../QueryFunctions/#runInterpretedQuery">runInterpretedQuery</a></td>
+<td><a href="../VertexFunctions/#getVertexType">getVertexType</a></td>
+<td><a href="../EdgeFunctions/#getEdgeType">getEdgeType</a></td>
+<td><a href="../TokenManagement/#refreshToken">refreshToken</a></td>
+<td><a href="OtherFunctions#getEndpoints">getEndpoints</a></td>
+</tr>
+<tr>
+<td><a href="../SchemaFunctions/#getUDT">getUDT</a></td>
+<td></td>
+<td><a href="../VertexFunctions/#getVertexCount">getVertexCount</a></td>
+<td><a href="../EdgeFunctions/#getEdgeCount">getEdgeCount</a></td>
+<td><a href="../TokenManagement/#deleteToken">deleteToken</a></td>
+<td><a href="OtherFunctions#getStatistics">getStatistics</a></td>
+</tr>
+<tr>
+<td><a href="../SchemaFunctions/#upsertData">upsertData</a></td>
+<td></td>
+<td><a href="../VertexFunctions/#upsertVertex">upsertVertex</a></td>
+<td><a href="../EdgeFunctions/#upsertEdge">upsertEdge</a></td>
+<td></td>
+<td><a href="OtherFunctions#getVersion">getVersion</a></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><a href="../VertexFunctions/#upsertVertices">upsertVertices</a></td>
+<td><a href="../EdgeFunctions/#upsertEdges">upsertEdges</a></td>
+<td></td>
+<td><a href="OtherFunctions#getVer">getVer</a></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><a href="../VertexFunctions/#getVertices">getVertices</a></td>
+<td><a href="../EdgeFunctions/#getEdges">getEdges</a></td>
+<td></td>
+<td><a href="OtherFunctions#getLicenseInfo">getLicenseInfo</a></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><a href="../VertexFunctions/#getVerticesById">getVerticesById</a></td>
+<td><a href="../EdgeFunctions/#getEdgeStats">getEdgeStats</a></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><a href="../VertexFunctions/#getVertexStats">getVertexStats</a></td>
+<td><a href="../EdgeFunctions/#delEdges">delEdges</a></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><a href="../VertexFunctions/#delVertices">delVertices</a></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td><a href="../VertexFunctions/#delVerticesById">delVerticesById</a></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
                 
               
               
@@ -590,7 +593,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="Functions.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview" rel="prev">
+        <a href="../Auth/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Authentication" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -599,20 +602,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Overview
+              Authentication
             </div>
           </div>
         </a>
       
       
         
-        <a href="VertexFunctions.html" class="md-footer__link md-footer__link--next" aria-label="Next: Vertex Functions" rel="next">
+        <a href="../SchemaFunctions/" class="md-footer__link md-footer__link--next" aria-label="Next: Schema Functions" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Vertex Functions
+              Schema Functions
             </div>
           </div>
           <div class="md-footer__button md-icon">
@@ -641,10 +644,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": ".", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "assets/javascripts/workers/search.477d984a.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.53c85856.min.js", "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.82b56eb2.min.js"></script>
+      <script src="../assets/javascripts/bundle.716f8af4.min.js"></script>
       
     
   </body>
