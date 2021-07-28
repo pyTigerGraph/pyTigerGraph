@@ -49,7 +49,7 @@ class TigerGraphConnection(object):
     def __init__(self, host="http://127.0.0.1", graphname="MyGraph", username="tigergraph", password="tigergraph",
                  restppPort="9000", gsPort="14240", gsqlVersion="", version="", apiToken="", useCert=True,
                  certPath=None,
-                 debug=False, sslPort="443"):
+                 debug=False, sslPort="443",beta=False):
         """Initiate a connection object.
 
         Arguments
@@ -80,13 +80,25 @@ class TigerGraphConnection(object):
         self.username = username
         self.password = password
         self.graphname = graphname
-        self.restppPort = str(restppPort)
-        self.restppUrl = self.host + ":" + self.restppPort
-        self.gsPort = str(gsPort)
+        self.beta = beta
+        if self.beta == True and (restppPort == "9000" or restppPort == "443"):
+            self.restppPort = "443"
+            self.restppUrl = self.host + ":443" + "/restpp"
+        else:
+            self.restppUrl = self.host + ":" + self.restppPort
+            self.restppPort = str(restppPort)
+        self.gsPort = ""
+        if self.beta == True and (gsPort == "14240" or gsPort == "443"):
+            self.gsPort = "443"
+            self.gsUrl = self.host + ":443"
+
+        else:
+            self.gsPort = str(gsPort)
+            self.gsUrl = self.host + ":" + self.gsPort
         self.debug = debug
         if self.debug:
             print(self.gsPort)
-        self.gsUrl = self.host + ":" + self.gsPort
+
         self.apiToken = apiToken
         if gsqlVersion != "":
             self.version = gsqlVersion
@@ -1368,21 +1380,58 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         Endpoint:      GET /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken
         """
-        res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
+        import requests
+        if self.beta:
+
+            headers = {
+                "Accept": "application/json, text/plain, */*",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-origin",
+                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
+                "Origin": self.host,
+                "Referer": self.host,
+                "Accept-Encoding": "gzip, deflate, br",
+                "Accept-Language": "en-US,en;q=0.9,ar;q=0.8",
+                "Content-Type": "application/json"
+
+            }
+            data = '{"username":"%s","password":"%s"}' % (self.username, self.password)
+            res = requests.post("{}/api/auth/login".format(self.host), headers=headers, data=data)
+
+            if res.status_code == 200:
+                cookie = res.headers["Set-Cookie"].split(";")[0]
+                headers["Cookie"] = cookie
+                if self.debug:
+                    print(cookie)
+            res = json.loads(requests.request("GET", self.host + "/api/gsql-server/requesttoken?secret=" + secret + (
+                "&lifetime=" + str(lifetime) if lifetime else ""),headers=headers).text)
+            if self.debug:
+                print(res)
+
+        else:
+            res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
             "&lifetime=" + str(lifetime) if lifetime else "")).text)
         if self.debug:
             print(res)
         if not res["error"]:
             if setToken:
-                self.apiToken = res["token"]
+                if self.beta:
+                    self.apiToken = res["results"]["token"]
+                else:
+                    self.apiToken = res["token"]
                 if self.debug:
                     print(self.apiToken)
                 self.authHeader = {'Authorization': "Bearer " + self.apiToken}
             else:
                 self.apiToken = None
                 self.authHeader = {'Authorization': 'Basic {0}'.format(self.base64_credential)}
-            return res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime(
-                '%Y-%m-%d %H:%M:%S')
+            if self.beta:
+                return res["results"]["token"], res["results"]["expiration"], datetime.utcfromtimestamp(res["results"]["expiration"]).strftime(
+                    '%Y-%m-%d %H:%M:%S')
+            else:
+                return res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime(
+                    '%Y-%m-%d %H:%M:%S')
         if "Endpoint is not found from url = /requesttoken" in res["message"]:
             raise TigerGraphException("REST++ authentication is not enabled, can't generate token.", None)
         raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
