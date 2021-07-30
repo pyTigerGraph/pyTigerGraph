@@ -85,8 +85,8 @@ class TigerGraphConnection(object):
             self.restppPort = "443"
             self.restppUrl = self.host + ":443" + "/restpp"
         else:
-            self.restppUrl = self.host + ":" + self.restppPort
             self.restppPort = str(restppPort)
+            self.restppUrl = self.host + ":" + self.restppPort
         self.gsPort = ""
         if self.beta == True and (gsPort == "14240" or gsPort == "443"):
             self.gsPort = "443"
