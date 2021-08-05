@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="../pyTigerGraphLogo-removebg-preview.png">
-      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.1">
+      <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.2.2">
     
     
       
@@ -634,7 +634,7 @@
 <ul>
 <li>As pyTigerGraph is communicating with the TigerGraph database through REST APIs, there is no real "connection". Most (but not all) function of pyTigerGraph sends (one or more) HTTP(s) request to the REST API and processes the data returned (typically a JSON response). Thus there is no "connection" that needs to be opened and then closed down. Instantiating pyTigerGraph simply means to provide the neccesary information to be able to send the requests and receive and response.</li>
 <li>See the <a href="../TokenManagement/">Token Management</a> page for information on how authentication works and how to retrieve and manage API tokens.</li>
-<li>If the TigerGraph database uses <a href="https://docs.tigergraph.com/admin/admin-guide/data-encryption/encrypting-connections">encrypted connections</a> (e.g. TigerGraph could instances), then you need to provide an SSL certificate for your connections. In this case you need to specify <code>userCert=True</code> and the location of the SSL certificate in <code>certPath</code>. pyTigerGraph will generate and download a self-signed SSL certificate for you. If <code>userCert=False</code> or <code>certPath</code> is not set, pyTigerGraph will try to connect without certificate. <code>userCert</code> should be <code>False</code> if you connect to an unsecure server such as a TigerGraph Developer instance.</li>
+<li>If the TigerGraph database uses <a href="https://docs.tigergraph.com/admin/admin-guide/data-encryption/encrypting-connections">encrypted connections</a> (e.g. TigerGraph could instances), then you need to provide an SSL certificate for your connections. In this case you need to specify <code>useCert=True</code> and the location of the SSL certificate in <code>certPath</code>. pyTigerGraph will generate and download a self-signed SSL certificate for you. If <code>useCert=False</code> or <code>certPath</code> is not set, pyTigerGraph will try to connect without certificate. <code>useCert</code> should be <code>False</code> if you connect to an unsecure server such as a TigerGraph Developer instance.</li>
 <li><span style="color:red"><strong>NOTE:</strong></span> This functionality is not tested and most likely does not work on Windows. We intend to fix this; help is welcome (it seems all contributors are using Macs).</li>
 </ul>
 <h2 id="gsql-101-with-pytigergraph">GSQL 101 With pyTigerGraph</h2>
@@ -709,10 +709,10 @@
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.53c85856.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.709b4209.min.js", "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.716f8af4.min.js"></script>
+      <script src="../assets/javascripts/bundle.2b46852b.min.js"></script>
       
     
   </body>
