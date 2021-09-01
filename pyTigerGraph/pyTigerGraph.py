@@ -1651,7 +1651,7 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
             print("Connection Failed check your Username/Password {}".format(e))
             self.gsqlInitiated = False
 
-    def gsql(self, query, options=None):
+    def gsql(self, query, graphname=None,options=None):
         """Runs a GSQL query and process the output.
 
         Arguments:
@@ -1659,11 +1659,15 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         - `options`:    A list of strings that will be passed as options the the gsql_client. Use
                         `options=[]` to overide the default graph.
         """
+        if graphname is None:
+            graphname = self.graphname
+        if str(graphname).upper() == "GLOBAL" or str(graphname).upper() == "" :
+            graphname = ""
         if not self.gsqlInitiated:
             self.gsqlInitiated = self.initGsql()
         if self.gsqlInitiated:
             if "\n" not in query:
-                res = self.Client.query(query,graph=self.graphname)
+                res = self.Client.query(query,graph=graphname)
                 if type(res) == type([]):
                     return "\n".join(res)
                 else:
