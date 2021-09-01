@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.9.7.9] - 2021-09-01
+## Changed
+* Fixed the SSL issue with Rest++ for self-signed certs 
+* Fixed the Driver part 
+* added the checks to debug
+
 ## [0.0.9.7.0] - 2021-07-07
 ### Changed
 * runInstalledQuery(usePost=True) will post params as body 

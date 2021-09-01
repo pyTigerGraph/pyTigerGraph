@@ -80,24 +80,14 @@ class TigerGraphConnection(object):
         self.username = username
         self.password = password
         self.graphname = graphname
-        self.beta = beta
-        if self.beta == True and (restppPort == "9000" or restppPort == "443"):
-            self.restppPort = "443"
-            self.restppUrl = self.host + ":443" + "/restpp"
-        else:
-            self.restppPort = str(restppPort)
-            self.restppUrl = self.host + ":" + self.restppPort
-        self.gsPort = ""
-        if self.beta == True and (gsPort == "14240" or gsPort == "443"):
-            self.gsPort = "443"
-            self.gsUrl = self.host + ":443"
 
-        else:
-            self.gsPort = str(gsPort)
-            self.gsUrl = self.host + ":" + self.gsPort
+        self.restppPort = str(restppPort)
+        self.restppUrl = self.host + ":" + self.restppPort
+        self.gsPort = ""
+
+        self.gsPort = str(gsPort)
+        self.gsUrl = self.host + ":" + self.gsPort
         self.debug = debug
-        if self.debug:
-            print(self.gsPort)
 
         self.apiToken = apiToken
         if gsqlVersion != "":
@@ -166,8 +156,6 @@ class TigerGraphConnection(object):
 
             if type(self.apiToken) == type(()):
                 self.apiToken = self.apiToken[0]
-            if self.debug:
-                print(self.apiToken)
             self.authHeader = {'Authorization': "Bearer " + self.apiToken}
             _headers = self.authHeader
         else:
@@ -191,18 +179,12 @@ class TigerGraphConnection(object):
         else:
             _data = None
 
-        if self.useCert is True and self.certPath is not None:
+        if self.useCert is True or self.certPath is not None:
             res = requests.request(method, url,  headers=_headers, data=_data, params=params, verify=False) # auth=_auth,
         else:
             res = requests.request(method, url, headers=_headers, data=_data, params=params) # , auth=_auth
-        if self.debug:
-            print(method + " " + url + (" => " + data if data else ""))
-            print(self.authHeader)
-            print(authMode)
-            # time.sleep(50000)
-        if self.debug:
-            print(res.url)
-        # print(res.text)
+
+
         if res.status_code != 200:
             res.raise_for_status()
         res = json.loads(res.text)
@@ -1198,8 +1180,6 @@ class TigerGraphConnection(object):
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#post-gsqlserver-interpreted_query-run-an-interpreted-query
         """
         queryText = queryText.replace("$graphname", self.graphname)
-        if self.debug:
-            print(queryText)
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText, params=params, authMode="pwd")
 
     # Pandas DataFrame support =================================================
@@ -1380,58 +1360,23 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         Endpoint:      GET /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken
         """
-        import requests
-        if self.beta:
 
-            headers = {
-                "Accept": "application/json, text/plain, */*",
-                "Sec-Fetch-Dest": "empty",
-                "Sec-Fetch-Mode": "cors",
-                "Sec-Fetch-Site": "same-origin",
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36",
-                "Origin": self.host,
-                "Referer": self.host,
-                "Accept-Encoding": "gzip, deflate, br",
-                "Accept-Language": "en-US,en;q=0.9,ar;q=0.8",
-                "Content-Type": "application/json"
-
-            }
-            data = '{"username":"%s","password":"%s"}' % (self.username, self.password)
-            res = requests.post("{}/api/auth/login".format(self.host), headers=headers, data=data)
-
-            if res.status_code == 200:
-                cookie = res.headers["Set-Cookie"].split(";")[0]
-                headers["Cookie"] = cookie
-                if self.debug:
-                    print(cookie)
-            res = json.loads(requests.request("GET", self.host + "/api/gsql-server/requesttoken?secret=" + secret + (
-                "&lifetime=" + str(lifetime) if lifetime else ""),headers=headers).text)
-            if self.debug:
-                print(res)
-
-        else:
+        if self.useCert is True and self.certPath is not None:
             res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
             "&lifetime=" + str(lifetime) if lifetime else "")).text)
-        if self.debug:
-            print(res)
+        else:
+            res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
+                "&lifetime=" + str(lifetime) if lifetime else ""),verify=False).text)
         if not res["error"]:
             if setToken:
-                if self.beta:
-                    self.apiToken = res["results"]["token"]
-                else:
-                    self.apiToken = res["token"]
-                if self.debug:
-                    print(self.apiToken)
+                self.apiToken = res["token"]
                 self.authHeader = {'Authorization': "Bearer " + self.apiToken}
             else:
                 self.apiToken = None
                 self.authHeader = {'Authorization': 'Basic {0}'.format(self.base64_credential)}
-            if self.beta:
-                return res["results"]["token"], res["results"]["expiration"], datetime.utcfromtimestamp(res["results"]["expiration"]).strftime(
-                    '%Y-%m-%d %H:%M:%S')
-            else:
-                return res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime(
-                    '%Y-%m-%d %H:%M:%S')
+
+            return res["token"], res["expiration"], datetime.utcfromtimestamp(res["expiration"]).strftime(
+                '%Y-%m-%d %H:%M:%S')
         if "Endpoint is not found from url = /requesttoken" in res["message"]:
             raise TigerGraphException("REST++ authentication is not enabled, can't generate token.", None)
         raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
@@ -1461,9 +1406,14 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         """
         if not token:
             token = self.apiToken
-        res = json.loads(requests.request("PUT",
+        if self.useCert is True and self.certPath is not None:
+            res = json.loads(requests.request("PUT",
                                           self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token + (
-                                              "&lifetime=" + str(lifetime) if lifetime else "")).text)
+                                              "&lifetime=" + str(lifetime) if lifetime else ""),verify=False).text)
+        else:
+            res = json.loads(requests.request("PUT",
+                                              self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token + (
+                                                  "&lifetime=" + str(lifetime) if lifetime else "")).text)
         if not res["error"]:
             exp = time.time() + res["expiration"]
             return res["token"], int(exp), datetime.utcfromtimestamp(exp).strftime('%Y-%m-%d %H:%M:%S')
@@ -1490,8 +1440,13 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         """
         if not token:
             token = self.apiToken
-        res = json.loads(
-            requests.request("DELETE", self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token).text)
+        if self.useCert is True and self.certPath is not None:
+            res = json.loads(
+            requests.request("DELETE", self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token,
+                             verify=False).text)
+        else:
+            res = json.loads(
+                requests.request("DELETE", self.restppUrl + "/requesttoken?secret=" + secret + "&token=" + token).text)
         if not res["error"]:
             return True
         if res["code"] == "REST-3300" and skipNA:
@@ -1592,7 +1547,11 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         Endpoint:      GET /version
         Documentation: https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-version
         """
-        response = requests.request("GET", self.restppUrl + "/version/" + self.graphname, headers=self.authHeader)
+        if self.useCert is True and self.certPath is not None:
+            response = requests.request("GET", self.restppUrl + "/version/" + self.graphname, headers=self.authHeader,
+                                        verify=False)
+        else:
+            response = requests.request("GET", self.restppUrl + "/version/" + self.graphname, headers=self.authHeader)
         res = json.loads(response.text, strict=False)  # "strict=False" is why _get() was not used
         self._errorCheck(res)
 
@@ -1654,8 +1613,11 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         sslhost = self.url.split(":")[0]
         if self.downloadCert:  # HTTP/HTTPS
             import ssl
-            Res = ssl.get_server_certificate((sslhost, self.sslPort))
-            # print(Res)
+            try:
+                Res = ssl.get_server_certificate((sslhost, self.sslPort))
+            except:
+                Res = ssl.get_server_certificate((sslhost, "14240"))
+
             try:
                 certcontent = open(self.certLocation, 'w')
                 certcontent.write(Res)
