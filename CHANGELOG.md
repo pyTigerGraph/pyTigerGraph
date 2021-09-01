@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Fixed the SSL issue with Rest++ for self-signed certs 
 * Fixed the Driver part 
 * added the checks to debug
+* Fixed the USE GRAPH cookie
 
 ## [0.0.9.7.0] - 2021-07-07
 ### Changed

@@ -1663,7 +1663,7 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
             self.gsqlInitiated = self.initGsql()
         if self.gsqlInitiated:
             if "\n" not in query:
-                res = self.Client.query(query)
+                res = self.Client.query(query,graph=self.graphname)
                 if type(res) == type([]):
                     return "\n".join(res)
                 else:
