@@ -74,8 +74,6 @@ class TigerGraphConnection(object):
         if inputHost.scheme not in ["http", "https"]:
             raise ("E-0003: Please verify the host (http/https) schema")
         self.netloc = inputHost.netloc
-        if self.netloc == "localhost":
-            self.netloc = "127.0.0.1"
         self.host = "{0}://{1}".format(inputHost.scheme, self.netloc)
         self.username = username
         self.password = password
