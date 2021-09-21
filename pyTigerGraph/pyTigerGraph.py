@@ -818,8 +818,8 @@ class TigerGraphConnection(object):
         - If edge is not yet present in graph, it will be created (see special case below).
         - If it's already in the graph, it is updated with the values specified in the request.
 
-        - `parameters`:  A dictionary in the form of {'ack': str, 'new_vertex_only': bool, 
-                        'vertex_must_exist': bool}. 
+        - `parameters`:  A dictionary in the form of {'ack': 'all', 'new_vertex_only': False, 
+                        'vertex_must_exist': False}. 
                         assert ack in ['all', 'none'] : return response acknowlidging or actually processing
                         new_vertex_only: If the input data refers to a vertex which already exists, 
                         do not update it.
@@ -849,13 +849,13 @@ class TigerGraphConnection(object):
         vals = self._upsertAttrs(attributes)
         data = json.dumps(
             {"edges": {sourceVertexType: {sourceVertexId: {edgeType: {targetVertexType: {targetVertexId: vals}}}}}})
-        return self._post(self.restppUrl + "/graph/" + self.graphname + f'/{self._get_edge_parameters_url_query(parameters)}', data=data)[0]["accepted_edges"]
+        return self._post(self.restppUrl + "/graph/" + self.graphname + f'/?{self._get_edge_parameters_url_query(parameters)}', data=data)[0]["accepted_edges"]
     
     def upsertEdges(self, sourceVertexType, edgeType, targetVertexType, edges, parameters):
         """Upserts multiple edges (of the same type).
         
-        - `parameters`:  A dictionary in the form of {'ack': str, 'new_vertex_only': bool, 
-                        'vertex_must_exist': bool}. 
+        - `parameters`:  A dictionary in the form of {'ack': 'all', 'new_vertex_only': False, 
+                        'vertex_must_exist': False}. 
                         assert ack in ['all', 'none'] : return response acknowlidging or actually processing
                         new_vertex_only: If the input data refers to a vertex which already exists, 
                         do not update it.
@@ -908,7 +908,7 @@ class TigerGraphConnection(object):
             l4[e[1]] = vals
         data = json.dumps({"edges": data})
         
-        return self._post(self.restppUrl + "/graph/" + self.graphname + f'/{self._get_edge_parameters_url_query(parameters)}', data=data)[0]["accepted_edges"]
+        return self._post(self.restppUrl + "/graph/" + self.graphname + f'/?{self._get_edge_parameters_url_query(parameters)}', data=data)[0]["accepted_edges"]
 
     def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None,
                  select="", where="", limit="", sort="", fmt="py", withId=True, withType=False, timeout=0):
@@ -1331,8 +1331,8 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
                          in the dataframe and target is the attribute name in the graph vertex. When omitted
                          all columns would be upserted with their current names. In this case column names
                          must match the vertex's attribute names.
-        - `parameters`:  A dictionary in the form of {'ack': str, 'new_vertex_only': bool, 
-                        'vertex_must_exist': bool}. 
+        - `parameters`:  A dictionary in the form of {'ack': 'all', 'new_vertex_only': False, 
+                        'vertex_must_exist': False}. 
                         assert ack in ['all', 'none'] : return response acknowlidging or actually processing
                         new_vertex_only: If the input data refers to a vertex which already exists, 
                         do not update it.
@@ -1483,8 +1483,8 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
     def _get_edge_parameters_url_query(parameters) -> str:
         """Checks whether the edge upser parameters align with requirements.
 
-        - `parameters`:  A dictionary in the form of {'ack': str, 'new_vertex_only': bool, 
-                        'vertex_must_exist': bool}. 
+        - `parameters`:  A dictionary in the form of {'ack': 'all', 'new_vertex_only': False, 
+                        'vertex_must_exist': False}. 
                         assert ack in ['all', 'none'] : return response acknowlidging or actually processing
                         new_vertex_only: If the input data refers to a vertex which already exists, 
                         do not update it.
