@@ -1,17 +1,18 @@
-import requests
+import base64
 import json
-import re
-from datetime import datetime
-import time
-import pandas as pd
 import os
+import re
+import sys
+import time
+import urllib
+from datetime import datetime
+from urllib.parse import urlencode, urlparse
+
+import pandas as pd
+import requests
+import urllib3
 # Added pyTigerDriver Client
 from pyTigerDriver import GSQL_Client
-import urllib3
-import sys
-import urllib
-from urllib.parse import urlparse
-import base64
 
 urllib3.disable_warnings()
 
@@ -810,13 +811,21 @@ class TigerGraphConnection(object):
         return self.getEdgeCountFrom(edgeType=edgeType, sourceVertexType=sourceVertexType,
                                      targetVertexType=targetVertexType)
 
-    def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes=None):
+    def upsertEdge(self, sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, attributes=None, parameters:dict={}):
         """Upserts an edge.
 
         Data is upserted:
         - If edge is not yet present in graph, it will be created (see special case below).
         - If it's already in the graph, it is updated with the values specified in the request.
 
+        - `parameters`:  A dictionary in the form of {'ack': str, 'new_vertex_only': bool, 
+                        'vertex_must_exist': bool}. 
+                        assert ack in ['all', 'none'] : return response acknowlidging or actually processing
+                        new_vertex_only: If the input data refers to a vertex which already exists, 
+                        do not update it.
+                        vertex_must_exist: If a new edge refers to an endpoint vertex which does not exist, 
+                        create the necessary vertices as dummy. Otherwise first check if vertices exist.
+        
         The `attributes` argument is expected to be a dictionary in this format:
             {<attribute_name>, <attribute_value>|(<attribute_name>, <operator>), …}
 
@@ -840,13 +849,21 @@ class TigerGraphConnection(object):
         vals = self._upsertAttrs(attributes)
         data = json.dumps(
             {"edges": {sourceVertexType: {sourceVertexId: {edgeType: {targetVertexType: {targetVertexId: vals}}}}}})
-        return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
-
-    def upsertEdges(self, sourceVertexType, edgeType, targetVertexType, edges):
+        return self._post(self.restppUrl + "/graph/" + self.graphname + f'/{self._get_edge_parameters_url_query(parameters)}', data=data)[0]["accepted_edges"]
+    
+    def upsertEdges(self, sourceVertexType, edgeType, targetVertexType, edges, parameters):
         """Upserts multiple edges (of the same type).
-
+        
+        - `parameters`:  A dictionary in the form of {'ack': str, 'new_vertex_only': bool, 
+                        'vertex_must_exist': bool}. 
+                        assert ack in ['all', 'none'] : return response acknowlidging or actually processing
+                        new_vertex_only: If the input data refers to a vertex which already exists, 
+                        do not update it.
+                        vertex_must_exist: If a new edge refers to an endpoint vertex which does not exist, 
+                        create the necessary vertices as dummy. Otherwise first check if vertices exist.
+        
         See the description of `upsertEdge` for generic information.
-
+        
         The `edges` argument is expected to be a list in of tuples in this format:
         [
           (<source_vertex_id>, <target_vertex_id>, {<attribute_name>: <attribute_value>|(<attribute_name>, <operator>), …})
@@ -890,7 +907,8 @@ class TigerGraphConnection(object):
             # targetVertexId
             l4[e[1]] = vals
         data = json.dumps({"edges": data})
-        return self._post(self.restppUrl + "/graph/" + self.graphname, data=data)[0]["accepted_edges"]
+        
+        return self._post(self.restppUrl + "/graph/" + self.graphname + f'/{self._get_edge_parameters_url_query(parameters)}', data=data)[0]["accepted_edges"]
 
     def getEdges(self, sourceVertexType, sourceVertexId, edgeType=None, targetVertexType=None, targetVertexId=None,
                  select="", where="", limit="", sort="", fmt="py", withId=True, withType=False, timeout=0):
@@ -1297,7 +1315,7 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
 
     def upsertEdgeDataFrame(
             self, df, sourceVertexType, edgeType, targetVertexType, from_id=None, to_id=None,
-            attributes=None):
+            attributes=None, parameters:dict={}):
         """Upserts edges from a Pandas DataFrame.
 
         Arguments:
@@ -1313,10 +1331,16 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
                          in the dataframe and target is the attribute name in the graph vertex. When omitted
                          all columns would be upserted with their current names. In this case column names
                          must match the vertex's attribute names.
+        - `parameters`:  A dictionary in the form of {'ack': str, 'new_vertex_only': bool, 
+                        'vertex_must_exist': bool}. 
+                        assert ack in ['all', 'none'] : return response acknowlidging or actually processing
+                        new_vertex_only: If the input data refers to a vertex which already exists, 
+                        do not update it.
+                        vertex_must_exist: If a new edge refers to an endpoint vertex which does not exist, 
+                        create the necessary vertices as dummy. Otherwise first check if vertices exist.
 
         Returns: The number of edges upserted.
         """
-
         json_up = []
 
         for index in df.index:
@@ -1333,7 +1357,8 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
             sourceVertexType=sourceVertexType,
             edgeType=edgeType,
             targetVertexType=targetVertexType,
-            edges=json_up
+            edges=json_up,
+            parameters=parameters
         )
 
     # Token management =========================================================
@@ -1454,7 +1479,31 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         raise TigerGraphException(res["message"], (res["code"] if "code" in res else None))
 
     # Other functions ==========================================================
+    @staticmethod
+    def _get_edge_parameters_url_query(parameters) -> str:
+        """Checks whether the edge upser parameters align with requirements.
 
+        - `parameters`:  A dictionary in the form of {'ack': str, 'new_vertex_only': bool, 
+                        'vertex_must_exist': bool}. 
+                        assert ack in ['all', 'none'] : return response acknowlidging or actually processing
+                        new_vertex_only: If the input data refers to a vertex which already exists, 
+                        do not update it.
+                        vertex_must_exist: If a new edge refers to an endpoint vertex which does not exist, 
+                        create the necessary vertices as dummy. Otherwise first check if vertices exist.
+        """
+        default_parameters = {
+            'ack': 'all',
+            'new_vertex_only': False,
+            'vertex_must_exist': False
+        }
+        default_parameters.update(parameters)
+        assert (len(default_parameters) == 3)
+        assert default_parameters['ack'] in ['all', 'none']
+        assert type(default_parameters['new_vertex_only']) == bool
+        assert type(default_parameters['vertex_must_exist']) == bool
+        
+        return urlencode(default_parameters)
+        
     def echo(self):
         """Pings the database.
 
