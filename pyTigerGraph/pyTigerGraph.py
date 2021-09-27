@@ -123,7 +123,8 @@ class TigerGraphConnection(object):
         self.Client = None
 
     # Private functions ========================================================
-
+    def safeChar(self,inputString):
+        return urllib.parse.quote(str(inputString), safe='')
     def _errorCheck(self, res):
         """
         Checks if the JSON document returned by an endpoint has contains error:
@@ -475,6 +476,7 @@ class TigerGraphConnection(object):
         return self.getVertices(vertexType, select=select, where=where, limit=limit, sort=sort, fmt="df",
                                 withId=True, withType=False, timeout=timeout)
 
+
     def getVerticesById(self, vertexType, vertexIds, fmt="py", withId=True, withType=False):
         """Retrieves vertices of the given vertex type, identified by their ID.
 
@@ -504,7 +506,7 @@ class TigerGraphConnection(object):
 
         ret = []
         for vid in vids:
-            ret += self._get(url + str(vid))
+            ret += self._get(url + self.safeChar(vid))
 
         if fmt == "json":
             return json.dumps(ret)
@@ -613,11 +615,11 @@ class TigerGraphConnection(object):
             raise TigerGraphException("No vertex ID was not specified.", None)
         vids = []
         if isinstance(vertexIds, (int, str)):
-            vids.append(vertexIds)
+            vids.append(self.safeChar(vertexIds))
         elif not isinstance(vertexIds, list):
             return None  # TODO: a better return value?
         else:
-            vids = vertexIds
+            vids = [ self.safeChar(f) for f in vertexIds]
         url1 = self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType + "/"
         url2 = ""
         if permanent:
@@ -775,16 +777,16 @@ class TigerGraphConnection(object):
                 raise TigerGraphException(
                     "If where condition is specified, then both sourceVertexType and sourceVertexId must be provided too.",
                     None)
-            url = self.restppUrl + "/graph/" + self.graphname + "/edges/" + sourceVertexType + "/" + str(sourceVertexId)
+            url = self.restppUrl + "/graph/" + self.safeChar(self.graphname) + "/edges/" + self.safeChar(sourceVertexType) + "/" + self.safeChar(sourceVertexId)
             if edgeType:
-                url += "/" + edgeType
+                url += "/" + self.safeChar(edgeType)
                 if targetVertexType:
-                    url += "/" + targetVertexType
+                    url += "/" + self.safeChar(targetVertexType)
                     if targetVertexId:
-                        url += "/" + str(targetVertexId)
+                        url += "/" + self.safeChar(targetVertexId)
             url += "?count_only=true"
             if where:
-                url += "&filter=" + where
+                url += "&filter=" + self.safeChar(where)
             res = self._get(url)
         else:
             if not edgeType:  # TODO is this a valid check?
@@ -1152,7 +1154,7 @@ class TigerGraphConnection(object):
         if sizeLimit:
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
         if isinstance(params, dict):
-            params = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
+            params = urllib.parse.urlencode(params, quote_via=urllib.parse.quote,safe='')
 
         if usePost:
             return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName, data=params, headers=headers)
