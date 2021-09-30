@@ -965,10 +965,12 @@ class TigerGraphConnection(object):
         if type(sourceVertexId) == type([]):
             df = None
             for e in sourceVertexId:
-                if df == None :
-                    df = self.getEdges(sourceVertexType, e, edgeType, targetVertexType, targetVertexId, select,
+                try:
+                    if df == None :
+                        df = self.getEdges(sourceVertexType, e, edgeType, targetVertexType, targetVertexId, select,
                              where, limit, sort, fmt="df", timeout=timeout)
-                else:
+                except:
+
                     df.append(self.getEdges(sourceVertexType, e, edgeType, targetVertexType, targetVertexId, select,
                              where, limit, sort, fmt="df", timeout=timeout))
             return df
