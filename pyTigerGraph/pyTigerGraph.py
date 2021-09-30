@@ -962,7 +962,18 @@ class TigerGraphConnection(object):
 
         For details on arguments see `getEdges` above.
         """
-        return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select,
+        if type(sourceVertexId) == type([]):
+            df = None
+            for e in sourceVertexId:
+                if df == None :
+                    df = self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select,
+                             where, limit, sort, fmt="df", timeout=timeout)
+                else:
+                    df.append(self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select,
+                             where, limit, sort, fmt="df", timeout=timeout))
+            return df
+        else:
+            return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select,
                              where, limit, sort, fmt="df", timeout=timeout)
 
     def getEdgesByType(self, edgeType, fmt="py", withId=True, withType=False):
