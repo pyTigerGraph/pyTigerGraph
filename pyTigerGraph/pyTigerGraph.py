@@ -963,17 +963,7 @@ class TigerGraphConnection(object):
         For details on arguments see `getEdges` above.
         """
         if type(sourceVertexId) == type([]):
-            df = None
-            for e in sourceVertexId:
-                try:
-
-                    df.append(self.getEdges(sourceVertexType, e, edgeType, targetVertexType, targetVertexId, select,
-                                                where, limit, sort, fmt="df", timeout=timeout))
-                except:
-                    df = self.getEdges(sourceVertexType, e, edgeType, targetVertexType, targetVertexId, select,
-                                       where, limit, sort, fmt="df", timeout=timeout)
-
-            return df
+            raise TigerGraphException("List is not yet supported")
         else:
             return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType, targetVertexId, select,
                              where, limit, sort, fmt="df", timeout=timeout)
