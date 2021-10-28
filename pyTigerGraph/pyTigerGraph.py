@@ -49,7 +49,7 @@ class TigerGraphConnection(object):
     def __init__(self, host="http://127.0.0.1", graphname="MyGraph", username="tigergraph", password="tigergraph",
                  restppPort="9000", gsPort="14240", gsqlVersion="", version="", apiToken="", useCert=True,
                  certPath=None,
-                 debug=False, sslPort="443",beta=False):
+                 debug=False, sslPort="443",gcp=False):
         """Initiate a connection object.
 
         Arguments
@@ -78,13 +78,22 @@ class TigerGraphConnection(object):
         self.username = username
         self.password = password
         self.graphname = graphname
-
-        self.restppPort = str(restppPort)
-        self.restppUrl = self.host + ":" + self.restppPort
+        self.beta = gcp
+        if self.beta == True and (restppPort == "9000" or restppPort == "443"):
+            self.restppPort = "443"
+            self.restppUrl = self.host + ":443" + "/restpp"
+        else:
+            self.restppPort = str(restppPort)
+            self.restppUrl = self.host + ":" + self.restppPort
         self.gsPort = ""
+        if self.beta == True and (gsPort == "14240" or gsPort == "443"):
+            self.gsPort = "443"
 
-        self.gsPort = str(gsPort)
-        self.gsUrl = self.host + ":" + self.gsPort
+            self.gsUrl = self.host + ":443"
+        else:
+            self.gsPort = str(gsPort)
+            self.gsUrl = self.host + ":" + self.gsPort
+
         self.debug = debug
 
         self.apiToken = apiToken
