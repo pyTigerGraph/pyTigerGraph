@@ -35,4 +35,4 @@ For more details on establishing a connection, read the [Getting Started](https:
 - [Movie Prediction with Graph Convolutional Neural Networks](https://colab.research.google.com/drive/11tcL4KXXwY__TmUUTjOf6InFQMC-VsG6)
 
 ## Credits
-pyTigerGraph was originally created by Parker Erickson, a Computer Science student at the University of Minnesota. Special thanks to contributors Jon Herke and Szilard Barany of TigerGraph. Read [this](CONTRIBUTING.md) to learn more about how you can contribute.
+pyTigerGraph was originally created by Parker Erickson, a Computer Science student at the University of Minnesota. Special thanks to contributors Jon Herke and Szilard Barany of TigerGraph. Read [this](docs/CONTRIBUTING.md) to learn more about how you can contribute.
