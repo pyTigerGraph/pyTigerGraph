@@ -4,7 +4,7 @@
 Retrieves the schema metadata of the graph.
 
 Arguments:
-- `full`: If `False`, returns metadata of vertices and edges only. If `True`, it will additionaly return additional info on veertices and egdes, plus info on UDTs, indices, loading jobs, queries, data sources, users and their roles, and proxy groups. The database user's privileges control how much data is returned for each object types.
+- `full`: If `False`, returns metadata of vertices and edges only. If `True`, it will additionaly return additional info on vertices and egdes, plus info on UDTs, indices, loading jobs, queries, data sources, users and their roles, and proxy groups. The database user's privileges control how much data is returned for each object types.
 
 This functions uses the [GSQL Submodule](Gsql.md) is `full` is `True`.
 
