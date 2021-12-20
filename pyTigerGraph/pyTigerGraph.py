@@ -1619,7 +1619,7 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
     # GSQL support =================================================
 
     def initGsql(self, certLocation="~/.gsql/my-cert.txt"):  # , jarLocation="~/.gsql"
-
+        
         self.certLocation = os.path.expanduser(certLocation)
         self.url = urlparse(self.gsUrl).netloc  # Getting URL with gsql port w/o https://
         sslhost = self.url.split(":")[0]
@@ -1635,8 +1635,9 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
                 certcontent.write(Res)
                 certcontent.close()
             except Exception:
-                from os.path import expanduser
-                os.mkdir(expanduser("~/.gsql"))
+                
+                self.certLocation = "/tmp/my-cert.txt"
+                
                 certcontent = open(self.certLocation, 'w')
                 certcontent.write(Res)
                 certcontent.close()
@@ -1647,10 +1648,10 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
 
             if self.downloadCert:
                 if not (self.certPath):
-                    self.certPath = "~/.gsql/my-cert.txt"
+                    self.certPath = self.certLocation
                 self.Client = GSQL_Client(urlparse(self.host).netloc, version=self.version, username=self.username,
                                           password=self.password,
-                                          cacert=os.path.expanduser(self.certPath),gsPort=self.gsPort,
+                                          cacert=self.certPath,gsPort=self.gsPort,
                                           restpp=self.restppPort,debug=self.debug)
             else:
                 self.Client = GSQL_Client(urlparse(self.host).netloc, version=self.version, username=self.username,
