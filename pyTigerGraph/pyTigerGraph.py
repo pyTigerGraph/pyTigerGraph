@@ -1106,8 +1106,6 @@ class TigerGraphConnection(object):
             return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName, data=params,
                               headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
         else:
-            if isinstance(params, dict):
-                params = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
             return self._get(self.restppUrl + "/query/" + self.graphname + "/" + queryName, params=params,
                              headers={"RESPONSE-LIMIT": str(sizeLimit), "GSQL-TIMEOUT": str(timeout)})
 
