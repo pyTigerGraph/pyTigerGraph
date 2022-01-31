@@ -1959,18 +1959,31 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         except:
             raise
 
-    def uploadFile(self, filePath, fileTag, jobName="", timeout=16000, sizeLimit=128000000, attributes=None):
+    def uploadFile(self, filePath, fileTag, jobName="", sep=None, eol=None, timeout=16000, sizeLimit=128000000):
         """DDL Upload File .
 
         Endpoint:      POST /graph
+
+        Arguments:
+        - `filePath`:   File variable name or file path for the file containing the data
+        - `fileTag`:    Name of file variable in DDL loading job
+        - `jobName`:    Loading job name defined in your DDL loading job
+        - `sep`:        Separator of CSV data. If your data is JSON, you do not need to specify this parameter. The default separator is a comma","
+        - `eol`:        End-of-line character. Only one or two characters are allowed, except for the special case "\r\n". The default value is "\n"
+        - `timeout`:    Timeout in seconds. If set to 0, use system-wide endpoint timeout setting.
+        - `sizeLimit`:  Maximum size for input file
 
         """
         try:
             data = open(filePath, 'rb').read()
             params = {
                 "tag": jobName,
-                "filename": fileTag
+                "filename": fileTag,
             }
+            if sep != None:
+                params["sep"] = sep
+            if eol != None:
+                params["eol"] = eol
         except:
             return None
         return self._post(self.restppUrl + "/ddl/" + self.graphname, params=params, data=data,
