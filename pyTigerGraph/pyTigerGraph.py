@@ -1372,13 +1372,34 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
         Endpoint:      GET /requesttoken
         Documentation: https://docs.tigergraph.com/dev/restpp-api/restpp-requests#requesting-a-token-with-get-requesttoken
         """
+        s,m,i = (0,0,0)
+        if self.version:
+            s,m,i = self.version.split(".")
+        tsuccess = False
+        if int(s) <3 or (int(s) >=3 and int(m)) < 5:
+            try:
+                if self.useCert is True and self.certPath is not None:
+                    res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
+                    "&lifetime=" + str(lifetime) if lifetime else "")).text)
+                    tsuccess = True
+                else:
+                    res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
+                        "&lifetime=" + str(lifetime) if lifetime else ""),verify=False).text)
+                if not res["error"]:
+                    tsuccess = True
+            except:
+                tsuccess = False
+                pass
+        if not tsuccess:
+            data = {}
+            data["secret"] = secret
 
-        if self.useCert is True and self.certPath is not None:
-            res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
-            "&lifetime=" + str(lifetime) if lifetime else "")).text)
-        else:
-            res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
-                "&lifetime=" + str(lifetime) if lifetime else ""),verify=False).text)
+            if lifetime:
+                data["lifetime"] = str(lifetime)
+            if self.useCert is True and self.certPath is not None:
+                res = json.loads(requests.post(self.restppUrl + "/requesttoken").text,data=json.dumps(data))
+            else:
+                res = json.loads(requests.post(self.restppUrl + "/requesttoken",data=json.dumps(data),verify=False).text)
         if not res["error"]:
             if setToken:
                 self.apiToken = res["token"]
