@@ -1639,11 +1639,19 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
 
     # GSQL support =================================================
 
-    def initGsql(self, certLocation="~/.gsql/my-cert.txt"):  # , jarLocation="~/.gsql"
+    def initGsql(self, certLocation=None):  # , jarLocation="~/.gsql"
         
+        if certLocation is None:
+            if os.path.isdir(os.path.expanduser("~/.gsql")) == False:
+                os.mkdir(os.path.expanduser("~/.gsql"))
+                
+        if certLocation == None:
+            certLocation = "~/.gsql/my-cert.txt"
+
         self.certLocation = os.path.expanduser(certLocation)
         self.url = urlparse(self.gsUrl).netloc  # Getting URL with gsql port w/o https://
         sslhost = self.url.split(":")[0]
+
         if self.downloadCert:  # HTTP/HTTPS
             import ssl
             try:
