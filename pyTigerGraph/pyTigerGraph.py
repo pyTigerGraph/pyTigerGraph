@@ -1722,7 +1722,7 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
                     return res
         else:
             print("Couldn't Initialize the client see Above Error")
-            exit(0)
+            sys.exit(1)
 
         return
 
