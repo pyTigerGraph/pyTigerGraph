@@ -1377,6 +1377,7 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
             s,m,i = self.version.split(".")
         tsuccess = False
         if int(s) <3 or (int(s) >=3 and int(m) < 5):
+            
             try:
                 if self.useCert is True and self.certPath is not None:
                     res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
@@ -1388,9 +1389,11 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
                 if not res["error"]:
                     tsuccess = True
             except:
+                
                 tsuccess = False
                 pass
         if not tsuccess:
+            print("")
             data = {}
             data["secret"] = secret
 
