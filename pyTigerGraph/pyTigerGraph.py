@@ -1377,32 +1377,30 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
             s,m,i = self.version.split(".")
         tsuccess = False
         if int(s) <3 or (int(s) >=3 and int(m) < 5):
-            
             try:
                 if self.useCert is True and self.certPath is not None:
                     res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
                     "&lifetime=" + str(lifetime) if lifetime else "")).text)
-                    tsuccess = True
                 else:
                     res = json.loads(requests.request("GET", self.restppUrl + "/requesttoken?secret=" + secret + (
                         "&lifetime=" + str(lifetime) if lifetime else ""),verify=False).text)
                 if not res["error"]:
                     tsuccess = True
             except:
-                
                 tsuccess = False
-                pass
         if not tsuccess:
-            print("")
-            data = {}
-            data["secret"] = secret
+            try:
+                data = {}
+                data["secret"] = secret
 
-            if lifetime:
-                data["lifetime"] = str(lifetime)
-            if self.useCert is True and self.certPath is not None:
-                res = json.loads(requests.post(self.restppUrl + "/requesttoken",data=json.dumps(data)).text)
-            else:
-                res = json.loads(requests.post(self.restppUrl + "/requesttoken",data=json.dumps(data),verify=False).text)
+                if lifetime:
+                    data["lifetime"] = str(lifetime)
+                if self.useCert is True and self.certPath is not None:
+                    res = json.loads(requests.post(self.restppUrl + "/requesttoken",data=json.dumps(data)).text)
+                else:
+                    res = json.loads(requests.post(self.restppUrl + "/requesttoken",data=json.dumps(data),verify=False).text)
+            except:
+                tsuccess = False
         if not res["error"]:
             if setToken:
                 self.apiToken = res["token"]
@@ -1987,7 +1985,7 @@ https://docs.tigergraph.com/dev/gsql-ref/querying/declaration-and-assignment-sta
                 errorMsg += "exists."
                 raise Exception(errorMsg)
             secret = "".join(response).replace('\n', '').split('The secret: ')[1].split(" ")[0]
-            return secret
+            return secret.strip()
         except:
             raise
 
