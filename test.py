@@ -28,7 +28,7 @@ def print_sep(label: str):
 
 parser = argparse.ArgumentParser("pyTigerGraph (unit)tests")
 parser.add_argument("-H", "--host", help="Host name or IP")
-parser.add_argument("-g", "--graph", help="grpah name", default="MyGraph")
+parser.add_argument("-g", "--graph", help="graph name", default="MyGraph")
 parser.add_argument("-s", "--secret", help="Secret")
 parser.add_argument("-u", "--user", help="Username", default="tigergraph")
 parser.add_argument("-p", "--password", help="Password", default="tigergraph")
