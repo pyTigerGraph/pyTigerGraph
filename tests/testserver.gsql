@@ -1,0 +1,96 @@
+SET exit_on_error = FALSE
+DROP ALL
+
+CREATE GRAPH tests()
+
+BEGIN
+TYPEDEF TUPLE <
+    f01_int        INT
+  , f02_int1       INT(1)
+  , f03_int2       INT(2)
+  , f04_int4       INT(4)
+  , f05_int8       INT(8)
+  , f06_uint       UINT
+  , f07_uint1      UINT(1)
+  , f08_uint2      UINT(2)
+  , f09_uint4      UINT(4)
+  , f10_uint8      UINT(8)
+  , f11_float      FLOAT
+  , f12_double     DOUBLE
+  , f13_datetime   DATETIME
+  , f14_bool       BOOL
+  , f15_string30   STRING(30)
+> tuple1_all_types
+END
+
+BEGIN
+TYPEDEF TUPLE <
+    field1         INT
+  , field2         STRING(10)
+  , field3         DATETIME
+> tuple2_simple
+END
+
+BEGIN
+CREATE SCHEMA_CHANGE JOB setup {
+
+    ADD VERTEX vertex1_all_types (
+        PRIMARY_ID id                        STRING
+      , a01_int                              INT
+      , a02_uint                             UINT
+      , a03_float                            FLOAT
+      , a04_double                           DOUBLE
+      , a05_datetime                         DATETIME
+      , a06_bool                             BOOL
+      , a07_string                           STRING
+   // , a08_string_compress                  STRING COMPRESS
+      , a09_fixed_binary100                  FIXED_BINARY(100)
+      , a10_udt                              tuple2_simple
+
+      , a11_list_int                         LIST<INT>
+   // , a12_list_uint                        LIST<UINT>
+   // , a13_list_float                       LIST<FLOAT>
+      , a14_list_double                      LIST<DOUBLE>
+      , a15_list_datetime                    LIST<DATETIME>
+      , a16_list_string                      LIST<STRING>
+   // , a17_list_string_compress             LIST<STRING COMPRESS>
+      , a18_list_udt                         LIST<tuple2_simple>
+
+      , a19_set_int                          SET<INT>
+   // , a20_set_uint                         SET<UINT>
+   // , a21_set_float                        SET<FLOAT>
+      , a22_set_double                       SET<DOUBLE>
+      , a23_set_datetime                     SET<DATETIME>
+      , a24_set_string                       SET<STRING>
+   // , a25_set_string_compress              SET<STRING COMPRESS>
+      , a26_set_udt                          SET<tuple2_simple>
+
+      , a27_int_int                          MAP<INT, INT>
+      , a28_int_double                       MAP<INT, DOUBLE>
+      , a29_int_string                       MAP<INT, STRING>
+   // , a30_int_string_compress              MAP<INT, STRING COMPRESS>
+      , a31_int_datetime                     MAP<INT, DATETIME>
+      , a32_int_udt                          MAP<INT, tuple2_simple>
+      , a33_datetime_int                     MAP<DATETIME, INT>
+      , a34_datetime_double                  MAP<DATETIME, DOUBLE>
+      , a35_datetime_string                  MAP<DATETIME, STRING>
+   // , a36_datetime_string_compress         MAP<DATETIME, STRING COMPRESS>
+      , a37_datetime_datetime                MAP<DATETIME, DATETIME>
+      , a38_datetime_udt                     MAP<DATETIME, tuple2_simple>
+      , a39_string_int                       MAP<STRING, INT>
+      , a40_string_double                    MAP<STRING, DOUBLE>
+      , a41_string_string                    MAP<STRING, STRING>
+   // , a42_string_string_compress           MAP<STRING, STRING COMPRESS>
+      , a43_string_datetime                  MAP<STRING, DATETIME>
+      , a44_string_udt                       MAP<STRING, tuple2_simple>
+   // , a45_string_compress_int              MAP<STRING COMPRESS, INT>
+   // , a46_string_compress_double           MAP<STRING COMPRESS, DOUBLE>
+   // , a47_string_compress_string           MAP<STRING COMPRESS, STRING>
+   // , a48_string_compress_string_compress  MAP<STRING COMPRESS, STRING COMPRESS>
+   // , a49_string_compress_datetime         MAP<STRING COMPRESS, DATETIME>
+   // , a50_string_compress_udt              MAP<STRING COMPRESS, tuple2_simple>
+    );
+}
+END
+
+// EOF

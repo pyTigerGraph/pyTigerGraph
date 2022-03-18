@@ -79,24 +79,27 @@ class pyTigerGraphBase(object):
 
         # TODO Use more generic name (e.g. `onCloud` or `viaFirewall`; not `beta` or `cgp`
         self.beta = gcp
+        restppPort=str(restppPort)
         if self.beta and (restppPort == "9000" or restppPort == "443"):
             # TODO Should not `sslPort` be used instead of hard coded value?
             self.restppPort = "443"
             self.restppUrl = self.host + ":443" + "/restpp"
         else:
-            self.restppPort = str(restppPort)
+            self.restppPort = restppPort
             self.restppUrl = self.host + ":" + self.restppPort
         self.gsPort = ""
+        gsPort = str(gsPort)
         if self.beta and (gsPort == "14240" or gsPort == "443"):
             # TODO Should not `sslPort` be used instead of hard coded value?
             self.gsPort = "443"
             self.gsUrl = self.host + ":443"
         else:
-            self.gsPort = str(gsPort)
+            self.gsPort = gsPort
             self.gsUrl = self.host + ":" + self.gsPort
         self.url = ""
 
         self.apiToken = apiToken
+        # TODO Eliminate version and use gsqlVersion only, meaning TigerGraph server version
         if gsqlVersion != "":
             self.version = gsqlVersion
         elif version != "":
