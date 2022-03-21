@@ -152,4 +152,32 @@ UPSERT vertex4 -(edge1_undirected)->            vertex5 VALUES (1, 1, 1)
 UPSERT vertex4 -(edge2_directed)->              vertex5 VALUES (2, 1, 2)
 UPSERT vertex4 -(edge3_directed_with_reverse)-> vertex5 VALUES (3, 1, 3)
 
+BEGIN
+CREATE QUERY query1() {
+  SumAccum<INT> @@summa;
+  start = {vertex4.*};
+  res =
+    SELECT src
+    FROM   start:src
+    ACCUM  @@summa += src.a01;
+  PRINT @@summa AS ret;
+}
+END
+
+INSTALL QUERY query1
+
+BEGIN
+CREATE QUERY query2_not_installed() {
+  PRINT "This query is not installed";
+}
+END
+
+BEGIN
+CREATE QUERY query3_installed() {
+  PRINT "This query is installed";
+}
+END
+
+INSTALL QUERY query3_installed
+
 // EOF

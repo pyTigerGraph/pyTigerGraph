@@ -30,8 +30,13 @@ class pyTigerGraphUnitTest(unittest.TestCase):
                 lines = cfg.readlines()
 
                 for l in lines:
-                    ll = l.rstrip("\n").split("=")
-                    params[ll[0]] = ll[1]
+                    if l.strip()[0] != "#":
+                        ll = l.rstrip("\n").split("=")
+                        if ll[1]:
+                            if ll[1] in ["True", "False"]:
+                                params[ll[0]] = ll[1] == "True"
+                            else:
+                                params[ll[0]] = ll[1]
 
             except OSError as e:
                 print(e.strerror)

@@ -16,9 +16,9 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
         ret = self.conn.getEdgeType("edge1_undirected")
         self.assertIsNotNone(ret)
         self.assertIn("FromVertexTypeName", ret)
-        self.assertEqual("vertex4", ret["FromVertexTypeName"])
+        self.assertEqual(ret["FromVertexTypeName"], "vertex4")
         self.assertIn("ToVertexTypeName", ret)
-        self.assertEqual("vertex5", ret["ToVertexTypeName"])
+        self.assertEqual(ret["ToVertexTypeName"], "vertex5")
         self.assertIn("IsDirected", ret)
         self.assertFalse(ret["IsDirected"])
 
@@ -33,7 +33,7 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
         self.assertTrue(ret["IsDirected"])
         self.assertIn("Config", ret)
         self.assertIn("REVERSE_EDGE", ret["Config"])
-        self.assertEqual("edge3_directed_with_reverse_reverse_edge", ret["Config"]["REVERSE_EDGE"])
+        self.assertEqual(ret["Config"]["REVERSE_EDGE"], "edge3_directed_with_reverse_reverse_edge")
 
         ret = self.conn.getEdgeType("non_existing_edge_type")
         self.assertEqual({}, ret)

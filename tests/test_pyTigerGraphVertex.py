@@ -20,7 +20,7 @@ class test_pyTigerGraphVertex(pyTigerGraphUnitTest):
         self.assertEqual("id", ret["PrimaryId"]["AttributeName"])
         self.assertIn("AttributeType", ret["PrimaryId"])
         self.assertIn("Name", ret["PrimaryId"]["AttributeType"])
-        self.assertEqual("STRING", ret["PrimaryId"]["AttributeType"]["Name"])
+        self.assertEqual(ret["PrimaryId"]["AttributeType"]["Name"], "STRING")
         self.assertIn("IsLocal", ret)
         self.assertTrue(ret["IsLocal"])
 
