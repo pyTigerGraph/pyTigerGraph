@@ -85,7 +85,7 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
 
         if isinstance(params, dict):
-            params = urllib.parse.urlencode(params, quote_via=urllib.parse.quote, safe='')
+            params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote, safe='')
 
         if usePost:
             return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName,
@@ -101,7 +101,7 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
     def runInterpretedQuery(self, queryText: str, params: [str, dict] = None) -> list:
         """Runs an interpreted query.
 
-        Use ``$graphname`` in the ``FOR GRAPH`` clause to avoid hard-coding it; it will be replaced
+        Use ``@graphname@`` in the ``FOR GRAPH`` clause to avoid hard-coding it; it will be replaced
         by the actual graph name.
 
         Args:
@@ -119,7 +119,9 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
         Documentation:
             https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-an-interpreted-query
         """
-        queryText = queryText.replace("$graphname", self.graphname)
+        queryText = queryText.replace("@graphname@", self.graphname)
+        if isinstance(params, dict):
+            params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote, safe='')
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText,
             params=params, authMode="pwd")
 
