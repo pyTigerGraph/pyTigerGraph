@@ -90,7 +90,66 @@ CREATE SCHEMA_CHANGE JOB setup {
    // , a49_string_compress_datetime         MAP<STRING COMPRESS, DATETIME>
    // , a50_string_compress_udt              MAP<STRING COMPRESS, tuple2_simple>
     );
+
+
+    ADD VERTEX vertex2_primary_key (
+        id     INT PRIMARY KEY
+      , a01    STRING
+      , a02    DATETIME
+    );
+
+
+    ADD VERTEX vertex3_primary_key_composite (
+        a01    INT 
+      , a02    STRING
+      , a03    DATETIME
+      , a04    BOOL
+      , PRIMARY KEY (a01, a02, a03)
+    );
+
+    ADD VERTEX vertex4 (
+        PRIMARY_ID id  INT
+      , a01            INT
+    );
+
+    ADD VERTEX vertex5 (
+        PRIMARY_ID id  INT
+    );
+
+    ADD UNDIRECTED EDGE edge1_undirected (
+        FROM vertex4
+      , TO   vertex5
+      , a01  INT
+    );
+
+    ADD DIRECTED EDGE edge2_directed (
+        FROM vertex4
+      , TO   vertex5
+      , a01  INT
+    );
+
+    ADD DIRECTED EDGE edge3_directed_with_reverse (
+        FROM vertex4
+      , TO   vertex5
+      , a01  INT
+    )
+    WITH REVERSE_EDGE="edge3_directed_with_reverse_reverse_edge";
+
 }
 END
+
+RUN SCHEMA_CHANGE JOB setup
+
+UPSERT vertex4 VALUES(1, 1)
+UPSERT vertex4 VALUES(2, 2)
+UPSERT vertex4 VALUES(3, 3)
+UPSERT vertex4 VALUES(4, 4)
+UPSERT vertex4 VALUES(5, 5)
+
+UPSERT vertex5 VALUES(1)
+
+UPSERT vertex4 -(edge1_undirected)->            vertex5 VALUES (1, 1, 1)
+UPSERT vertex4 -(edge2_directed)->              vertex5 VALUES (2, 1, 2)
+UPSERT vertex4 -(edge3_directed_with_reverse)-> vertex5 VALUES (3, 1, 3)
 
 // EOF

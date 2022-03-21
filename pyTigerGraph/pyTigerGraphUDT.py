@@ -28,7 +28,7 @@ class pyTigerGraphUDT(pyTigerGraphSchema):
                 The name of the User Defined Type.
 
         Returns:
-            The metadata (details of the fields) of the UDT.
+            The metadata (the details of the fields) of the UDT.
 
         Documentation:
             https://docs.tigergraph.com/dev/gsql-ref/ddl-and-loading/system-and-language-basics#typedef-tuple
