@@ -41,6 +41,3 @@ class pyTigerGraphUnitTest(unittest.TestCase):
             restppPort=params["restppPort"], gsPort=params["gsPort"],
             gsqlVersion=params["gsqlVersion"], useCert=params["userCert"],
             certPath=params["certPath"], sslPort=params["sslPort"], gcp=params["gcp"])
-
-        # print("\nConnected to host " + params["host"] + " and graph " + params["graphname"] + " as "
-        #       + params["username"])

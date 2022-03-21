@@ -21,7 +21,7 @@ class pyTigerGraphLoading(pyTigerGraphBase):
             jobName:
                 The name of the loading job.
             sep:
-                Data value serparator. If your data is JSON, you do not need to specify this
+                Data value separator. If your data is JSON, you do not need to specify this
                 parameter. The default separator is a comma (,).
             eol:
                 End-of-line character. Only one or two characters are allowed, except for the
