@@ -36,6 +36,20 @@ class test_pyTigerGraphQuery(pyTigerGraphUnitTest):
         self.assertIn("ret", ret[0])
         self.assertEqual(15, ret[0]["ret"])
 
+        queryText = \
+"""INTERPRET QUERY () FOR GRAPH @graphname@ {
+  SumAccum<INT> @@summa;
+  start = {vertex4.*};
+  res =
+    SELECT src
+    FROM   start:src
+    ACCUM  @@summa += src.a01;
+  PRINT @@summa AS ret;
+}"""
+        ret = self.conn.runInterpretedQuery(queryText)
+        self.assertIn("ret", ret[0])
+        self.assertEqual(15, ret[0]["ret"])
+
 
 if __name__ == '__main__':
     unittest.main()

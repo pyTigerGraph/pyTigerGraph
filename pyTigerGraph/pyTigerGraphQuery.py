@@ -12,6 +12,8 @@ from pyTigerGraph.pyTigerGraphSchema import pyTigerGraphSchema
 class pyTigerGraphQuery(pyTigerGraphSchema):
     """Query-specific pyTigerGraph functions."""
 
+    # TODO getQueries()  # List _all_ query names
+
     def getInstalledQueries(self, fmt: str = "py") -> [dict, json, pd.DataFrame]:
         """
         Returns a list of installed queries.
@@ -25,6 +27,10 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
 
         Returns:
             The names of the installed queries.
+
+        TODO This function returns all (installed and non-installed) queries
+             Modify to return only installed ones
+        TODO Return with query name as key rather than REST endpoint as key?
         """
         ret = self.getEndpoints(dynamic=True)
         if fmt == "json":
@@ -101,8 +107,8 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
     def runInterpretedQuery(self, queryText: str, params: [str, dict] = None) -> list:
         """Runs an interpreted query.
 
-        Use ``@graphname@`` in the ``FOR GRAPH`` clause to avoid hard-coding it; it will be replaced
-        by the actual graph name.
+        Use ``$graphname`` or ``@graphname@`` in the ``FOR GRAPH`` clause to avoid hard coding the
+        name of the graph in your app; it will be replaced by the actual graph name.
 
         Args:
             queryText:
@@ -119,6 +125,7 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
         Documentation:
             https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-an-interpreted-query
         """
+        queryText = queryText.replace("$graphname", self.graphname)
         queryText = queryText.replace("@graphname@", self.graphname)
         if isinstance(params, dict):
             params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote, safe='')
