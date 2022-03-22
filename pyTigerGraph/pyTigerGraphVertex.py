@@ -67,7 +67,11 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
                 See: filter at https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#parameters-15
 
         Returns:
-             A dictionary of <vertex_type>: <vertex_count> pairs.
+            A dictionary of <vertex_type>: <vertex_count> pairs.
+
+        Raises:
+            TigerGraphException when "*" is specified as vertex type and a where condition is
+            provided; or invalid vertex type name is specified.
 
         Endpoint:
             GET /graph/{graph_name}/vertices
@@ -281,7 +285,7 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             return self.vertexSetToDataFrame(ret, withId, withType)
         return ret
 
-    def getVertexDataframe(self, vertexType: str, select: str = "", where: str = "",
+    def getVertexDataFrame(self, vertexType: str, select: str = "", where: str = "",
             limit: str = "", sort: str = "", timeout: int = 0) -> pd.DataFrame:
         """Retrieves vertices of the given vertex type and returns them as pandas DataFrame.
 
@@ -317,6 +321,15 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
         return self.getVertices(vertexType, select=select, where=where, limit=limit, sort=sort,
             fmt="df", withId=True, withType=False, timeout=timeout)
 
+    def getVertexDataframe(self, vertexType: str, select: str = "", where: str = "",
+            limit: str = "", sort: str = "", timeout: int = 0) -> pd.DataFrame:
+        """DEPRECATED
+
+        TODO Proper deprecation
+        """
+        return self.getVertexDataFrame(vertexType, select=select, where=where, limit=limit,
+            sort=sort, timeout=timeout)
+
     def getVerticesById(self, vertexType: str, vertexIds: [int, str, list], select: str = "",
             fmt: str = "py", withId: bool = True, withType: bool = False,
             timeout: int = 0) -> [dict, str, pd.DataFrame]:
@@ -349,6 +362,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             GET /graph/{graph_name}/vertices/{vertex_type}/{vertex_id}
         Documentation:
             https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#retrieve-a-vertex
+
+        TODO Find out how/if select and timeout can be specified
         """
         if not vertexIds:
             raise TigerGraphException("No vertex ID was specified.", None)
@@ -372,7 +387,7 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             return self.vertexSetToDataFrame(ret, withId, withType)
         return ret
 
-    def getVertexDataframeById(self, vertexType: str, vertexIds: [int, str, list],
+    def getVertexDataFrameById(self, vertexType: str, vertexIds: [int, str, list],
             select: str = "") -> pd.DataFrame:
         """Retrieves vertices of the given vertex type, identified by their ID.
 
@@ -389,7 +404,16 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
         Returns:
             The (selected) details of the (matching) vertex instances as pandas DataFrame.
         """
-        return self.getVerticesById(vertexType, vertexIds, fmt="df", withId=True, withType=False)
+        return self.getVerticesById(vertexType, vertexIds, select, fmt="df", withId=True,
+            withType=False)
+
+    def getVertexDataframeById(self, vertexType: str, vertexIds: [int, str, list],
+            select: str = "") -> pd.DataFrame:
+        """DEPRECATED
+
+        TODO Proper deprecation
+        """
+        return self.getVertexDataFrameById(vertexType, vertexIds, select)
 
     def getVertexStats(self, vertexTypes: [str, list], skipNA: bool = False) -> dict:
         """Returns vertex attribute statistics.
@@ -426,7 +450,7 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data, resKey="",
                 skipCheck=True)
             if res["error"]:
-                if "stat_vertex_attr is skipped" in res["message"]:
+                if "stat_vertex_attr is skip" in res["message"]:
                     if not skipNA:
                         ret[vt] = {}
                 else:

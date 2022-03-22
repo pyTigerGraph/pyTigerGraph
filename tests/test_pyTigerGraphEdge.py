@@ -18,9 +18,9 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
         self.assertIsNotNone(ret)
         self.assertIsInstance(ret, dict)
         self.assertIn("FromVertexTypeName", ret)
-        self.assertEqual(ret["FromVertexTypeName"], "vertex4")
+        self.assertEqual("vertex4", ret["FromVertexTypeName"])
         self.assertIn("ToVertexTypeName", ret)
-        self.assertEqual(ret["ToVertexTypeName"], "vertex5")
+        self.assertEqual("vertex5", ret["ToVertexTypeName"])
         self.assertIn("IsDirected", ret)
         self.assertFalse(ret["IsDirected"])
         self.assertNotIn("EdgePairs", ret)
@@ -40,27 +40,27 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
         self.assertTrue(ret["IsDirected"])
         self.assertIn("Config", ret)
         self.assertIn("REVERSE_EDGE", ret["Config"])
-        self.assertEqual(ret["Config"]["REVERSE_EDGE"], "edge3_directed_with_reverse_reverse_edge")
+        self.assertEqual("edge3_directed_with_reverse_reverse_edge", ret["Config"]["REVERSE_EDGE"])
 
         ret = self.conn.getEdgeType("edge4_many_to_many")
         self.assertIsNotNone(ret)
         self.assertIsInstance(ret, dict)
         self.assertIn("ToVertexTypeName", ret)
-        self.assertEqual(ret["ToVertexTypeName"], "*")
+        self.assertEqual("*", ret["ToVertexTypeName"])
         self.assertIn("FromVertexTypeName", ret)
-        self.assertEqual(ret["FromVertexTypeName"], "*")
+        self.assertEqual("*", ret["FromVertexTypeName"])
         self.assertIn("EdgePairs", ret)
-        self.assertEqual(len(ret["EdgePairs"]), 5)
+        self.assertEqual(5, len(ret["EdgePairs"]))
 
         ret = self.conn.getEdgeType("edge5_all_to_all")
         self.assertIsNotNone(ret)
         self.assertIsInstance(ret, dict)
         self.assertIn("ToVertexTypeName", ret)
-        self.assertEqual(ret["ToVertexTypeName"], "*")
+        self.assertEqual("*", ret["ToVertexTypeName"])
         self.assertIn("FromVertexTypeName", ret)
-        self.assertEqual(ret["FromVertexTypeName"], "*")
+        self.assertEqual("*", ret["FromVertexTypeName"])
         self.assertIn("EdgePairs", ret)
-        self.assertEqual(len(ret["EdgePairs"]), 49)
+        self.assertEqual(49, len(ret["EdgePairs"]))
 
         ret = self.conn.getEdgeType("non_existing_edge_type")
         self.assertEqual({}, ret)
@@ -71,12 +71,12 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
     def test_03_getEdgeSourceVertexType(self):
         ret = self.conn.getEdgeSourceVertexType("edge1_undirected")
         self.assertIsInstance(ret, str)
-        self.assertEqual(ret, "vertex4")
+        self.assertEqual("vertex4", ret)
 
     def test_04_getEdgeTargetVertexType(self):
         ret = self.conn.getEdgeTargetVertexType("edge2_directed")
         self.assertIsInstance(ret, str)
-        self.assertEqual(ret, "vertex5")
+        self.assertEqual("vertex5", ret)
 
     def test_05_isDirected(self):
         ret = self.conn.isDirected("edge1_undirected")
@@ -89,44 +89,44 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
     def test_06_getReverseEdge(self):
         ret = self.conn.getReverseEdge("edge1_undirected")
         self.assertIsInstance(ret, str)
-        self.assertEqual(ret, "")  # TODO Change this to None or something in getReverseEdge()?
+        self.assertEqual("", ret)  # TODO Change this to None or something in getReverseEdge()?
         ret = self.conn.getReverseEdge("edge2_directed")
         self.assertIsInstance(ret, str)
-        self.assertEqual(ret, "")  # TODO Change this to None or something in getReverseEdge()?
+        self.assertEqual("", ret)  # TODO Change this to None or something in getReverseEdge()?
         ret = self.conn.getReverseEdge("edge3_directed_with_reverse")
         self.assertIsInstance(ret, str)
-        self.assertEqual(ret, "edge3_directed_with_reverse_reverse_edge")
+        self.assertEqual("edge3_directed_with_reverse_reverse_edge", ret)
 
     def test_07_getEdgeCountFrom(self):
         ret = self.conn.getEdgeCountFrom(edgeType="*")
         self.assertIsInstance(ret, dict)
         self.assertIn("edge1_undirected", ret)
-        self.assertEqual(ret["edge1_undirected"], 8)
+        self.assertEqual(8, ret["edge1_undirected"])
         self.assertIn("edge6_loop", ret)
-        self.assertEqual(ret["edge6_loop"], 0)
+        self.assertEqual(0, ret["edge6_loop"])
 
         ret = self.conn.getEdgeCountFrom(edgeType="edge4_many_to_many")
         self.assertIsInstance(ret, int)
-        self.assertEqual(ret, 8)
+        self.assertEqual(8, ret)
 
         ret = self.conn.getEdgeCountFrom(sourceVertexType="vertex4", edgeType="edge4_many_to_many",
             targetVertexType="vertex5")
         self.assertIsInstance(ret, int)
-        self.assertEqual(ret, 3)
+        self.assertEqual(3, ret)
 
         ret = self.conn.getEdgeCountFrom(sourceVertexType="vertex4", sourceVertexId=1)
         self.assertIsInstance(ret, dict)
         self.assertIn("edge1_undirected", ret)
-        self.assertEqual(ret["edge1_undirected"], 3)
+        self.assertEqual(3, ret["edge1_undirected"])
         self.assertIn("edge2_directed", ret)
-        self.assertEqual(ret["edge2_directed"], 0)
+        self.assertEqual(0, ret["edge2_directed"])
         self.assertIn("edge4_many_to_many", ret)
-        self.assertEqual(ret["edge1_undirected"], 3)
+        self.assertEqual(3, ret["edge1_undirected"])
 
         ret = self.conn.getEdgeCountFrom(sourceVertexType="vertex4", sourceVertexId=1,
             edgeType="edge1_undirected")
         self.assertIsInstance(ret, int)
-        self.assertEqual(ret, 3)
+        self.assertEqual(3, ret)
 
 
 if __name__ == '__main__':
