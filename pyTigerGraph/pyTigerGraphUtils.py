@@ -3,6 +3,7 @@
 import json
 import re
 import urllib
+from typing import Any
 from urllib.parse import urlparse
 
 import requests
@@ -14,7 +15,7 @@ from pyTigerGraph.pyTigerGraphException import TigerGraphException
 class pyTigerGraphUtils(pyTigerGraphBase):
     """Utility pyTigerGraph functions."""
 
-    def _safeChar(self, inputString: str) -> str:
+    def _safeChar(self, inputString: Any) -> str:
         """Replace special characters in string using the %xx escape.
 
         Args:

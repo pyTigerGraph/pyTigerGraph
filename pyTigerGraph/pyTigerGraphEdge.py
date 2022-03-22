@@ -151,8 +151,8 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
         return ""
         # TODO Should return some other value or raise exception?
 
-    def getEdgeCountFrom(self, sourceVertexType: str = None, sourceVertexId: str = None,
-            edgeType: str = None, targetVertexType: str = None, targetVertexId: str = None,
+    def getEdgeCountFrom(self, sourceVertexType: str = None, sourceVertexId: [str, int] = None,
+            edgeType: str = None, targetVertexType: str = None, targetVertexId: [str, int] = None,
             where: str = "") -> dict:
         """Returns the number of edges from a specific vertex.
 
@@ -205,9 +205,8 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
                 raise TigerGraphException(
                     "If where condition is specified, then both sourceVertexType and sourceVertexId"
                     " must be provided too.", None)
-            url = self.restppUrl + "/graph/" + self._safeChar(self.graphname) + \
-                  "/edges/" + self._safeChar(sourceVertexType) + "/" + self._safeChar(
-                sourceVertexId)
+            url = self.restppUrl + "/graph/" + self._safeChar(self.graphname) + "/edges/" + \
+                  self._safeChar(sourceVertexType) + "/" + self._safeChar(sourceVertexId)
             if edgeType:
                 url += "/" + self._safeChar(edgeType)
                 if targetVertexType:
