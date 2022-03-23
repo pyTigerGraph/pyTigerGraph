@@ -562,6 +562,7 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
 
     # def delVerticesByType(self, vertexType: str, permanent: bool = False):
     # TODO Implementation
+    # TODO Maybe call it truncateVertex[Type] or delAllVertices?
 
     def vertexSetToDataFrame(self, vertexSet: list, withId: bool = True,
             withType: bool = False) -> pd.DataFrame:

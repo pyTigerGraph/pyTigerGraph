@@ -53,12 +53,12 @@ class test_pyTigerGraphVertex(pyTigerGraphUnitTest):
         self.assertEqual(3, ret)
 
         with self.assertRaises(TigerGraphException) as tge:
-            ret = self.conn.getVertexCount("*", "a01>=3")
+            self.conn.getVertexCount("*", "a01>=3")
         self.assertEqual("VertexType cannot be \"*\" if where condition is specified.",
             tge.exception.message)
 
         with self.assertRaises(TigerGraphException) as tge:
-            ret = self.conn.getVertexCount("non_existing_vertex_type")
+            self.conn.getVertexCount("non_existing_vertex_type")
         self.assertEqual("GSQL-7004", tge.exception.code)
 
     def test_04_upsertVertex(self):
@@ -67,11 +67,11 @@ class test_pyTigerGraphVertex(pyTigerGraphUnitTest):
         self.assertEqual(1, ret)
 
         with self.assertRaises(TigerGraphException) as tge:
-            ret = self.conn.upsertVertex("non_existing_vertex_type", 100, {"a01": 100})
+            self.conn.upsertVertex("non_existing_vertex_type", 100, {"a01": 100})
         self.assertEqual("REST-30200", tge.exception.code)
 
         with self.assertRaises(TigerGraphException) as tge:
-            ret = self.conn.upsertVertex("vertex4", 100, {"non_existing_vertex_attribute": 100})
+            self.conn.upsertVertex("vertex4", 100, {"non_existing_vertex_attribute": 100})
         self.assertEqual("REST-30200", tge.exception.code)
 
     def test_05_upsertVertices(self):
@@ -106,7 +106,7 @@ class test_pyTigerGraphVertex(pyTigerGraphUnitTest):
 
     def test_06_upsertVertexDataFrame(self):
         # TODO Implement
-        None
+        pass
 
     def test_07_getVertices(self):
         ret = self.conn.getVertices("vertex4", select="a01", where="a01>1,a01<5", sort="-a01",
@@ -172,6 +172,49 @@ class test_pyTigerGraphVertex(pyTigerGraphUnitTest):
 
         ret = self.conn.getVertexStats("vertex5", skipNA=True)
         self.assertEqual({}, ret)
+
+    def test_12_delVertices(self):
+        vs = [
+            (300, {"a01": 300}),
+            (301, {"a01": 301}),
+            (302, {"a01": 302}),
+            (303, {"a01": 303}),
+            (304, {"a01": 304})
+        ]
+        ret = self.conn.upsertVertices("vertex4", vs)
+        self.assertIsInstance(ret, int)
+        self.assertEqual(5, ret)
+
+        ret = self.conn.getVertices("vertex4", where="a01>=300")
+        self.assertIsInstance(ret, list)
+        self.assertEqual(5, len(ret))
+
+        ret = self.conn.delVertices("vertex4", where="a01>=303")
+        self.assertIsInstance(ret, int)
+        self.assertEqual(2, ret)
+
+    def test_13_delVerticesById(self):
+        ret = self.conn.delVerticesById("vertex4", 300)
+        self.assertIsInstance(ret, int)
+        self.assertEqual(1, ret)
+
+        ret = self.conn.delVerticesById("vertex4", [301, 302])
+        self.assertIsInstance(ret, int)
+        self.assertEqual(2, ret)
+
+    def test_14_delVerticesByType(self):
+        pass
+        # TODO Implement pyTigergraphVertices.delVerticesByType() first
+
+    def test_15_vertexSetToDataFrame(self):
+        ret = self.conn.getVertices("vertex4")
+        self.assertIsInstance(ret, list)
+        self.assertEqual(5, len(ret))
+
+        ret = self.conn.vertexSetToDataFrame(ret)
+        self.assertIsInstance(ret, pandas.DataFrame)
+        self.assertEqual(5, len(ret.index))
+        self.assertEqual(["v_id","a01"], list(ret.columns))
 
 
 if __name__ == '__main__':

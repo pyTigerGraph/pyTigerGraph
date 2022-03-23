@@ -262,7 +262,7 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
         Data is upserted:
             If edge is not yet present in graph, it will be created (see special case below).
             If it's already in the graph, it is updated with the values specified in the request.
-            If operator is "vertex_must_exist" then edge will only be created if both vertex exists
+            If "vertex_must_exist" is True then edge will only be created if both vertex exists
             in graph. Otherwise missing vertices are created with the new edge; the newly created
             vertices' attributes (if any) will be created with default values.
 
@@ -291,6 +291,9 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
             POST /graph/{graph_name}
         Documentation:
             https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#upsert-data-to-graph
+
+        TODO Add ack, new_vertex_only, vertex_must_exist, update_vertex_only and atomic_level
+            parameters and functionality.
         """
         if attributes is None:
             attributes = {}
@@ -335,6 +338,9 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
             POST /graph/{graph_name}
         Documentation:
             https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#upsert-data-to-graph
+
+        TODO Add ack, new_vertex_only, vertex_must_exist, update_vertex_only and atomic_level
+            parameters and functionality.
         """
         if not isinstance(edges, list):
             return None
@@ -500,7 +506,7 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
             return self.edgeSetToDataFrame(ret, withId, withType)
         return ret
 
-    def getEdgesDataframe(self, sourceVertexType: str, sourceVertexId: str, edgeType: str = "",
+    def getEdgesDataFrame(self, sourceVertexType: str, sourceVertexId: str, edgeType: str = "",
             targetVertexType: str = "", targetVertexId: str = "", select: str = "", where: str = "",
             limit: str = "", sort: str = "", timeout: int = 0) -> pd.DataFrame:
         """Retrieves edges of the given edge type originating from a specific source vertex.
@@ -542,6 +548,16 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
         else:
             return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType,
                 targetVertexId, select, where, limit, sort, fmt="df", timeout=timeout)
+
+    def getEdgesDataframe(self, sourceVertexType: str, sourceVertexId: str, edgeType: str = "",
+            targetVertexType: str = "", targetVertexId: str = "", select: str = "", where: str = "",
+            limit: str = "", sort: str = "", timeout: int = 0) -> pd.DataFrame:
+        """DEPRECATED
+
+        TODO Proper deprecation
+        """
+        return self.getEdgesDataFrame(sourceVertexType, sourceVertexId, edgeType, targetVertexType,
+            targetVertexId, select, where, limit, sort, timeout)
 
     def getEdgesByType(self, edgeType: str, fmt: str = "py", withId: bool = True,
             withType: bool = False) -> [dict, str, pd.DataFrame]:
@@ -598,7 +614,7 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
             return self.edgeSetToDataFrame(ret, withId, withType)
         return ret
 
-    # TODO getEdgesDataframeByType
+    # TODO getEdgesDataFrameByType
 
     def getEdgeStats(self, edgeTypes: [str, list], skipNA: bool = False) -> dict:
         """Returns edge attribute statistics.

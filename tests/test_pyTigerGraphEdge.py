@@ -128,6 +128,80 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
         self.assertIsInstance(ret, int)
         self.assertEqual(3, ret)
 
+        ret = self.conn.getEdgeCountFrom(sourceVertexType="vertex4", sourceVertexId=1,
+            edgeType="edge1_undirected", where="a01=2")
+        self.assertIsInstance(ret, int)
+        self.assertEqual(2, ret)
+
+        ret = self.conn.getEdgeCountFrom(sourceVertexType="vertex4", sourceVertexId=1,
+            edgeType="edge1_undirected", targetVertexType="vertex5")
+        self.assertIsInstance(ret, int)
+        self.assertEqual(3, ret)
+
+        ret = self.conn.getEdgeCountFrom(sourceVertexType="vertex4", sourceVertexId=1,
+            edgeType="edge1_undirected", targetVertexType="vertex5", targetVertexId=3)
+        self.assertIsInstance(ret, int)
+        self.assertEqual(1, ret)
+
+    def test_08_getEdgeCount(self):
+        ret = self.conn.getEdgeCount("*")
+        self.assertIsInstance(ret, dict)
+        self.assertIn("edge1_undirected", ret)
+        self.assertEqual(8, ret["edge1_undirected"])
+        self.assertIn("edge6_loop", ret)
+        self.assertEqual(0, ret["edge6_loop"])
+
+        ret = self.conn.getEdgeCount("edge4_many_to_many")
+        self.assertIsInstance(ret, int)
+        self.assertEqual(8, ret)
+
+        ret = self.conn.getEdgeCount("edge4_many_to_many", "vertex4")
+        self.assertIsInstance(ret, int)
+        self.assertEqual(8, ret)
+
+        ret = self.conn.getEdgeCount("edge4_many_to_many", "vertex4", "vertex5")
+        self.assertIsInstance(ret, int)
+        self.assertEqual(3, ret)
+
+    def test_09_upsertEdge(self):
+        ret = self.conn.upsertEdge("vertex6", 1, "edge4_many_to_many", "vertex7", 1)
+        self.assertIsInstance(ret, int)
+        self.assertEqual(1, ret)
+
+        ret = self.conn.upsertEdge("vertex6", 6, "edge4_many_to_many", "vertex7", 6)
+        self.assertIsInstance(ret, int)
+        self.assertEqual(1, ret)
+
+        # TODO Tests with ack, new_vertex_only, vertex_must_exist, update_vertex_only and
+        #   atomic_level parameters; when they will be added to pyTigergrapEdge.upsertEdge()
+
+    def test_10_upsertEdges(self):
+        pass
+
+    def test_11_upsertEdgeDataFrame(self):
+        pass
+
+    def test_12_getEdges(self):
+        pass
+
+    def test_13_getEdgesDataFrame(self):
+        pass
+
+    def test_14_getEdgesByType(self):
+        pass
+
+    def test_15_getEdgesDataFrameByType(self):
+        pass
+
+    def test_16_getEdgeStats(self):
+        pass
+
+    def test_17_delEdges(self):
+        pass
+
+    def test_18_edgeSetToDataFrame(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

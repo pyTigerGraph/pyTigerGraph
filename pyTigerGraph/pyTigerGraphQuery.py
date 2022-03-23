@@ -91,7 +91,8 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
 
         if isinstance(params, dict):
-            params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote, safe='')
+            params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote,
+                safe='')
 
         if usePost:
             return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName,
@@ -128,7 +129,8 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
         queryText = queryText.replace("$graphname", self.graphname)
         queryText = queryText.replace("@graphname@", self.graphname)
         if isinstance(params, dict):
-            params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote, safe='')
+            params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote,
+                safe='')
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText,
             params=params, authMode="pwd")
 
