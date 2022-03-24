@@ -2,14 +2,17 @@
 
 import json
 import urllib
+from datetime import datetime
 from urllib.parse import urlparse
 
 import pandas as pd
 
+from pyTigerGraph.pyTigerGraphException import TigerGraphException
 from pyTigerGraph.pyTigerGraphSchema import pyTigerGraphSchema
+from pyTigerGraph.pyTigerGraphUtils import pyTigerGraphUtils
 
 
-class pyTigerGraphQuery(pyTigerGraphSchema):
+class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
     """Query-specific pyTigerGraph functions."""
 
     # TODO getQueries()  # List _all_ query names
@@ -43,6 +46,42 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
     #   GET /gsqlserver/gsql/queryinfo
     #   https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#get-query-metadata
 
+    def _parseQueryParameters(self, params: dict) -> str:
+        """Parse a dictionary of query parameters and convert them to query string.
+
+        While most of the values provided for various query parameter types can be easily converted
+        to query string (key1=value1&key2=value2), SET and BAG parameter types, and especially
+        VERTEX and SET<VERTEX> (i.e. vertex primary ID types without vertex type specification)
+        require special handling.
+        See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_query_parameter_passing
+        """
+        ret = ""
+        for k, v in params.items():
+            if isinstance(v, tuple):
+                if len(v) == 2 and isinstance(v[1], str):
+                    ret += k + "=" + str(v[0]) + "&" + k + ".type=" + self._safeChar(v[1]) + "&"
+                else:
+                    raise TigerGraphException(
+                        "Invalid parameter value: (vertex_primary_id, vertex_type) was expected.")
+            elif isinstance(v, list):
+                i = 0
+                for vv in v:
+                    if isinstance(vv, tuple):
+                        if len(vv) == 2 and isinstance(vv[1], str):
+                            ret += k + "[" + str(i) + "]=" + self._safeChar(vv[0]) + "&" + \
+                                   k + "[" + str(i) + "].type=" + vv[1] + "&"
+                        else:
+                            raise TigerGraphException(
+                                "Invalid parameter value: (vertex_primary_id, vertex_type) was expected.")
+                    else:
+                        ret += k + "=" + self._safeChar(vv) + "&"
+                    i += 1
+            elif isinstance(v, datetime):
+                ret += k + "=" + self._safeChar(v.strftime("%Y-%m-%d %H:%M:%S")) + "&"
+            else:
+                ret += k + "=" + self._safeChar(v) + "&"
+        return ret[:-1]
+
     def runInstalledQuery(self, queryName: str, params: [str, dict] = None, timeout: int = None,
             sizeLimit: int = None, usePost: bool = False) -> list:
         """Runs an installed query.
@@ -56,6 +95,7 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
                 The name of the query to be executed.
             params:
                 Query parameters. A string of param1=value1&param2=value2 format or a dictionary.
+                See below for special rules for dictionaries.
             timeout:
                 Maximum duration for successful query execution (in milliseconds).
                 See: https://docs.tigergraph.com/dev/restpp-api/intro#gsql-query-timeout
@@ -69,6 +109,21 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
         Returns:
             The output of the query, a list of output elements (vertex sets, edge sets, variables,
             accumulators, etc.
+
+        Notes:
+            When specifying parameter values in a dictionary:
+                For primitive parameter types use
+                    "key": value
+                For `SET` and `BAG` parameter types with primitive values, use
+                    "key": [value1, value2, ...]
+                For `VERTEX<type>` use
+                    "key": primary_id
+                For `VERTEX` (no vertex type specified) use
+                    "key": (primary_id, "vertex_type")
+                For `SET<VERTEX<type>>` use
+                    "key": [primary_id1, primary_id2, ...]
+                For `SET<VERTEX>` (no vertex type specified) use
+                    "key": [(primary_id1, "vertex_type1"), (primary_id2, "vertex_type2"), ...]
 
         Endpoint:
             GET /query/{graph_name}/{query_name}
@@ -87,12 +142,11 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
         headers = {}
         if timeout and timeout > 0:
             headers["GSQL-TIMEOUT"] = str(timeout)
-        if sizeLimit:
+        if sizeLimit and sizeLimit > 0:
             headers["RESPONSE-LIMIT"] = str(sizeLimit)
 
         if isinstance(params, dict):
-            params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote,
-                safe='')
+            params = self._parseQueryParameters(params)
 
         if usePost:
             return self._post(self.restppUrl + "/query/" + self.graphname + "/" + queryName,
@@ -120,23 +174,41 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
                     }
             params:
                 A string of param1=value1&param2=value2 format or a dictionary.
+                See below for special rules for dictionaries.
+
+        Notes:
+            When specifying parameter values in a dictionary:
+                For primitive parameter types use
+                    "key": value
+                For `SET` and `BAG` parameter types with primitive values, use
+                    "key": [value1, value2, ...]
+                For `VERTEX<type>` use
+                    "key": primary_id
+                For `VERTEX` (no vertex type specified) use
+                    "key": (primary_id, "vertex_type")
+                For `SET<VERTEX<type>>` use
+                    "key": [primary_id1, primary_id2, ...]
+                For `SET<VERTEX>` (no vertex type specified) use
+                    "key": [(primary_id1, "vertex_type1"), (primary_id2, "vertex_type2"), ...]
 
         Endpoint:
             POST /gsqlserver/interpreted_query
         Documentation:
             https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-an-interpreted-query
+
+        TODO Add "GSQL-TIMEOUT: <timeout value in ms>" and "RESPONSE-LIMIT: <size limit in byte>"
+            plus parameters if applicable to interpreted queries (see runInstalledQuery() above)
         """
         queryText = queryText.replace("$graphname", self.graphname)
         queryText = queryText.replace("@graphname@", self.graphname)
         if isinstance(params, dict):
-            params = urllib.parse.urlencode(params, doseq=True, quote_via=urllib.parse.quote,
-                safe='')
+            params = self._parseQueryParameters(params)
         return self._post(self.gsUrl + "/gsqlserver/interpreted_query", data=queryText,
             params=params, authMode="pwd")
 
     # TODO getRunningQueries()
-    #  GET /showprocesslist/{graph_name}
-    #  https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#list-running-queries
+    # GET /showprocesslist/{graph_name}
+    # https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#list-running-queries
 
     def parseQueryOutput(self, output: list, graphOnly: bool = True) -> dict:
         """Parses query output and separates vertex and edge data (and optionally other output) for
@@ -260,7 +332,7 @@ class pyTigerGraphQuery(pyTigerGraphSchema):
 
                             # Then handle the edge itself
                             eId = o3["from_type"] + "(" + o3["from_id"] + ")->" + o3["to_type"] + \
-                                "(" + o3["to_id"] + ")"
+                                  "(" + o3["to_id"] + ")"
                             o3["e_id"] = eId
 
                             # Add reverse edge name, if applicable

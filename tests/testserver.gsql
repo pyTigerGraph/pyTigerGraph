@@ -252,4 +252,41 @@ END
 
 INSTALL QUERY query3_installed
 
+BEGIN
+CREATE QUERY query4_all_param_types(
+    INT                   p01_int
+  , UINT                  p02_uint
+  , FLOAT                 p03_float
+  , DOUBLE                p04_double
+  , STRING                p05_string
+  , BOOL                  p06_bool
+  , VERTEX                p07_vertex
+  , VERTEX<vertex4>       p08_vertex_vertex4
+  , DATETIME              p09_datetime
+  , SET<INT>              p10_set_int
+  , BAG<INT>              p11_bag_int
+//, FILE                  p12_file
+  , SET<VERTEX>           p13_set_vertex
+  , SET<VERTEX<vertex4>>  p14_set_vertex_vertex4
+) {
+
+  PRINT p01_int;
+  PRINT p02_uint;
+  PRINT p03_float;
+  PRINT p04_double;
+  PRINT p05_string;
+  PRINT p06_bool;
+  PRINT p07_vertex;
+  PRINT p08_vertex_vertex4;
+  PRINT p09_datetime;
+  PRINT p10_set_int;
+  PRINT p11_bag_int;
+//PRINT p12_file;
+  PRINT p13_set_vertex;
+  PRINT p14_set_vertex_vertex4;
+}
+END
+
+INSTALL QUERY query4_all_param_types
+
 // EOF

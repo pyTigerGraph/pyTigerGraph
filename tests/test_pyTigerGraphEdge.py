@@ -1,4 +1,7 @@
+import json
 import unittest
+
+import pandas
 
 from pyTigerGraphUnitTest import pyTigerGraphUnitTest
 
@@ -173,31 +176,117 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
         self.assertEqual(1, ret)
 
         # TODO Tests with ack, new_vertex_only, vertex_must_exist, update_vertex_only and
-        #   atomic_level parameters; when they will be added to pyTigergrapEdge.upsertEdge()
+        #   atomic_level parameters; when they will be added to pyTigerGraphEdge.upsertEdge()
 
     def test_10_upsertEdges(self):
-        pass
+        es = [
+            (2, 1),
+            (2, 2),
+            (2, 3),
+            (2, 4)
+        ]
+        ret = self.conn.upsertEdges("vertex6", "edge4_many_to_many", "vertex7", es)
+        self.assertIsInstance(ret, int)
+        self.assertEqual(4, ret)
+
+        ret = self.conn.getEdgeCount("edge4_many_to_many")
+        self.assertIsInstance(ret, int)
+        self.assertEqual(14, ret)
 
     def test_11_upsertEdgeDataFrame(self):
+        # TODO Implement
         pass
 
     def test_12_getEdges(self):
-        pass
+        ret = self.conn.getEdges("vertex4", 1)
+        self.assertIsInstance(ret, list)
+        self.assertEqual(6, len(ret))
+
+        ret = self.conn.getEdges("vertex4", 1, "edge1_undirected")
+        self.assertIsInstance(ret, list)
+        self.assertEqual(3, len(ret))
+
+        ret = self.conn.getEdges("vertex4", 1, "edge1_undirected", "vertex5")
+        self.assertIsInstance(ret, list)
+        self.assertEqual(3, len(ret))
+
+        ret = self.conn.getEdges("vertex4", 1, "edge1_undirected", "vertex5", 2)
+        self.assertIsInstance(ret, list)
+        self.assertEqual(1, len(ret))
+
+        ret = self.conn.getEdges("vertex4", 1, "edge1_undirected", select="a01", where="a01>1")
+        self.assertIsInstance(ret, list)
+        self.assertEqual(2, len(ret))
+
+        ret = self.conn.getEdges("vertex4", 1, "edge1_undirected", sort="-a01", limit=2)
+        self.assertIsInstance(ret, list)
+        self.assertEqual(2, len(ret))
+
+        ret = self.conn.getEdges("vertex4", 1, "edge1_undirected", "vertex5", fmt="json")
+        self.assertIsInstance(ret, str)
+        ret = json.loads(ret)
+        self.assertIsInstance(ret, list)
+        self.assertEqual(3, len(ret))
+
+        ret = self.conn.getEdges("vertex4", 1, "edge1_undirected", "vertex5", fmt="df")
+        self.assertIsInstance(ret, pandas.DataFrame)
+        self.assertEqual(3, len(ret.index))
 
     def test_13_getEdgesDataFrame(self):
-        pass
+        ret = self.conn.getEdgesDataFrame("vertex4", 1, "edge1_undirected", "vertex5")
+        self.assertIsInstance(ret, pandas.DataFrame)
+        self.assertEqual(3, len(ret.index))
 
     def test_14_getEdgesByType(self):
-        pass
+        ret = self.conn.getEdgesByType("edge1_undirected")
+        self.assertIsInstance(ret, list)
+        self.assertEqual(8, len(ret))
 
     def test_15_getEdgesDataFrameByType(self):
         pass
 
     def test_16_getEdgeStats(self):
-        pass
+        ret = self.conn.getEdgeStats("edge1_undirected")
+        self.assertIsInstance(ret, dict)
+        self.assertIn("edge1_undirected", ret)
+        self.assertEqual(2, ret["edge1_undirected"]["a01"]["MAX"])
+        self.assertEqual(1.875, ret["edge1_undirected"]["a01"]["AVG"])
+
+        ret = self.conn.getEdgeStats("*", skipNA=True)
+        self.assertIsInstance(ret, dict)
+        self.assertIn("edge3_directed_with_reverse", ret)
+        self.assertNotIn("edge4_many_to_many", ret)
 
     def test_17_delEdges(self):
-        pass
+        ret = self.conn.delEdges("vertex6", 1)
+        self.assertIsInstance(ret, dict)
+        self.assertEqual(7, len(ret))
+        self.assertIn("edge4_many_to_many", ret)
+        self.assertEqual(1, ret["edge4_many_to_many"])
+
+        ret = self.conn.delEdges("vertex6", 6, "edge4_many_to_many")
+        self.assertIsInstance(ret, dict)
+        self.assertEqual(1, len(ret))
+        self.assertIn("edge4_many_to_many", ret)
+        self.assertEqual(1, ret["edge4_many_to_many"])
+
+        ret = self.conn.delEdges("vertex6", 6, "edge4_many_to_many")
+        self.assertIsInstance(ret, dict)
+        self.assertEqual(1, len(ret))
+        self.assertIn("edge4_many_to_many", ret)
+        self.assertEqual(0, ret["edge4_many_to_many"])
+
+        ret = self.conn.delEdges("vertex6", 2, "edge4_many_to_many", "vertex7", 1)
+        self.assertIsInstance(ret, dict)
+        self.assertEqual(1, len(ret))
+        self.assertIn("edge4_many_to_many", ret)
+        self.assertEqual(1, ret["edge4_many_to_many"])
+
+        ret = self.conn.delEdges("vertex6", 2, "edge4_many_to_many", "vertex7")
+        self.assertIsInstance(ret, dict)
+        self.assertEqual(1, len(ret))
+        self.assertIn("edge4_many_to_many", ret)
+        self.assertEqual(3, ret["edge4_many_to_many"])
 
     def test_18_edgeSetToDataFrame(self):
         pass

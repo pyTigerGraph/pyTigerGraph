@@ -6,10 +6,9 @@ import pandas as pd
 
 from pyTigerGraph.pyTigerGraphException import TigerGraphException
 from pyTigerGraph.pyTigerGraphQuery import pyTigerGraphQuery
-from pyTigerGraph.pyTigerGraphUtils import pyTigerGraphUtils
 
 
-class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
+class pyTigerGraphEdge(pyTigerGraphQuery):
     """Edge-specific pyTigerGraph functions."""
 
     def getEdgeTypes(self, force: bool = False) -> list:
@@ -420,8 +419,8 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
 
     def getEdges(self, sourceVertexType: str, sourceVertexId: str, edgeType: str = None,
             targetVertexType: str = None, targetVertexId: str = None, select: str = "",
-            where: str = "", limit: str = "", sort: str = "", fmt: str = "py", withId: bool = True,
-            withType: bool = False, timeout: int = 0) -> [dict, str, pd.DataFrame]:
+            where: str = "", limit: [int, str] = None, sort: str = "", fmt: str = "py",
+            withId: bool = True, withType: bool = False, timeout: int = 0) -> [dict, str, pd.DataFrame]:
         """Retrieves edges of the given edge type originating from a specific source vertex.
 
         Only `sourceVertexType` and `sourceVertexId` are required.
@@ -543,11 +542,8 @@ class pyTigerGraphEdge(pyTigerGraphUtils, pyTigerGraphQuery):
             The (selected) details of the (matching) edge instances (sorted, limited) as dictionary,
             JSON or pandas DataFrame.
         """
-        if isinstance(sourceVertexId, list):
-            raise TigerGraphException("List is not yet supported", None)
-        else:
-            return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType,
-                targetVertexId, select, where, limit, sort, fmt="df", timeout=timeout)
+        return self.getEdges(sourceVertexType, sourceVertexId, edgeType, targetVertexType,
+            targetVertexId, select, where, limit, sort, fmt="df", timeout=timeout)
 
     def getEdgesDataframe(self, sourceVertexType: str, sourceVertexId: str, edgeType: str = "",
             targetVertexType: str = "", targetVertexId: str = "", select: str = "", where: str = "",
