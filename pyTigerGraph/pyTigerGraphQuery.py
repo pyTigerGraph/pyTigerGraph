@@ -54,6 +54,10 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
         VERTEX and SET<VERTEX> (i.e. vertex primary ID types without vertex type specification)
         require special handling.
         See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_query_parameter_passing
+
+        TODO Accept this format for SET<VERTEX>:
+            "key": [([p_id1, p_id2, ...], "vtype"), ...]
+            I.e. multiple primary IDs of the same vertex type
         """
         ret = ""
         for k, v in params.items():
@@ -156,8 +160,10 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
                 params=params, headers=headers)
 
     # TODO checkQueryStatus()
+    # GET /query_status/{graph_name}
 
     # TODO getQueryResult()
+    # GET /query_result/{requestid}
 
     def runInterpretedQuery(self, queryText: str, params: [str, dict] = None) -> list:
         """Runs an interpreted query.
@@ -209,6 +215,8 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
     # TODO getRunningQueries()
     # GET /showprocesslist/{graph_name}
     # https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#list-running-queries
+
+    # TODO GET /abortquery/{graph_name}
 
     def parseQueryOutput(self, output: list, graphOnly: bool = True) -> dict:
         """Parses query output and separates vertex and edge data (and optionally other output) for

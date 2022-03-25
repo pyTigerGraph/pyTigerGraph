@@ -55,3 +55,5 @@ class pyTigerGraphLoading(pyTigerGraphBase):
             sizeLimit=128000000):
         """DEPRECATED; use runLoadingJobWithFile()"""
         self.runLoadingJobWithFile(filePath, fileTag, jobName, sep, eol, timeout, sizeLimit)
+
+    # TODO POST /restpploader/{graph_name}

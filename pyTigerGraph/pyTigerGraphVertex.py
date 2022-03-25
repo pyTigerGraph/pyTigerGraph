@@ -562,7 +562,10 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
 
     # def delVerticesByType(self, vertexType: str, permanent: bool = False):
     # TODO Implementation
+    # TODO DELETE /graph/{graph_name}/delete_by_type/vertices/{vertex_type}/
     # TODO Maybe call it truncateVertex[Type] or delAllVertices?
+
+    # TODO GET /deleted_vertex_check/{graph_name}
 
     def vertexSetToDataFrame(self, vertexSet: list, withId: bool = True,
             withType: bool = False) -> pd.DataFrame:

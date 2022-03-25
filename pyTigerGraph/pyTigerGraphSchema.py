@@ -42,6 +42,7 @@ class pyTigerGraphSchema(pyTigerGraphBase):
         """
         if not isinstance(attributes, dict):
             return {}
+            # TODO Should return something else or raise exception?
         vals = {}
         for attr in attributes:
             val = attributes[attr]
@@ -76,7 +77,6 @@ class pyTigerGraphSchema(pyTigerGraphBase):
                 authMode="pwd")
         if udts and ("UDTs" not in self.schema or force):
             self.schema["UDTs"] = self._getUDTs()
-        self.schema["Message"] = "Hey!"
         return self.schema
 
     def upsertData(self, data: [str, object]) -> dict:
@@ -142,3 +142,5 @@ class pyTigerGraphSchema(pyTigerGraphBase):
         if sta:
             ret.update(self._get(url + "static=true", resKey=""))
         return ret
+
+    # TODO GET /rebuildnow/{graph_name}
