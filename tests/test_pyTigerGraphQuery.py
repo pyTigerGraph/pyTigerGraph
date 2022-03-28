@@ -12,15 +12,15 @@ class test_pyTigerGraphQuery(pyTigerGraphUnitTest):
         pass
 
     def test_02_getInstalledQueries(self):
-        ret = self.conn.getInstalledQueries()
-        self.assertIn("GET /query/tests/query1", ret)
-        # self.assertNotIn("GET /query/tests/query2_not_installed", ret)
-        self.assertIn("GET /query/tests/query3_installed", ret)
+        res = self.conn.getInstalledQueries()
+        self.assertIn("GET /query/tests/query1", res)
+        # self.assertNotIn("GET /query/tests/query2_not_installed", res)
+        self.assertIn("GET /query/tests/query3_installed", res)
 
     def test_03_runInstalledQuery(self):
-        ret = self.conn.runInstalledQuery("query1")
-        self.assertIn("ret", ret[0])
-        self.assertEqual(15, ret[0]["ret"])
+        res = self.conn.runInstalledQuery("query1")
+        self.assertIn("ret", res[0])
+        self.assertEqual(15, res[0]["ret"])
 
         params = {
             "p01_int": 1,
@@ -38,13 +38,13 @@ class test_pyTigerGraphQuery(pyTigerGraphUnitTest):
             "p14_set_vertex_vertex4": [1, 2, 3]
         }
 
-        ret = self.conn.runInstalledQuery("query4_all_param_types", params)
-        self.assertIsInstance(ret, list)
-        self.assertIsInstance(ret[4], dict)
-        self.assertIn("p05_string", ret[4])
-        self.assertEqual(params["p05_string"], ret[4]["p05_string"])
-        self.assertIsInstance(ret[11], dict)
-        vs = ret[11]
+        res = self.conn.runInstalledQuery("query4_all_param_types", params)
+        self.assertIsInstance(res, list)
+        self.assertIsInstance(res[4], dict)
+        self.assertIn("p05_string", res[4])
+        self.assertEqual(params["p05_string"], res[4]["p05_string"])
+        self.assertIsInstance(res[11], dict)
+        vs = res[11]
         self.assertIn("p13_set_vertex", vs)
         vs = sorted(vs["p13_set_vertex"])
         self.assertIsInstance(vs, list)
@@ -61,9 +61,9 @@ class test_pyTigerGraphQuery(pyTigerGraphUnitTest):
     ACCUM  @@summa += src.a01;
   PRINT @@summa AS ret;
 }"""
-        ret = self.conn.runInterpretedQuery(queryText)
-        self.assertIn("ret", ret[0])
-        self.assertEqual(15, ret[0]["ret"])
+        res = self.conn.runInterpretedQuery(queryText)
+        self.assertIn("ret", res[0])
+        self.assertEqual(15, res[0]["ret"])
 
         queryText = \
 """INTERPRET QUERY () FOR GRAPH @graphname@ {
@@ -75,9 +75,9 @@ class test_pyTigerGraphQuery(pyTigerGraphUnitTest):
     ACCUM  @@summa += src.a01;
   PRINT @@summa AS ret;
 }"""
-        ret = self.conn.runInterpretedQuery(queryText)
-        self.assertIn("ret", ret[0])
-        self.assertEqual(15, ret[0]["ret"])
+        res = self.conn.runInterpretedQuery(queryText)
+        self.assertIn("ret", res[0])
+        self.assertEqual(15, res[0]["ret"])
 
 
 if __name__ == '__main__':

@@ -47,7 +47,7 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
         return {}  # Vertex type was not found
         # TODO Should raise exception instead?
 
-    def getVertexCount(self, vertexType: str, where: str = "") -> dict:
+    def getVertexCount(self, vertexType: [str, list], where: str = "") -> [int, dict]:
         """Returns the number of vertices of the specified type.
 
         Uses:
@@ -84,21 +84,27 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-built-in-functions-on-graph
         """
         # If WHERE condition is not specified, use /builtins else use /vertices
+        if isinstance(vertexType, str) and vertexType != "*":
+            res = self._get(self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType
+                + "?count_only=true" + ("&filter=" + where if where else ""))[0]
+            return res["count"]
         if where:
             if vertexType == "*":
                 raise TigerGraphException(
                     "VertexType cannot be \"*\" if where condition is specified.", None)
-            res = self._get(
-                self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType +
-                "?count_only=true&filter=" + where)
-        else:
-            data = '{"function":"stat_vertex_number","type":"' + vertexType + '"}'
-            res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data)
-        if len(res) == 1 and res[0]["v_type"] == vertexType:
-            return res[0]["count"]
+            else:
+                raise TigerGraphException(
+                    "VertexType cannot be a list if where condition is specified.", None)
+        if vertexType == "*":
+            # TODO Investigate: /builtins/stat_vertex_number: why it is not up-to-date after insert?
+            # data = '{"function":"stat_vertex_number","type":"' + vertexType + '"}'
+            # res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data)
+            vertexType = self.getVertexTypes()
         ret = {}
-        for r in res:
-            ret[r["v_type"]] = r["count"]
+        for vt in vertexType:
+            res = self._get(self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vt
+                + "?count_only=true")[0]
+            ret[res["v_type"]] = res["count"]
         return ret
 
     def upsertVertex(self, vertexType: str, vertexId: str, attributes: dict = None) -> int:
@@ -149,8 +155,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             vertices:
                 A list of tuples in this format:
                     [
-                        (<vertex_id>, {<attribute_name>, <attribute_value>, …}),
-                        (<vertex_id>, {<attribute_name>, (<attribute_name>, <operator>), …}),
+                        (<vertex_id>, {<attribute_name>: <attribute_value>, …}),
+                        (<vertex_id>, {<attribute_name>: (<attribute_value>, <operator>), …}),
                         ⋮
                     ]
                 Example:

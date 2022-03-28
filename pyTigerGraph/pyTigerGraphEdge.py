@@ -320,7 +320,7 @@ class pyTigerGraphEdge(pyTigerGraphQuery):
                 A list in of tuples in this format:
                     [
                         (<source_vertex_id>, <target_vertex_id>, {<attribute_name>: <attribute_value>, …})
-                        (<source_vertex_id>, <target_vertex_id>, {<attribute_name>: (<attribute_name>, <operator>), …})
+                        (<source_vertex_id>, <target_vertex_id>, {<attribute_name>: (<attribute_value>, <operator>), …})
                         ⋮
                     ]
                 Example:
@@ -646,7 +646,8 @@ class pyTigerGraphEdge(pyTigerGraphQuery):
             res = self._post(self.restppUrl + "/builtins/" + self.graphname, data=data, resKey="",
                 skipCheck=True)
             if res["error"]:
-                if "stat_edge_attr is skiped" in res["message"]:
+                if "stat_edge_attr is skip" in res["message"] or \
+                        "No valid edge for the input edge type" in res["message"]:
                     if not skipNA:
                         ret[et] = {}
                 else:

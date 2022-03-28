@@ -155,12 +155,6 @@ CREATE SCHEMA_CHANGE JOB setup {
         FROM *
       , TO *
     );
-
-    ADD DIRECTED EDGE edge6_loop (
-        FROM vertex4
-      , TO   vertex4
-    );
-
 }
 END
 
@@ -172,6 +166,7 @@ CREATE SCHEMA_CHANGE JOB setup2 {
     ADD DIRECTED EDGE edge6_loop (
         FROM vertex4
       , TO   vertex4
+      , a01  INT
     );
 
 }
@@ -288,5 +283,9 @@ CREATE QUERY query4_all_param_types(
 END
 
 INSTALL QUERY query4_all_param_types
+
+CREATE SECRET secret1
+CREATE SECRET secret2
+CREATE SECRET secret3
 
 // EOF

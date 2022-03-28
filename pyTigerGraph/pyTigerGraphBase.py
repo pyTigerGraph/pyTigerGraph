@@ -19,6 +19,7 @@ def excepthook(type, value, traceback):
     See: https://docs.python.org/3/library/sys.html#sys.excepthook
     """
     print(value)
+    # TODO Proper logging
 
 
 class pyTigerGraphBase(object):
@@ -211,9 +212,11 @@ class pyTigerGraphBase(object):
         if not resKey:
             if self.debug:
                 print(res)
+                # TODO Proper logging
             return res
         if self.debug:
             print(res[resKey])
+            # TODO Proper logging
         return res[resKey]
 
     def _get(self, url: str, authMode: str = "token", headers: dict = None, resKey: str = "results",

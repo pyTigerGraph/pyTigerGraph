@@ -7,15 +7,15 @@ class test_pyTigerGraphSchema(pyTigerGraphUnitTest):
     conn = None
 
     def test_01_getUDTs(self):
-        ret = self.conn._getUDTs()
-        self.assertIsInstance(ret, list)
-        self.assertEqual(2, len(ret))
-        self.assertTrue(ret[0]["name"] == "tuple1_all_types" or ret[0]["name"] == "tuple2_simple")
+        res = self.conn._getUDTs()
+        self.assertIsInstance(res, list)
+        self.assertEqual(2, len(res))
+        self.assertTrue(res[0]["name"] == "tuple1_all_types" or res[0]["name"] == "tuple2_simple")
         tuple2_simple = {'name': 'tuple2_simple',
             'fields': [{'fieldName': 'field1', 'fieldType': 'INT'},
                 {'fieldName': 'field2', 'length': 10, 'fieldType': 'STRING'},
                 {'fieldName': 'field3', 'fieldType': 'DATETIME'}]}
-        self.assertTrue(ret[0] == tuple2_simple or ret[1] == tuple2_simple)
+        self.assertTrue(res[0] == tuple2_simple or res[1] == tuple2_simple)
 
     def test_02_upsertAttrs(self):
         tests = [
@@ -34,11 +34,11 @@ class test_pyTigerGraphSchema(pyTigerGraphUnitTest):
         ]
 
         for t in tests:
-            ret = self.conn._upsertAttrs(t[0])
-            self.assertEqual(t[1], ret)
+            res = self.conn._upsertAttrs(t[0])
+            self.assertEqual(t[1], res)
 
     def test_03_getSchema(self):
-        ret = self.conn.getSchema()
+        res = self.conn.getSchema()
         items = [
             ("GraphName"),
             ("VertexTypes", "Name", [
@@ -63,13 +63,13 @@ class test_pyTigerGraphSchema(pyTigerGraphUnitTest):
                 "tuple2_simple"
             ])
         ]
-        self.assertEqual(len(items), len(ret))
+        self.assertEqual(len(items), len(res))
         for i in items:
             if i == "GraphName":
-                self.assertEqual(self.conn.graphname, ret[i])
+                self.assertEqual(self.conn.graphname, res[i])
             else:
-                self.assertIn(i[0], ret)
-                t = ret[i[0]]
+                self.assertIn(i[0], res)
+                t = res[i[0]]
                 self.assertIsInstance(t, list)
                 self.assertEqual(len(i[2]), len(t))
                 for tt in t:
@@ -128,22 +128,22 @@ class test_pyTigerGraphSchema(pyTigerGraphUnitTest):
                 }
             }
         }
-        ret = self.conn.upsertData(data)
-        self.assertEqual({"accepted_vertices": 4, "accepted_edges": 3}, ret)
+        res = self.conn.upsertData(data)
+        self.assertEqual({"accepted_vertices": 4, "accepted_edges": 3}, res)
 
-        ret = self.conn.delVertices("vertex4", where="a01>1000")
-        self.assertEqual(2, ret)
+        res = self.conn.delVertices("vertex4", where="a01>1000")
+        self.assertEqual(2, res)
 
-        ret = self.conn.delVerticesById("vertex5", [5000, 5001])
-        self.assertEqual(2, ret)
+        res = self.conn.delVerticesById("vertex5", [5000, 5001])
+        self.assertEqual(2, res)
 
     def test_05_getEndpoints(self):
-        ret = self.conn.getEndpoints()
-        self.assertIsInstance(ret, dict)
-        self.assertIn("GET /endpoints/{graph_name}", ret)
+        res = self.conn.getEndpoints()
+        self.assertIsInstance(res, dict)
+        self.assertIn("GET /endpoints/{graph_name}", res)
 
-        ret = self.conn.getEndpoints(dynamic=True)
-        self.assertEqual(4, len(ret))
+        res = self.conn.getEndpoints(dynamic=True)
+        self.assertEqual(4, len(res))
 
 
 if __name__ == '__main__':

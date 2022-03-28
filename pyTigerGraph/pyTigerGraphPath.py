@@ -65,7 +65,7 @@ class pyTigerGraphPath(pyTigerGraphBase):
                     ret.append(tmp)
                 elif self.debug:
                     print("Invalid vertex type or value: " + str(v))
-            print(ret)
+                    # TODO Proper logging
             return ret
 
         def parseFilters(filters: list) -> list:
@@ -92,7 +92,7 @@ class pyTigerGraphPath(pyTigerGraphBase):
                     ret.append(tmp)
                 elif self.debug:
                     print("Invalid filter type or value: " + str(f))
-            print(ret)
+                    # TODO Proper logging
             return ret
 
         # Assembling the input payload
