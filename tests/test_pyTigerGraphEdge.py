@@ -166,6 +166,28 @@ class test_pyTigerGraphEdge(pyTigerGraphUnitTest):
         self.assertIsInstance(res, int)
         self.assertEqual(3, res)
 
+    """
+    Apparently, the following tests are not structured properly.
+    The code below first inserts edges in two steps, then retrieves them, and finally, deletes them.
+    It seems that the order of execution is not guaranteed, so the serialised nature of steps might
+    not work in some environments/setups.
+    Also, unittest runs separate tests with fresh instances of the TestCase, so setUp and tearDown
+    are executed before/after each tests and – importantly – it is not "possible" to persist
+    information between test cases (i.e. save a piece of information in e.g. a variable of the class
+    instance in one test and use it in another test) (it is technically possible, but not
+    recommended due to the aforementioned reasons).
+    
+    Luckily, it seems that tests are executed in alphabetical order, so there is a good chance that
+    in basic testing setups, they will be executed in the desired order.
+    
+    TODO How to structure tests so that every step can be executed independently?
+    E.g. how to test insertion and deletion of edge?
+     • Should the insertion test have a clean-up stage deleting the newly inserted vertices?
+       And similarly, should the deletion test have a setup stage, when vertices to be deleted are
+       inserted?
+     • Or should these two actions tested together? But that would defeat the idea of unittests.
+    """
+
     def test_09_upsertEdge(self):
         res = self.conn.upsertEdge("vertex6", 1, "edge4_many_to_many", "vertex7", 1)
         self.assertIsInstance(res, int)

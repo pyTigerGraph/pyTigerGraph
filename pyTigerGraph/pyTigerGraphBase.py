@@ -80,7 +80,7 @@ class pyTigerGraphBase(object):
 
         # TODO Use more generic name (e.g. `onCloud` or `viaFirewall`; not `beta` or `cgp`
         self.beta = gcp
-        restppPort=str(restppPort)
+        restppPort = str(restppPort)
         if self.beta and (restppPort == "9000" or restppPort == "443"):
             # TODO Should not `sslPort` be used instead of hard coded value?
             self.restppPort = "443"

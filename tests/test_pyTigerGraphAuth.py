@@ -8,7 +8,6 @@ class test_pyTigerGraphPath(pyTigerGraphUnitTest):
     conn = None
 
     def test_01_getSecrets(self):
-        return
         res = self.conn.showSecrets()
         self.assertIsInstance(dict)
         self.assertEqual(3, len(res))
@@ -38,8 +37,7 @@ class test_pyTigerGraphPath(pyTigerGraphUnitTest):
 
         with self.assertRaises(TigerGraphException) as tge:
             self.conn.createSecret("secret1")
-        self.assertEqual("The secret with alias secret1 already exists.",
-            tge.exception.message)
+        self.assertEqual("The secret with alias secret1 already exists.", tge.exception.message)
 
     def test_04_dropSecret(self):
         res = self.conn.showSecrets()
@@ -56,6 +54,15 @@ class test_pyTigerGraphPath(pyTigerGraphUnitTest):
 
         with self.assertRaises(TigerGraphException) as tge:
             res = self.conn.dropSecret("non_existent_secret", False)
+
+    def test_05_getToken(self):
+        pass
+
+    def test_06_refreshToken(self):
+        pass
+
+    def test_07_deleteToken(self):
+        pass
 
 
 if __name__ == '__main__':

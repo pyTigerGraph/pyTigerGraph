@@ -53,7 +53,10 @@ class pyTigerGraphLoading(pyTigerGraphBase):
 
     def uploadFile(self, filePath, fileTag, jobName="", sep=None, eol=None, timeout=16000,
             sizeLimit=128000000):
-        """DEPRECATED; use runLoadingJobWithFile()"""
+        """DEPRECATED
+
+        Use runLoadingJobWithFile()
+        TODO Proper depreciation"""
         self.runLoadingJobWithFile(filePath, fileTag, jobName, sep, eol, timeout, sizeLimit)
 
     # TODO POST /restpploader/{graph_name}
