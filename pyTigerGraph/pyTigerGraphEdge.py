@@ -675,12 +675,12 @@ class pyTigerGraphEdge(pyTigerGraphQuery):
 
     def delEdges(self, sourceVertexType: str, sourceVertexId: str, edgeType: str = "",
             targetVertexType: str = "", targetVertexId: str = "", where: str = "",
-            limit: str = "", sort: str = "", timeout: int = 0):
+            limit: str = "", sort: str = "", timeout: int = 0) -> dict:
         """Deletes edges from the graph.
 
-        Only ``sourceVertexType`` and ``sourceVertexId`` are required.
-        If ``targetVertexId`` is specified, then ``targetVertexType`` must also be specified.
-        If ``targetVertexType`` is specified, then ``edgeType`` must also be specified.
+        Only `sourceVertexType` and `sourceVertexId` are required.
+        If `targetVertexId` is specified, then `targetVertexType` must also be specified.
+        If `targetVertexType` is specified, then `edgeType` must also be specified.
 
         Args:
             sourceVertexType:
@@ -704,7 +704,7 @@ class pyTigerGraphEdge(pyTigerGraphQuery):
                 Time allowed for successful execution (0 = no limit, default).
 
         Returns:
-             A dictionary of `edge_type: deleted_edge_count`>` pairs.
+             A dictionary of `edge_type: deleted_edge_count` pairs.
 
         Endpoint:
             - `DELETE /graph/{graph_name}/edges/{source_vertex_type}/{source_vertex_id}/{edge_type}/{target_vertex_type}/{target_vertex_id}`
