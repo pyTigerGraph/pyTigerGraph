@@ -237,7 +237,7 @@ class pyTigerGraphEdge(pyTigerGraphQuery):
             targetVertexType: str = "") -> dict:
         """Returns the number of edges of an edge type.
 
-        This is a simplified version of ``getEdgeCountFrom()``, to be used when the total number of
+        This is a simplified version of `getEdgeCountFrom()`, to be used when the total number of
         edges of a given type is needed, regardless which vertex instance they are originated from.
         See documentation of `getEdgeCountFrom` above for more details.
 
@@ -741,10 +741,10 @@ class pyTigerGraphEdge(pyTigerGraphQuery):
         """Converts an edge set to Pandas DataFrame
 
         Edge sets contain instances of the same edge type. Edge sets are not generated "naturally"
-        like vertex sets, you need to collect edges in (global) accumulators, for example when you
+        like vertex sets, you need to collect edges in (global) accumulators, like in case when you
         want to visualise them in GraphStudio or by other tools.
 
-        Example:
+        For example:
         ```
         SetAccum<EDGE> @@edges;
 

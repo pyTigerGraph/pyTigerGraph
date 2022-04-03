@@ -58,8 +58,7 @@ class pyTigerGraphSchema(pyTigerGraphBase):
 
         Args:
             udts:
-                If `True`, calls `_getUDTs()`, i.e. includes User Defined Types in the schema
-                details.
+                If `True`, the output includes User Defined Types in the schema details.
             force:
                 If `True`, retrieves the schema metadata again, otherwise returns a cached copy of
                 the schema metadata (if they were already fetched previously).
@@ -68,9 +67,8 @@ class pyTigerGraphSchema(pyTigerGraphBase):
             The schema metadata.
 
         Endpoint:
-            GET /gsqlserver/gsql/schema
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#show-graph-schema-metadata
+            - `GET /gsqlserver/gsql/schema`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_show_graph_schema_metadata
         """
         if not self.schema or force:
             self.schema = self._get(self.gsUrl + "/gsqlserver/gsql/schema?graph=" + self.graphname,
@@ -90,9 +88,8 @@ class pyTigerGraphSchema(pyTigerGraphBase):
             The result of upsert (number of vertices and edges accepted/upserted).
 
         Endpoint:
-            POST /graph
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#upsert-data-to-graph
+            - `POST /graph`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_upsert_data_to_graph
         """
         if not isinstance(data, str):
             data = json.dumps(data)
@@ -113,9 +110,8 @@ class pyTigerGraphSchema(pyTigerGraphBase):
         If none of the above arguments are specified, all endpoints are listed
 
         Endpoint:
-            GET /endpoints/{graph_name}
-        Documentation:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_list_all_endpoints
+            - `GET /endpoints/{graph_name}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_list_all_endpoints
         """
         ret = {}
         if not (builtin or dynamic or static):

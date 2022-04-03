@@ -18,8 +18,7 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
     # TODO getQueries()  # List _all_ query names
 
     def getInstalledQueries(self, fmt: str = "py") -> [dict, json, pd.DataFrame]:
-        """
-        Returns a list of installed queries.
+        """Returns a list of installed queries.
 
         Args:
             fmt:

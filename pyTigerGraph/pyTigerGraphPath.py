@@ -14,8 +14,7 @@ class pyTigerGraphPath(pyTigerGraphBase):
             allShortestPaths: bool = False) -> str:
         """Prepares the input parameters by transforming them to the format expected by the path algorithms.
 
-        See:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_input_parameters_and_output_format_for_path_finding
+        See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_input_parameters_and_output_format_for_path_finding
 
         A vertex set is a dict that has three top-level keys: v_type, v_id, attributes (a dict).
 
@@ -118,37 +117,43 @@ class pyTigerGraphPath(pyTigerGraphBase):
             edgeFilters: [list, dict] = None, allShortestPaths: bool = False) -> dict:
         """Find the shortest path (or all shortest paths) between the source and target vertex sets.
 
-        See:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_input_parameters_and_output_format_for_path_finding
-
-        A vertex set is a dict that has three top-level keys: v_type, v_id, attributes (a dict).
+        A vertex set is a dict that has three top-level keys: `v_type`, `v_id`, `attributes` (a dict).
 
         Args:
             sourceVertices:
-                A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples;
+                A vertex set (a list of vertices) or a list of `(vertexType, vertexID)` tuples;
                 the source vertices of the shortest paths sought.
             targetVertices:
-                A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples;
+                A vertex set (a list of vertices) or a list of `(vertexType, vertexID)` tuples;
                 the target vertices of the shortest paths sought.
             maxLength:
                 The maximum length of a shortest path. Optional, default is 6.
             vertexFilters:
                 An optional list of (vertexType, condition) tuples or
-                {"type": <str>, "condition": <str>} dictionaries.
+                `{"type": <str>, "condition": <str>}` dictionaries.
             edgeFilters:
                 An optional list of (edgeType, condition) tuples or
-                {"type": <str>, "condition": <str>} dictionaries.
+                `{"type": <str>, "condition": <str>}` dictionaries.
             allShortestPaths:
-                If true, the endpoint will return all shortest paths between the source and target.
-                Default is false, meaning that the endpoint will return only one path.
+                If `True`, the endpoint will return all shortest paths between the source and target.
+                Default is `False`, meaning that the endpoint will return only one path.
 
         Returns:
             The shortest path between the source and the target.
+            The returned value is a subgraph: all vertices and edges that are part of the path(s);
+            i.e. not a (list of individual) path(s).
+
+        Examples:
+            ```
+            path = conn.shortestPath(("account", 10), ("person", 50), maxLength=3)
+
+            path = conn.shortestPath(("account", 10), ("person", 50), allShortestPaths=True,
+                vertexFilters=("transfer", "amount>950"), edgeFilters=("receive", "type=4"))
+            ```
 
         Endpoint:
-            POST /shortestpath/{graphName}
-        Documentation:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_find_shortest_path
+            - `POST /shortestpath/{graphName}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_find_shortest_path
         """
         data = self._preparePathParams(sourceVertices, targetVertices, maxLength, vertexFilters,
             edgeFilters, allShortestPaths)
@@ -160,33 +165,39 @@ class pyTigerGraphPath(pyTigerGraphBase):
         """Find all possible paths up to a given maximum path length between the source and target
         vertex sets.
 
-        See:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_input_parameters_and_output_format_for_path_finding
-
         A vertex set is a dict that has three top-level keys: v_type, v_id, attributes (a dict).
 
         Args:
             sourceVertices:
-                A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples;
+                A vertex set (a list of vertices) or a list of `(vertexType, vertexID)` tuples;
                 the source vertices of the shortest paths sought.
             targetVertices:
-                A vertex set (a list of vertices) or a list of (vertexType, vertexID) tuples;
+                A vertex set (a list of vertices) or a list of `(vertexType, vertexID)` tuples;
                 the target vertices of the shortest paths sought.
             maxLength:
                 The maximum length of the paths.
             vertexFilters:
                 An optional list of (vertexType, condition) tuples or
-                {"type": <str>, "condition": <str>} dictionaries.
+                `{"type": <str>, "condition": <str>}` dictionaries.
             edgeFilters:
                 An optional list of (edgeType, condition) tuples or
-                {"type": <str>, "condition": <str>} dictionaries.
+                `{"type": <str>, "condition": <str>}` dictionaries.
 
-        See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#input-parameters-and-output-format-for-path-finding for information on filters.
+        Returns:
+            All paths between a source vertex (or vertex set) and target vertex (or vertex set).
+            The returned value is a subgraph: all vertices and edges that are part of the path(s);
+            i.e. not a (list of individual) path(s).
+
+        Example:
+            ```
+            path = conn.allPaths(("account", 10), ("person", 50), allShortestPaths=True,
+                vertexFilters=("transfer", "amount>950"), edgeFilters=("receive", "type=4"))
+            ```
+
 
         Endpoint:
-            POST /allpaths/{graphName}
-        Documentation:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_find_all_paths
+            - `POST /allpaths/{graphName}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_find_all_paths
         """
         data = self._preparePathParams(sourceVertices, targetVertices, maxLength, vertexFilters,
             edgeFilters)

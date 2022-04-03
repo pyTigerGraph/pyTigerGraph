@@ -41,10 +41,9 @@ class pyTigerGraphUtils(pyTigerGraphBase):
             "Hello GSQL" if everything was OK.
 
         Endpoint:
-            GET /echo
-            POST /echo
-        Documentation:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_echo
+            - `GET /echo`
+            - `POST /echo`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_echo
 
         TODO Implement POST
         """
@@ -65,9 +64,8 @@ class pyTigerGraphUtils(pyTigerGraphBase):
             info for each components.
 
         Endpoint:
-            GET /version
-        Documentation:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_show_component_versions
+            - `GET /version`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_show_component_versions
         """
         if self.useCert and self.certPath:
             response = requests.request("GET", self.restppUrl + "/version/" + self.graphname,
@@ -93,6 +91,8 @@ class pyTigerGraphUtils(pyTigerGraphBase):
     def getVer(self, component: str = "product", full: bool = False) -> str:
         """Gets the version information of specific component.
 
+        Get the full list of components using `getVersion()`.
+
         Args:
             component:
                 One of TigerGraph's components (e.g. product, gpe, gse).
@@ -103,9 +103,7 @@ class pyTigerGraphUtils(pyTigerGraphBase):
             Version info for specified component.
 
         Raises:
-            TigerGraphException if invalid/non-existent component is specified.
-
-        Get the full list of components using `getVersion`.
+            `TigerGraphException` if invalid/non-existent component is specified.
         """
         ret = ""
         for v in self.getVersion():
