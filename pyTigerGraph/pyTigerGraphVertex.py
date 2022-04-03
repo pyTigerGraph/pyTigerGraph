@@ -1,4 +1,4 @@
-"""Vertex-specific pyTigerGraph functions."""
+"""Vertex-specific functions."""
 
 import json
 
@@ -10,7 +10,7 @@ from pyTigerGraph.pyTigerGraphUtils import pyTigerGraphUtils
 
 
 class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
-    """Vertex-specific pyTigerGraph functions."""
+    """Vertex-specific functions."""
 
     def getVertexTypes(self, force: bool = False) -> list:
         """Returns the list of vertex type names of the graph.
@@ -18,7 +18,7 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
         Args:
             force:
                 If `True`, forces the retrieval the schema metadata again, otherwise returns a
-                cached copy of vertex type details (if they were already fetched previously).
+                cached copy of vertex type metadata (if they were already fetched previously).
 
         Returns:
             The list of vertex types defined in the the current graph.
@@ -50,13 +50,6 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
     def getVertexCount(self, vertexType: [str, list], where: str = "") -> [int, dict]:
         """Returns the number of vertices of the specified type.
 
-        Uses:
-            If ``vertexType`` == "*": vertex count of all vertex types (`where` cannot be specified
-                in this case).
-            If ``vertexType`` is specified only: vertex count of the given type.
-            If ``vertexType`` and ``where`` are specified: vertex count of the given type after
-                filtered by ``where`` condition(s).
-
         Args:
             vertexType:
                 The name of the vertex type.
@@ -64,24 +57,26 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
                 A comma separated list of conditions that are all applied on each vertex's
                 attributes. The conditions are in logical conjunction (i.e. they are "AND'ed"
                 together).
-                See: filter at https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#parameters-15
 
         Returns:
             A dictionary of <vertex_type>: <vertex_count> pairs.
 
+        Uses:
+            - If `vertexType` == "*": the count of the instances of all vertex types (`where` cannot
+                be specified in this case).
+            - If `vertexType` is specified only: count of the instances of the given vertex type.
+            - If `vertexType` and `where` are specified: count of the instances of the given vertex
+                type after being filtered by `where` condition(s).
+
         Raises:
-            TigerGraphException when "*" is specified as vertex type and a where condition is
-            provided; or invalid vertex type name is specified.
+            `TigerGraphException` when "*" is specified as vertex type and a `where` condition is
+            provided; or when invalid vertex type name is specified.
 
-        Endpoint:
-            GET /graph/{graph_name}/vertices
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#list-vertices
-
-        Endpoint:
-            POST /builtins
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-built-in-functions-on-graph
+        Endpoints:
+            - `GET /graph/{graph_name}/vertices`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_list_vertices
+            - `POST /builtins`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_run_built_in_functions_on_graph
         """
         # If WHERE condition is not specified, use /builtins else use /vertices
         if isinstance(vertexType, str) and vertexType != "*":
@@ -111,9 +106,10 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
         """Upserts a vertex.
 
         Data is upserted:
-            If vertex is not yet present in graph, it will be created.
-            If it's already in the graph, its attributes are updated with the values specified in
-                the request. An optional operator controls how the attributes are updated.
+
+        - If vertex is not yet present in graph, it will be created.
+        - If it's already in the graph, its attributes are updated with the values specified in
+            the request. An optional operator controls how the attributes are updated.
 
         Args:
             vertexType:
@@ -122,19 +118,21 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
                 The primary ID of the vertex to be upserted.
             attributes:
                 The attributes of the vertex to be upserted; a dictionary in this format:
+                ```
                     {<attribute_name>: <attribute_value>|(<attribute_name>, <operator>), …}
+                ```
                 Example:
+                ```
                     {"name": "Thorin", points: (10, "+"), "bestScore": (67, "max")}
-                For valid values of <operator> see:
-                    https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#operation-codes
+                ```
+                For valid values of `<operator>` see https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#operation-codes .
 
         Returns:
              A single number of accepted (successfully upserted) vertices (0 or 1).
 
         Endpoint:
-            POST /graph/{graph_name}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#upsert-data-to-graph
+            - `POST /graph/{graph_name}`
+                See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#upsert-data-to-graph
         """
         if not isinstance(attributes, dict):
             return None
@@ -154,26 +152,28 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
                 The name of the vertex type.
             vertices:
                 A list of tuples in this format:
-                    [
-                        (<vertex_id>, {<attribute_name>: <attribute_value>, …}),
-                        (<vertex_id>, {<attribute_name>: (<attribute_value>, <operator>), …}),
-                        ⋮
-                    ]
+                ```
+                [
+                    (<vertex_id>, {<attribute_name>: <attribute_value>, …}),
+                    (<vertex_id>, {<attribute_name>: (<attribute_value>, <operator>), …}),
+                    ⋮
+                ]
+                ```
                 Example:
-                    [
-                        (2, {"name": "Balin", "points": (10, "+"), "bestScore": (67, "max")}),
-                        (3, {"name": "Dwalin", "points": (7, "+"), "bestScore": (35, "max")})
-                    ]
-                For valid values of <operator> see:
-                    https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#operation-codes
+                ```
+                [
+                    (2, {"name": "Balin", "points": (10, "+"), "bestScore": (67, "max")}),
+                    (3, {"name": "Dwalin", "points": (7, "+"), "bestScore": (35, "max")})
+                ]
+                ```
+                For valid values of `<operator>` see https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#operation-codes .
 
         Returns:
             A single number of accepted (successfully upserted) vertices (0 or positive integer).
 
         Endpoint:
-            POST /graph/{graph_name}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#upsert-data-to-graph
+            - `POST /graph/{graph_name}`
+                See https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#upsert-data-to-graph
         """
         if not isinstance(vertices, list):
             return None
@@ -199,10 +199,10 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
                 The field name where the vertex primary id is given. If omitted the dataframe index
                 would be used instead.
             attributes:
-                A dictionary in the form of {target: source} where source is the column name in the
-                dataframe and target is the attribute name in the graph vertex. When omitted, all
-                columns would be upserted with their current names. In this case column names must
-                match the vertex's attribute names.
+                A dictionary in the form of `{target: source}` where source is the column name in
+                the dataframe and target is the attribute name in the graph vertex. When omitted,
+                all columns would be upserted with their current names. In this case column names
+                must match the vertex's attribute names.
 
         Returns:
             The number of vertices upserted.
@@ -225,11 +225,11 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             withType: bool = False, timeout: int = 0) -> [dict, str, pd.DataFrame]:
         """Retrieves vertices of the given vertex type.
 
-        Notes:
+        *Note*:
             The primary ID of a vertex instance is NOT an attribute, thus cannot be used in
-            ``select``, ``where`` or ``sort`` parameters (unless the
-            ``WITH primary_id_as_attribute`` clause was used when the vertex type was created).
-            Use ``getVerticesById()`` if you need to retrieve vertices by their primary ID.
+            `select`, `where` or `sort` parameters (unless the `WITH primary_id_as_attribute` clause
+            was used when the vertex type was created). /
+            Use `getVerticesById()` if you need to retrieve vertices by their primary ID.
 
         Args:
             vertexType:
@@ -247,13 +247,13 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
                 Must be used with `sort`.
             fmt:
                 Format of the results:
-                    "py":   Python objects
-                    "json": JSON document
-                    "df":   pandas DataFrame
+                - "py":   Python objects
+                - "json": JSON document
+                - "df":   pandas DataFrame
             withId:
-                (If the output format is "df") should the vertex ID be included in the dataframe?
+                (When the output format is "df") should the vertex ID be included in the dataframe?
             withType:
-                (If the output format is "df") should the vertex type be included in the dataframe?
+                (When the output format is "df") should the vertex type be included in the dataframe?
             timeout:
                 Time allowed for successful execution (0 = no limit, default).
 
@@ -262,9 +262,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             dictionary, JSON or pandas DataFrame.
 
         Endpoint:
-            GET /graph/{graph_name}/vertices/{vertex_type}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#list-vertices
+            - `GET /graph/{graph_name}/vertices/{vertex_type}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_list_vertices
         """
         url = self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType
         isFirst = True
@@ -295,13 +294,13 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             limit: str = "", sort: str = "", timeout: int = 0) -> pd.DataFrame:
         """Retrieves vertices of the given vertex type and returns them as pandas DataFrame.
 
-        This is a shortcut to ``getVertices(..., fmt="df", withId=True, withType=False)``.
+        This is a shortcut to `getVertices(..., fmt="df", withId=True, withType=False)`.
 
-        Notes:
+        *Note*:
             The primary ID of a vertex instance is NOT an attribute, thus cannot be used in
-            ``select``, ``where`` or ``sort`` parameters (unless the
-            ``WITH primary_id_as_attribute`` clause was used when the vertex type was created).
-            Use ``getVerticesById()`` if you need to retrieve vertices by their primary ID.
+            `select`, `where` or `sort` parameters (unless the `WITH primary_id_as_attribute` clause
+            was used when the vertex type was created). /
+            Use `getVerticesById()` if you need to retrieve vertices by their primary ID.
 
         Args:
             vertexType:
@@ -330,6 +329,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
     def getVertexDataframe(self, vertexType: str, select: str = "", where: str = "",
             limit: str = "", sort: str = "", timeout: int = 0) -> pd.DataFrame:
         """DEPRECATED
+
+        Use `getVertexDataFrame()` instead.
 
         TODO Proper deprecation
         """
@@ -365,9 +366,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             DataFrame.
 
         Endpoint:
-            GET /graph/{graph_name}/vertices/{vertex_type}/{vertex_id}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#retrieve-a-vertex
+            - `GET /graph/{graph_name}/vertices/{vertex_type}/{vertex_id}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_retrieve_a_vertex
 
         TODO Find out how/if select and timeout can be specified
         """
@@ -417,6 +417,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             select: str = "") -> pd.DataFrame:
         """DEPRECATED
 
+        Use `getVertexDataFrameById()` instead.
+
         TODO Proper deprecation
         """
         return self.getVertexDataFrameById(vertexType, vertexIds, select)
@@ -436,9 +438,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             A dictionary of various vertex stats for each vertex type specified.
 
         Endpoint:
-            POST /builtins/{graph_name}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-built-in-functions-on-graph
+            - `POST /builtins/{graph_name}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_run_built_in_functions_on_graph
         """
         vts = []
         if vertexTypes == "*":
@@ -472,11 +473,11 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             permanent: bool = False, timeout: int = 0) -> int:
         """Deletes vertices from graph.
 
-        Notes:
+        *Note*:
             The primary ID of a vertex instance is NOT an attribute, thus cannot be used in
-            ``where`` or ``sort`` parameters (unless the ``WITH primary_id_as_attribute`` clause was
-            used when the vertex type was created).
-            Use ``delVerticesById`` if you need to delete by vertex ID.
+            `select`, `where` or `sort` parameters (unless the `WITH primary_id_as_attribute` clause
+            was used when the vertex type was created). /
+            Use `delVerticesById()` if you need to retrieve vertices by their primary ID.
 
         Args:
             vertexType:
@@ -503,9 +504,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             arguments.
 
         Endpoint:
-            DELETE /graph/{graph_name}/vertices/{vertex_type}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-vertices
+            - `DELETE /graph/{graph_name}/vertices/{vertex_type}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_delete_vertices
         """
         url = self.restppUrl + "/graph/" + self.graphname + "/vertices/" + vertexType
         isFirst = True
@@ -541,9 +541,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             A single number of vertices deleted.
 
         Endpoint:
-            DELETE /graph/{graph_name}/vertices/{vertex_type}/{vertex_id}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#delete-a-vertex
+            - `DELETE /graph/{graph_name}/vertices/{vertex_type}/{vertex_id}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_delete_a_vertex
         """
         if not vertexIds:
             raise TigerGraphException("No vertex ID was not specified.", None)
@@ -577,14 +576,14 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             withType: bool = False) -> pd.DataFrame:
         """Converts a vertex set to Pandas DataFrame.
 
-        Vertex sets are used for both the input and output of ``SELECT`` statements. They contain
+        Vertex sets are used for both the input and output of `SELECT` statements. They contain
         instances of vertices of the same type.
         For each vertex instance the vertex ID, the vertex type and the (optional) attributes are
-        present (under ``v_id``, ``v_type`` and ``attributes`` keys, respectively).
-        See an example in ``edgeSetToDataFrame()``.
+        present (under `v_id`, `v_type` and `attributes` keys, respectively). /
+        See an example in `edgeSetToDataFrame()`.
 
         A vertex set has this structure (when serialised as JSON):
-
+        ```
         [
             {
                 "v_id": <vertex_id>,
@@ -598,10 +597,8 @@ class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
             },
                 ⋮
         ]
-
-        Documentation:
-            https://docs.tigergraph.com/gsql-ref/current/querying/declaration-and-assignment-statements#_vertex_set_variables
-            https://docs.tigergraph.com/gsql-ref/current/querying/output-statements-and-file-objects#_examples_of_printing_various_data_types
+        ```
+        For more information on vertex sets see https://docs.tigergraph.com/gsql-ref/current/querying/declaration-and-assignment-statements#_vertex_set_variables .
 
         Args:
             vertexSet:

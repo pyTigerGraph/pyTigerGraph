@@ -1,4 +1,4 @@
-"""Query-specific pyTigerGraph functions."""
+"""Query-specific functions."""
 
 import json
 import urllib
@@ -13,7 +13,7 @@ from pyTigerGraph.pyTigerGraphUtils import pyTigerGraphUtils
 
 
 class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
-    """Query-specific pyTigerGraph functions."""
+    """Query-specific functions."""
 
     # TODO getQueries()  # List _all_ query names
 
@@ -24,9 +24,9 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
         Args:
             fmt:
                 Format of the results:
-                    "py":   Python objects (default)
-                    "json": JSON document
-                    "df":   pandas DataFrame
+                - "py":   Python objects (default)
+                - "json": JSON document
+                - "df":   pandas DataFrame
 
         Returns:
             The names of the installed queries.
@@ -102,10 +102,10 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
                 See below for special rules for dictionaries.
             timeout:
                 Maximum duration for successful query execution (in milliseconds).
-                See: https://docs.tigergraph.com/dev/restpp-api/intro#gsql-query-timeout
+                See https://docs.tigergraph.com/tigergraph-server/current/api/#_gsql_query_timeout
             sizeLimit:
                 Maximum size of response (in bytes).
-                See: https://docs.tigergraph.com/dev/restpp-api/intro#response-size
+                See https://docs.tigergraph.com/tigergraph-server/current/api/#_response_size
             usePost:
                 The RESTPP accepts a maximum URL length of 8192 characters. Use POST if params cause
                 you to exceed this limit.
@@ -116,28 +116,26 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
 
         Notes:
             When specifying parameter values in a dictionary:
-                For primitive parameter types use
-                    "key": value
-                For `SET` and `BAG` parameter types with primitive values, use
-                    "key": [value1, value2, ...]
-                For `VERTEX<type>` use
-                    "key": primary_id
-                For `VERTEX` (no vertex type specified) use
-                    "key": (primary_id, "vertex_type")
-                For `SET<VERTEX<type>>` use
-                    "key": [primary_id1, primary_id2, ...]
-                For `SET<VERTEX>` (no vertex type specified) use
-                    "key": [(primary_id1, "vertex_type1"), (primary_id2, "vertex_type2"), ...]
 
-        Endpoint:
-            GET /query/{graph_name}/{query_name}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-an-installed-query-get
+            - For primitive parameter types use
+                `"key": value`
+            - For `SET` and `BAG` parameter types with primitive values, use
+                `"key": [value1, value2, ...]`
+            - For `VERTEX<type>` use
+                `"key": primary_id`
+            - For `VERTEX` (no vertex type specified) use
+                `"key": (primary_id, "vertex_type")`
+            - For `SET<VERTEX<type>>` use
+                `"key": [primary_id1, primary_id2, ...]`
+            - For `SET<VERTEX>` (no vertex type specified) use
+                `"key": [(primary_id1, "vertex_type1"), (primary_id2, "vertex_type2"), ...]`
 
-        Endpoint:
-            POST /query/{graph_name}/{query_name}
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-an-installed-query-post
+
+        Endpoints:
+            - `GET /query/{graph_name}/{query_name}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_run_an_installed_query_get
+            - `POST /query/{graph_name}/{query_name}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_run_an_installed_query_post
 
         TODO Specify replica: GSQL-REPLICA
         TODO Specify thread limit: GSQL-THREAD-LIMIT
@@ -173,34 +171,40 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
 
         Args:
             queryText:
-                The text of the GSQL query:
-                You must provide the query text in this format:
-                    INTERPRET QUERY (<params>) FOR GRAPH <graph_name> {
-                        <statements>
-                    }
+                The text of the GSQL query that must be provided in this format:
+                ```
+                INTERPRET QUERY (<params>) FOR GRAPH <graph_name> {
+                    <statements>
+                }
+                ```
             params:
-                A string of param1=value1&param2=value2 format or a dictionary.
+                A string of `param1=value1&param2=value2...` format or a dictionary.
                 See below for special rules for dictionaries.
+
+        Returns:
+            The output of the query, a list of output elements (vertex sets, edge sets, variables,
+            accumulators, etc.
 
         Notes:
             When specifying parameter values in a dictionary:
-                For primitive parameter types use
-                    "key": value
-                For `SET` and `BAG` parameter types with primitive values, use
-                    "key": [value1, value2, ...]
-                For `VERTEX<type>` use
-                    "key": primary_id
-                For `VERTEX` (no vertex type specified) use
-                    "key": (primary_id, "vertex_type")
-                For `SET<VERTEX<type>>` use
-                    "key": [primary_id1, primary_id2, ...]
-                For `SET<VERTEX>` (no vertex type specified) use
-                    "key": [(primary_id1, "vertex_type1"), (primary_id2, "vertex_type2"), ...]
+
+            - For primitive parameter types use
+                `"key": value`
+            - For `SET` and `BAG` parameter types with primitive values, use
+                `"key": [value1, value2, ...]`
+            - For `VERTEX<type>` use
+                `"key": primary_id`
+            - For `VERTEX` (no vertex type specified) use
+                `"key": (primary_id, "vertex_type")`
+            - For `SET<VERTEX<type>>` use
+                `"key": [primary_id1, primary_id2, ...]`
+            - For `SET<VERTEX>` (no vertex type specified) use
+                `"key": [(primary_id1, "vertex_type1"), (primary_id2, "vertex_type2"), ...]`
+
 
         Endpoint:
-            POST /gsqlserver/interpreted_query
-        Documentation:
-            https://docs.tigergraph.com/dev/restpp-api/built-in-endpoints#run-an-interpreted-query
+            - `POST /gsqlserver/interpreted_query`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_run_an_interpreted_query
 
         TODO Add "GSQL-TIMEOUT: <timeout value in ms>" and "RESPONSE-LIMIT: <size limit in byte>"
             plus parameters if applicable to interpreted queries (see runInstalledQuery() above)
@@ -240,9 +244,9 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
             SELECT statement), edge sets (e.g. collected in a global accumulator), printout of
             global and local variables and accumulators, including complex types (LIST, MAP, etc.).
             The type of the various output entries is not explicit, you need to inspect the content
-            to find out what it is actually.
+            to find out what it is actually. /
         This function "cleans" this output, separating and collecting vertices and edges in an easy
-            to access way. It can also collect other output or ignore it.
+            to access way. It can also collect other output or ignore it. /
         The output of this function can be used e.g. with the `vertexSetToDataFrame()` and
             `edgeSetToDataFrame()` functions or (after some transformation) to pass a subgraph to a
             visualisation component.
@@ -386,9 +390,8 @@ class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
                 Segments must be [1, 100].
 
         Endpoint:
-            GET /statistics/{graph_name}
-        Documentation:
-            https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_show_query_performance
+            - `GET /statistics/{graph_name}`
+                See https://docs.tigergraph.com/tigergraph-server/current/api/built-in-endpoints#_show_query_performance
         """
         if not seconds:
             seconds = 10
