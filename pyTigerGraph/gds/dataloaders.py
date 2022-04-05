@@ -972,3 +972,215 @@ class NeighborLoader(BaseLoader):
         )
         self._reader.start()
 
+
+class EdgeLoader(BaseLoader):
+    def __init__(
+        self,
+        graph: TigerGraphConnection,
+        batch_size: int = None,
+        num_batches: int = 1,
+        shuffle: bool = False,
+        filter_by: str = None,
+        output_format: str = "dataframe",
+        loader_id: str = None,
+        buffer_size: int = 4,
+        kafka_address: str = None,
+        kafka_max_msg_size: int = 104857600,
+        kafka_num_partitions: int = 1,
+        kafka_replica_factor: int = 1,
+        kafka_retention_ms: int = 60000,
+        kafka_auto_del_topic: bool = True,
+        kafka_address_consumer: str = None,
+        kafka_address_producer: str = None,
+        timeout: int = 300000,
+    ) -> None:
+        """Data loader that pulls batches of edges from database.
+        Edge attributes are not supported.
+
+        Specifically, it divides edges into `num_batches` and returns each batch separately.
+        The boolean attribute provided to `filter_by` indicates which edges are included.
+        If you need random batches, set `shuffle` to True.
+
+        **Note**: For the first time you initialize the loader on a graph in TigerGraph,
+        the initialization might take a minute as it installs the corresponding
+        query to the database and optimizes it. However, the query installation only
+        needs to be done once, so it will take no time when you initialize the loader
+        on the same TG graph again.
+
+        There are two ways to use the data loader.
+        See [here](https://github.com/TigerGraph-DevLabs/mlworkbench-docs/blob/main/tutorials/basics/2_dataloaders.ipynb)
+        for examples.
+
+        * First, it can be used as an iterable, which means you can loop through
+          it to get every batch of data. If you load all edges at once (`num_batches=1`),
+          there will be only one batch (of all the edges) in the iterator.
+        * Second, you can access the `data` property of the class directly. If there is
+          only one batch of data to load, it will give you the batch directly instead
+          of an iterator, which might make more sense in that case. If there are
+          multiple batches of data to load, it will return the loader again.
+
+        Args:
+          What data to get:
+            graph (TigerGraphConnection): Connection to the TigerGraph database.
+          How to get the data:
+            batch_size (int, optional):  Number of edges in each batch.
+                Defaults to None.
+            num_batches (int, optional): Number of batches to split the edges.
+                Defaults to 1.
+            shuffle (bool, optional): Whether to shuffle the edges before loading data.
+                Defaults to False.
+            filter_by (str, optional): A boolean attribute used to indicate which edges
+                are included. Defaults to None.
+          What is the output:
+            output_format (str, optional): Format of the output data of the loader. Only
+                "dataframe" is supported. Defaults to "dataframe".
+          Low-level details of the loader:
+            loader_id (str, optional): An identifier of the loader which can be any string. It is
+                also used as the Kafka topic name. If `None`, a random string will be generated
+                for it. Defaults to None.
+            buffer_size (int, optional): Number of data batches to prefetch and store in memory. Defaults to 4.
+            kafka_address (str, optional): Address of the kafka broker. Defaults to None.
+            kafka_max_msg_size (int, optional): Maximum size of a Kafka message in bytes.
+                Defaults to 104857600.
+            kafka_num_partitions (int, optional): Number of partitions for the topic created by this loader.
+                Defaults to 1.
+            kafka_replica_factor (int, optional): Number of replications for the topic created by this
+                loader. Defaults to 1.
+            kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
+                loader in milliseconds. Defaults to 60000.
+            kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
+                should use. Defaults to be the same as `kafkaAddress`.
+            kafka_address_producer (str, optional): Address of the kafka broker that a producer
+                should use. Defaults to be the same as `kafkaAddress`.
+            timeout (int, optional): Timeout value for GSQL queries, in ms. Defaults to 300000.
+        """
+        super().__init__(
+            graph,
+            loader_id,
+            num_batches,
+            buffer_size,
+            output_format,
+            kafka_address,
+            kafka_max_msg_size,
+            kafka_num_partitions,
+            kafka_replica_factor,
+            kafka_retention_ms,
+            kafka_auto_del_topic,
+            kafka_address_consumer,
+            kafka_address_producer,
+            timeout,
+        )
+        # Initialize parameters for the query
+        self._payload = {}
+        if batch_size:
+            # If batch_size is given, calculate the number of batches
+            num_edges_by_type = self._graph.getEdgeCount("*")
+            if filter_by:
+                # TODO: use getEdgeCountFrom
+                num_edges = sum(
+                    self._graph.getEdgeCount(k, where="{}!=0".format(filter_by))
+                    for k in num_edges_by_type
+                )
+                raise NotImplementedError
+            else:
+                num_edges = sum(num_edges_by_type.values())
+            self.num_batches = math.ceil(num_edges / batch_size)
+        else:
+            # Otherwise, take the number of batches as is.
+            self.num_batches = num_batches
+        # Initialize the exporter
+        self._payload["num_batches"] = self.num_batches
+        if filter_by:
+            self._payload["filter_by"] = filter_by
+        self._payload["shuffle"] = shuffle
+        if self.kafka_address_producer:
+            self._payload["kafka_address"] = self.kafka_address_producer
+        # kafka_topic will be filled in later.
+        # Output
+        # Install query
+        self.query_name = self._install_query()
+
+    def _install_query(self):
+        # Install the right GSQL query for the loader.
+        query_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "gsql",
+            "dataloaders",
+            "edge_loader.gsql",
+        )
+        return self._install_query_file(query_path)
+
+    def _start(self) -> None:
+        # Create task and result queues
+        self._read_task_q = Queue(self.buffer_size * 2)
+        self._data_q = Queue(self.buffer_size)
+        self._exit_event = Event()
+
+        # Start requesting thread.
+        if self.kafka_address_consumer:
+            # If using kafka
+            self._kafka_topic = "{}_{}".format(self.loader_id, self._iterations)
+            self._payload["kafka_topic"] = self._kafka_topic
+            self._requester = Thread(
+                target=self._request_kafka,
+                args=(
+                    self._exit_event,
+                    self._graph,
+                    self.query_name,
+                    self._kafka_consumer,
+                    self._kafka_admin,
+                    self._kafka_topic,
+                    self.kafka_partitions,
+                    self.kafka_replica,
+                    self.max_kafka_msg_size,
+                    self.kafka_retention_ms,
+                    self.timeout,
+                    self._payload,
+                ),
+            )
+        else:
+            # Otherwise, use rest api
+            self._requester = Thread(
+                target=self._request_rest,
+                args=(
+                    self._graph,
+                    self.query_name,
+                    self._read_task_q,
+                    self.timeout,
+                    self._payload,
+                    "edge",
+                ),
+            )
+        self._requester.start()
+
+        # If using Kafka, start downloading thread.
+        if self.kafka_address_consumer:
+            self._downloader = Thread(
+                target=self._download_from_kafka,
+                args=(
+                    self._exit_event,
+                    self._read_task_q,
+                    self.num_batches,
+                    False,
+                    self._kafka_consumer,
+                ),
+            )
+            self._downloader.start()
+
+        # Start reading thread.
+        if self.kafka_address_consumer:
+            raw_format = "edge_bytes"
+        else:
+            raw_format = "edge_str"
+        self._reader = Thread(
+            target=self._read_data,
+            args=(
+                self._exit_event,
+                self._read_task_q,
+                self._data_q,
+                raw_format,
+                self.output_format,
+            ),
+        )
+        self._reader.start()
+
