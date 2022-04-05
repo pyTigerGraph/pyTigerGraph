@@ -9,11 +9,10 @@ class pyTigerGraphUDT(pyTigerGraphSchema):
     def getUDTs(self) -> list:
         """Returns the list of User Defined Types (names only).
 
+        For information on UDTs see https://docs.tigergraph.com/dev/gsql-ref/ddl-and-loading/system-and-language-basics#typedef-tuple .
+
         Returns:
             The list of names of UDTs (defined in the global scope, i.e. not in queries).
-
-        Documentation:
-            https://docs.tigergraph.com/dev/gsql-ref/ddl-and-loading/system-and-language-basics#typedef-tuple
         """
         ret = []
         for udt in self._getUDTs():
@@ -23,6 +22,8 @@ class pyTigerGraphUDT(pyTigerGraphSchema):
     def getUDT(self, udtName: str) -> list:
         """Returns the details of a specific User Defined Type (defined in the global scope).
 
+        For information on UDTs see https://docs.tigergraph.com/dev/gsql-ref/ddl-and-loading/system-and-language-basics#typedef-tuple .
+
         Args:
             udtName:
                 The name of the User Defined Type.
@@ -30,8 +31,6 @@ class pyTigerGraphUDT(pyTigerGraphSchema):
         Returns:
             The metadata (the details of the fields) of the UDT.
 
-        Documentation:
-            https://docs.tigergraph.com/dev/gsql-ref/ddl-and-loading/system-and-language-basics#typedef-tuple
         """
         for udt in self._getUDTs():
             if udt["name"] == udtName:
