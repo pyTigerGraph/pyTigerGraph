@@ -1,6 +1,6 @@
 """pyTigerGraph basic functionality.
 
-Lowe(est) level HTTP(S) communication used by all other modules (directly or indirectly).
+Low(est) level HTTP(S) communication used by all other modules (directly or indirectly).
 """
 
 import base64
@@ -23,7 +23,7 @@ def excepthook(type, value, traceback):
 
 
 class pyTigerGraphBase(object):
-    """Low(est) level HTTP(s) communication functions."""
+    """pyTigerGraph basic functionality."""
 
     def __init__(self, host: str = "http://127.0.0.1", graphname: str = "MyGraph",
             username: str = "tigergraph", password: str = "tigergraph",
@@ -49,9 +49,9 @@ class pyTigerGraphBase(object):
                 The version of the GSQL client to be used. Effectively the version of the database
                 being connected to.
             version:
-                DEPRECATED; use gsqlVersion.
+                DEPRECATED; use `gsqlVersion()`.
             apiToken:
-                DEPRECATED; use getToken() with a secret to get a session token.
+                DEPRECATED; use `getToken()` with a secret to get a session token.
             useCert:
                 DEPRECATED; the need for CA certificate is now determined by URL scheme.
             certPath:
