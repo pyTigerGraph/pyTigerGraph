@@ -7,7 +7,10 @@ from argparse import ArgumentError
 from queue import Empty, Queue
 from threading import Event, Thread
 from time import sleep
-from typing import NoReturn, Union
+from typing import TYPE_CHECKING, NoReturn, Union
+
+if TYPE_CHECKING:
+    from ..pyTigerGraph import TigerGraphConnection
 
 import numpy as np
 import pandas as pd
@@ -15,7 +18,6 @@ import torch
 from kafka import KafkaAdminClient, KafkaConsumer
 from kafka.admin import NewTopic
 
-from ..pyTigerGraph import TigerGraphConnection
 from ..pyTigerGraphException import TigerGraphException
 from .utilities import random_string
 
@@ -33,7 +35,7 @@ _udf_funcs = {
 class BaseLoader:
     def __init__(
         self,
-        graph: TigerGraphConnection,
+        graph: "TigerGraphConnection",
         loaderID: str = None,
         numBatches: int = 1,
         bufferSize: int = 4,
@@ -77,8 +79,8 @@ class BaseLoader:
                 loader. Defaults to 1.
             kafkaRetentionMS (int, optional): Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
-            kafkaAutoDelTopic (bool, optional): Whether to delete the kafka topics created for this loader.
-                Defaults to True.
+            kafkaAutoDelTopic (bool, optional): Whether to delete the Kafka topic once the 
+                loader finishes pulling data. Defaults to True.
             kafkaAddressForConsumer (str, optional): Address of the kafka broker that a consumer
                 should use. Defaults to be the same as `kafkaAddress`.
             kafkaAddressForProducer (str, optional): Address of the kafka broker that a producer
@@ -265,7 +267,7 @@ class BaseLoader:
     @staticmethod
     def _request_kafka(
         exit_event: Event,
-        tgraph: TigerGraphConnection,
+        tgraph: "TigerGraphConnection",
         query_name: str,
         kafka_consumer: KafkaConsumer,
         kafka_admin: KafkaAdminClient,
@@ -342,7 +344,7 @@ class BaseLoader:
 
     @staticmethod
     def _request_rest(
-        tgraph: TigerGraphConnection,
+        tgraph: "TigerGraphConnection",
         query_name: str,
         read_task_q: Queue,
         timeout: int = 600000,
@@ -715,7 +717,7 @@ class BaseLoader:
 class NeighborLoader(BaseLoader):
     def __init__(
         self,
-        graph: TigerGraphConnection,
+        graph: "TigerGraphConnection",
         v_in_feats: Union[list, dict] = None,
         v_out_labels: Union[list, dict] = None,
         v_extra_feats: Union[list, dict] = None,
@@ -807,6 +809,8 @@ class NeighborLoader(BaseLoader):
                 Defaults to 1.
             kafka_replica_factor (int, optional): Number of replications for the topic created by this
                 loader. Defaults to 1.
+            kafka_auto_del_topic (bool, optional): Whether to delete the Kafka topic once the 
+                loader finishes pulling data. Defaults to True.
             kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
             kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
@@ -976,7 +980,7 @@ class NeighborLoader(BaseLoader):
 class EdgeLoader(BaseLoader):
     def __init__(
         self,
-        graph: TigerGraphConnection,
+        graph: "TigerGraphConnection",
         batch_size: int = None,
         num_batches: int = 1,
         shuffle: bool = False,
@@ -1048,6 +1052,8 @@ class EdgeLoader(BaseLoader):
                 loader. Defaults to 1.
             kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
+            kafka_auto_del_topic (bool, optional): Whether to delete the Kafka topic once the 
+                loader finishes pulling data. Defaults to True.
             kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
                 should use. Defaults to be the same as `kafkaAddress`.
             kafka_address_producer (str, optional): Address of the kafka broker that a producer
@@ -1188,7 +1194,7 @@ class EdgeLoader(BaseLoader):
 class VertexLoader(BaseLoader):
     def __init__(
         self,
-        graph: TigerGraphConnection,
+        graph: "TigerGraphConnection",
         attributes: Union[list, dict] = None,
         batch_size: int = None,
         num_batches: int = 1,
@@ -1261,6 +1267,8 @@ class VertexLoader(BaseLoader):
                 loader. Defaults to 1.
             kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
+            kafka_auto_del_topic (bool, optional): Whether to delete the Kafka topic once the 
+                loader finishes pulling data. Defaults to True.
             kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
                 should use. Defaults to be the same as `kafkaAddress`.
             kafka_address_producer (str, optional): Address of the kafka broker that a producer
@@ -1419,7 +1427,7 @@ class VertexLoader(BaseLoader):
 class GraphLoader(BaseLoader):
     def __init__(
         self,
-        graph: TigerGraphConnection,
+        graph: "TigerGraphConnection",
         v_in_feats: Union[list, dict] = None,
         v_out_labels: Union[list, dict] = None,
         v_extra_feats: Union[list, dict] = None,
@@ -1500,6 +1508,8 @@ class GraphLoader(BaseLoader):
                 loader. Defaults to 1.
             kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
+            kafka_auto_del_topic (bool, optional): Whether to delete the Kafka topic once the 
+                loader finishes pulling data. Defaults to True.
             kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
                 should use. Defaults to be the same as `kafkaAddress`.
             kafka_address_producer (str, optional): Address of the kafka broker that a producer
