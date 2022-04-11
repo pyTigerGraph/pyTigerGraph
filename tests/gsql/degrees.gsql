@@ -1,0 +1,8 @@
+CREATE QUERY degrees()  SYNTAX V1{
+   SumAccum<INT> @in_degree;
+   SumAccum<INT> @out_degree;
+   all = {ANY};
+   neighbors = SELECT p FROM all:p - () -> :q
+       ACCUM p.@out_degree += 1, q.@in_degree += 1;
+PRINT "degrees";
+}

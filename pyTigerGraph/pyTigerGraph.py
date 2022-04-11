@@ -10,6 +10,7 @@ from pyTigerGraph.pyTigerGraphLoading import pyTigerGraphLoading
 from pyTigerGraph.pyTigerGraphPath import pyTigerGraphPath
 from pyTigerGraph.pyTigerGraphUDT import pyTigerGraphUDT
 from pyTigerGraph.pyTigerGraphVertex import pyTigerGraphVertex
+from .gds import gds
 
 # Added pyTigerDriver Client
 
@@ -22,12 +23,13 @@ class TigerGraphConnection(pyTigerGraphVertex, pyTigerGraphEdge, pyTigerGraphUDT
     pyTigerGraphLoading, pyTigerGraphPath):
     """Python wrapper for TigerGraph's REST++ and GSQL APIs"""
 
-    def __init__(self, host: str = "http://127.0.0.1", graphname: str = "MyGraph",
+    def __init__(self, host: str = "http://localhost", graphname: str = "BankSim",
             username: str = "tigergraph", password: str = "tigergraph",
             restppPort: [int, str] = "9000", gsPort: [int, str] = "14240", gsqlVersion: str = "",
             version: str = "", apiToken: str = "", useCert: bool = True, certPath: str = None,
             debug: bool = False, sslPort: [int, str] = "443", gcp: bool = False):
         super().__init__(host, graphname, username, password, restppPort
             , gsPort, gsqlVersion, version, apiToken, useCert, certPath, debug, sslPort, gcp)
+        self.gds = gds.GDS(self)
 
 # EOF
