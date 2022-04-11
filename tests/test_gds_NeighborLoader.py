@@ -48,18 +48,20 @@ class TestGDSNeighborLoader(unittest.TestCase):
             buffer_size=4,
             kafka_address="18.117.192.44:9092",
         )
-        num_batches = 0
-        for data in loader:
-            # print(num_batches, data)
-            self.assertIsInstance(data, pygData)
-            self.assertIn("x", data)
-            self.assertIn("y", data)
-            self.assertIn("train_mask", data)
-            self.assertIn("val_mask", data)
-            self.assertIn("test_mask", data)
-            self.assertIn("is_seed", data)
-            num_batches += 1
-        self.assertEqual(num_batches, 9)
+        for epoch in range(2):
+            with self.subTest(i=epoch):
+                num_batches = 0
+                for data in loader:
+                    # print(num_batches, data)
+                    self.assertIsInstance(data, pygData)
+                    self.assertIn("x", data)
+                    self.assertIn("y", data)
+                    self.assertIn("train_mask", data)
+                    self.assertIn("val_mask", data)
+                    self.assertIn("test_mask", data)
+                    self.assertIn("is_seed", data)
+                    num_batches += 1
+                self.assertEqual(num_batches, 9)
 
     def test_whole_graph_pyg(self):
         loader = NeighborLoader(

@@ -300,7 +300,7 @@ class BaseLoader:
                 )
         # Subscribe to the topic
         kafka_consumer.subscribe([kafka_topic])
-
+        _ = kafka_consumer.topics() # Call this to refresh metadata. Or the new subscription seems to be delayed.
         # Run query async
         # TODO: change to runInstalledQuery when it supports async mode
         _headers = {"GSQL-ASYNC": "true", "GSQL-TIMEOUT": str(timeout)}
@@ -688,6 +688,7 @@ class BaseLoader:
         )
         if self.delete_kafka_topic:
             if self._kafka_topic:
+                self._kafka_consumer.unsubscribe()
                 resp = self._kafka_admin.delete_topics([self._kafka_topic])
                 del_res = resp.to_object()["topic_error_codes"][0]
                 if del_res["error_code"] != 0:
