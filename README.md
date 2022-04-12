@@ -22,6 +22,15 @@ conn = tg.TigerGraphConnection(host="localhost", restppPort=25900, gsPort=25240,
 
 For more details on establishing a connection, read the [Getting Started](https://pytigergraph.github.io/pyTigerGraph/GettingStarted/) page.
 
+## Development
+Fork or clone this repo. Check out a new branch. 
+
+Set up the dev environment:
+* For core functions
+* For the GDS subpackage, install the `gds_dev_env.yml` environment in the "conda" folder. If you don't have `conda`, install [miniforge](https://github.com/conda-forge/miniforge) first. (Don't use [miniconda](https://docs.conda.io/en/latest/miniconda.html) as  Anaconda repo has a restrictive license now.)
+
+Work on your branch. Once your work is done, send a pull request. Unit tests are required for the review.
+
 ## Example Projects
 
 - [Connecting to TigerGraph Database with pyTigerGraph](https://colab.research.google.com/drive/1sYv3Jvc6KYsqC4D-Rxkvjh4iPnrp4rg7)

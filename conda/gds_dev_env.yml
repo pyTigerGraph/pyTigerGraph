@@ -1,0 +1,23 @@
+name: gds_dev
+channels:
+  - pyg
+  - pytorch
+  - dglteam
+  - conda-forge
+dependencies:
+  - python=3.9
+  - conda
+  - pip
+  - numpy
+  - scipy
+  - pandas
+  - pytorch
+  - cpuonly
+  - pyg
+  - dgl
+  - pip:
+    - requests
+    - boto3
+    - google-cloud-storage
+    - pyTigerDriver
+    - kafka-python
