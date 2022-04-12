@@ -10,7 +10,7 @@ class GDS:
     def __init__(self, conn: "TigerGraphConnection"):
         self.conn = conn
 
-    def neighborloader(
+    def neighborLoader(
         self,
         v_in_feats: Union[list, dict] = None,
         v_out_labels: Union[list, dict] = None,
@@ -141,7 +141,7 @@ class GDS:
             timeout,
         )
 
-    def edgeloader(
+    def edgeLoader(
         self,
         batch_size: int = None,
         num_batches: int = 1,
@@ -242,7 +242,7 @@ class GDS:
             timeout,
         )
 
-    def vertexloader(
+    def vertexLoader(
         self,
         attributes: Union[list, dict] = None,
         batch_size: int = None,
@@ -345,7 +345,7 @@ class GDS:
             timeout,
         )
 
-    def graphloader(
+    def graphLoader(
         self,
         v_in_feats: Union[list, dict] = None,
         v_out_labels: Union[list, dict] = None,

@@ -12,7 +12,7 @@ class TestGDSNeighborLoader(unittest.TestCase):
         # cls.conn.gsql("drop query all")
 
     def test_init(self):
-        loader = self.conn.gds.neighborloader(
+        loader = self.conn.gds.neighborLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -31,7 +31,7 @@ class TestGDSNeighborLoader(unittest.TestCase):
         self.assertEqual(loader.num_batches, 9)
 
     def test_iterate_pyg(self):
-        loader = self.conn.gds.neighborloader(
+        loader = self.conn.gds.neighborLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -60,7 +60,7 @@ class TestGDSNeighborLoader(unittest.TestCase):
         self.assertEqual(num_batches, 9)
 
     def test_whole_graph_pyg(self):
-        loader = self.conn.gds.neighborloader(
+        loader = self.conn.gds.neighborLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -93,7 +93,7 @@ class TestGDSNeighborLoaderREST(unittest.TestCase):
         # cls.conn.gsql("drop query all")
 
     def test_init(self):
-        loader = self.conn.gds.neighborloader(
+        loader = self.conn.gds.neighborLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -111,7 +111,7 @@ class TestGDSNeighborLoaderREST(unittest.TestCase):
         self.assertEqual(loader.num_batches, 9)
 
     def test_iterate_pyg(self):
-        loader = self.conn.gds.neighborloader(
+        loader = self.conn.gds.neighborLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -139,7 +139,7 @@ class TestGDSNeighborLoaderREST(unittest.TestCase):
         self.assertEqual(num_batches, 9)
 
     def test_whole_graph_pyg(self):
-        loader = self.conn.gds.neighborloader(
+        loader = self.conn.gds.neighborLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -171,7 +171,7 @@ class TestGDSGraphLoader(unittest.TestCase):
         # cls.conn.gsql("drop query all")
 
     def test_init(self):
-        loader = self.conn.gds.graphloader(
+        loader = self.conn.gds.graphLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -188,7 +188,7 @@ class TestGDSGraphLoader(unittest.TestCase):
         self.assertEqual(loader.num_batches, 11)
 
     def test_iterate_pyg(self):
-        loader = self.conn.gds.graphloader(
+        loader = self.conn.gds.graphLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -214,7 +214,7 @@ class TestGDSGraphLoader(unittest.TestCase):
         self.assertEqual(num_batches, 11)
 
     def test_iterate_df(self):
-        loader = self.conn.gds.graphloader(
+        loader = self.conn.gds.graphLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -248,7 +248,7 @@ class TestGDSGraphLoaderREST(unittest.TestCase):
         # cls.conn.gsql("drop query all")
 
     def test_init(self):
-        loader = self.conn.gds.graphloader(
+        loader = self.conn.gds.graphLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -264,7 +264,7 @@ class TestGDSGraphLoaderREST(unittest.TestCase):
         self.assertEqual(loader.num_batches, 11)
 
     def test_iterate_pyg(self):
-        loader = self.conn.gds.graphloader(
+        loader = self.conn.gds.graphLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -289,7 +289,7 @@ class TestGDSGraphLoaderREST(unittest.TestCase):
         self.assertEqual(num_batches, 11)
 
     def test_iterate_df(self):
-        loader = self.conn.gds.graphloader(
+        loader = self.conn.gds.graphLoader(
             v_in_feats=["x"],
             v_out_labels=["y"],
             v_extra_feats=["train_mask", "val_mask", "test_mask"],
@@ -322,7 +322,7 @@ class TestGDSVertexLoader(unittest.TestCase):
         # cls.conn.gsql("drop query all")
 
     def test_init(self):
-        loader = self.conn.gds.vertexloader(
+        loader = self.conn.gds.vertexLoader(
             attributes=["x", "y", "train_mask", "val_mask", "test_mask"],
             batch_size=16,
             shuffle=True,
@@ -335,7 +335,7 @@ class TestGDSVertexLoader(unittest.TestCase):
         self.assertEqual(loader.num_batches, 9)
 
     def test_iterate(self):
-        loader = self.conn.gds.vertexloader(
+        loader = self.conn.gds.vertexLoader(
             attributes=["x", "y", "train_mask", "val_mask", "test_mask"],
             batch_size=16,
             shuffle=True,
@@ -357,7 +357,7 @@ class TestGDSVertexLoader(unittest.TestCase):
         self.assertEqual(num_batches, 9)
 
     def test_all_vertices(self):
-        loader = self.conn.gds.vertexloader(
+        loader = self.conn.gds.vertexLoader(
             attributes=["x", "y", "train_mask", "val_mask", "test_mask"],
             num_batches=1,
             shuffle=False,
@@ -383,7 +383,7 @@ class TestGDSVertexLoaderREST(unittest.TestCase):
         # cls.conn.gsql("drop query all")
 
     def test_init(self):
-        loader = self.conn.gds.vertexloader(
+        loader = self.conn.gds.vertexLoader(
             attributes=["x", "y", "train_mask", "val_mask", "test_mask"],
             batch_size=16,
             shuffle=True,
@@ -395,7 +395,7 @@ class TestGDSVertexLoaderREST(unittest.TestCase):
         self.assertEqual(loader.num_batches, 9)
 
     def test_iterate(self):
-        loader = self.conn.gds.vertexloader(
+        loader = self.conn.gds.vertexLoader(
             attributes=["x", "y", "train_mask", "val_mask", "test_mask"],
             batch_size=16,
             shuffle=True,
@@ -416,7 +416,7 @@ class TestGDSVertexLoaderREST(unittest.TestCase):
         self.assertEqual(num_batches, 9)
 
     def test_all_vertices(self):
-        loader = self.conn.gds.vertexloader(
+        loader = self.conn.gds.vertexLoader(
             attributes=["x", "y", "train_mask", "val_mask", "test_mask"],
             num_batches=1,
             shuffle=False,
@@ -441,7 +441,7 @@ class TestGDSEdgeLoader(unittest.TestCase):
         # cls.conn.gsql("drop query all")
 
     def test_init(self):
-        loader = self.conn.gds.edgeloader(
+        loader = self.conn.gds.edgeLoader(
             batch_size=1024,
             shuffle=False,
             filter_by=None,
@@ -453,7 +453,7 @@ class TestGDSEdgeLoader(unittest.TestCase):
         self.assertEqual(loader.num_batches, 11)
 
     def test_iterate(self):
-        loader = self.conn.gds.edgeloader(
+        loader = self.conn.gds.edgeLoader(
             batch_size=1024,
             shuffle=True,
             filter_by=None,
@@ -469,7 +469,7 @@ class TestGDSEdgeLoader(unittest.TestCase):
         self.assertEqual(num_batches, 11)
 
     def test_whole_edgelist(self):
-        loader = self.conn.gds.edgeloader(
+        loader = self.conn.gds.edgeLoader(
             num_batches=1,
             shuffle=True,
             filter_by=None,
@@ -491,7 +491,7 @@ class TestGDSEdgeLoaderREST(unittest.TestCase):
         # cls.conn.gsql("drop query all")
 
     def test_init(self):
-        loader = self.conn.gds.edgeloader(
+        loader = self.conn.gds.edgeLoader(
             batch_size=1024,
             shuffle=False,
             filter_by=None,
@@ -502,7 +502,7 @@ class TestGDSEdgeLoaderREST(unittest.TestCase):
         self.assertEqual(loader.num_batches, 11)
 
     def test_iterate(self):
-        loader = self.conn.gds.edgeloader(
+        loader = self.conn.gds.edgeLoader(
             batch_size=1024,
             shuffle=True,
             filter_by=None,
@@ -517,7 +517,7 @@ class TestGDSEdgeLoaderREST(unittest.TestCase):
         self.assertEqual(num_batches, 11)
 
     def test_whole_edgelist(self):
-        loader = self.conn.gds.edgeloader(
+        loader = self.conn.gds.edgeLoader(
             num_batches=1,
             shuffle=True,
             filter_by=None,
