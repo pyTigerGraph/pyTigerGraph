@@ -168,7 +168,7 @@ class Featurizer:
         self.params_dict[self.name_of_query] = _dict
         return _dict  
     
-    def runAlgorithm(self,name_of_query:str,params:dict = None) -> None:
+    def runAlgorithm(self,name_of_query:str,params:dict = None, timeout:int=2147480) -> None:
         # Initialize the params (if it is None) by parsing the query.
         if params == None:
             params = self._get_Params(name_of_query)
@@ -179,7 +179,7 @@ class Featurizer:
             print("Default parameters are:",params)
         if None in params.values():
             raise ValueError("Query parameters which are None need to be initialized.")
-        result = self.conn.runInstalledQuery(name_of_query, params,timeout=2147480)
+        result = self.conn.runInstalledQuery(name_of_query, params,timeout=timeout)
         if result != None:
             return "Success!"
 
