@@ -11,6 +11,8 @@ from pyTigerGraph.pyTigerGraphPath import pyTigerGraphPath
 from pyTigerGraph.pyTigerGraphUDT import pyTigerGraphUDT
 from pyTigerGraph.pyTigerGraphVertex import pyTigerGraphVertex
 
+from .gds import gds
+
 # Added pyTigerDriver Client
 
 warnings.filterwarnings("default", category=DeprecationWarning)
@@ -29,5 +31,6 @@ class TigerGraphConnection(pyTigerGraphVertex, pyTigerGraphEdge, pyTigerGraphUDT
             debug: bool = False, sslPort: [int, str] = "443", gcp: bool = False):
         super().__init__(host, graphname, username, password, restppPort
             , gsPort, gsqlVersion, version, apiToken, useCert, certPath, debug, sslPort, gcp)
+        self.gds = gds.GDS(self)
 
 # EOF
