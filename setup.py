@@ -36,9 +36,9 @@ setup(
         'Programming Language :: Python :: 3.10',
     ],
     extras_require={
-        "gds-pyg": ["python-dotenv", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric"],
-        "gds-dgl": ["python-dotenv", "numpy", "torch", "dgl"],
-        "gds-lite": ["python-dotenv", "numpy"],
-        "gds": ["python-dotenv", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric", "dgl"]
+        "gds-pyg": ["kafka-python", "python-dotenv", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric"],
+        "gds-dgl": ["kafka-python", "python-dotenv", "numpy", "torch", "dgl"],
+        "gds-lite": ["kafka-python", "python-dotenv", "numpy"],
+        "gds": ["kafka-python", "python-dotenv", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric", "dgl"]
     },
 )
