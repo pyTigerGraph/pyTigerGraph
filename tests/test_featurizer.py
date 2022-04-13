@@ -67,10 +67,6 @@ class test_Featurizer(unittest.TestCase):
             self.featurizer.installAlgorithm("someQuery","VERTEX")
     
     def test01_runAlgorithm(self):
-        # algo_path = pjoin(os.path.dirname(
-        #     os.path.abspath(__file__)), "gsql", "degrees2" + ".gsql")
-        # self.local_gsql_path = algo_path
-        # params = self.featurizer._get_Params("degrees")
         message = "Test value is not none."
         self.assertIsNotNone(self.featurizer.runAlgorithm("degrees"),message)
 
@@ -117,10 +113,10 @@ if __name__ == '__main__':
     suite.addTest(test_Featurizer("test_install_query_file"))
     suite.addTest(test_Featurizer("test01_get_Params"))
     suite.addTest(test_Featurizer("test02_get_Params"))
-    # suite.addTest(test_Featurizer("test01_add_attribute"))
-    # suite.addTest(test_Featurizer("test02_add_attribute"))
-    # suite.addTest(test_Featurizer("test03_add_attribute"))
-    # suite.addTest(test_Featurizer("test04_add_attribute"))
+    suite.addTest(test_Featurizer("test01_add_attribute"))
+    suite.addTest(test_Featurizer("test02_add_attribute"))
+    suite.addTest(test_Featurizer("test03_add_attribute"))
+    suite.addTest(test_Featurizer("test04_add_attribute"))
     suite.addTest(test_Featurizer("test01_installAlgorithm"))
     suite.addTest(test_Featurizer("test02_installAlgorithm"))
     suite.addTest(test_Featurizer("test01_runAlgorithm"))

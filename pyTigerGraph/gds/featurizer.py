@@ -20,10 +20,7 @@ class Featurizer:
     def __init__(
     self, 
     conn: "TigerGraphConnection"):
-    # name_of_query: str = None,
-    # result_attr: str = None, 
-    # local_gsql_path: str = None):
-
+    
         """Class for Feature Extraction.
         The job of a feature extracter is to install and run the current algorithms in graph data science libarary.
         Currently, a set of graph algorithms are moved to the gsql folder and have been saved into a dictionary along with their output type.
@@ -76,7 +73,7 @@ class Featurizer:
             raise ConnectionError(status)
         return name_of_query 
 
-    def installAlgorithm(self,query_name:str,schema_type:str="VERTEX",attr_name:str=None,schema_name:str=None):
+    def installAlgorithm(self,query_name:str,schema_type:str="VERTEX",attr_name:str=None):
         '''
         Checks if the query is already installed, if not it will install the query and change the schema if an attribute needs to be added.
         It can change 
@@ -85,7 +82,6 @@ class Featurizer:
             query_name (str): the name of query to be installed
             schema_type (str): vertex or edge 
             attr_name (str): An attribute name that needs to be added to the vertex/edge
-            schema_name (str): the name of specified vertex/edge
         '''
         query_path = pjoin(os.path.dirname(os.path.abspath(__file__)), "gsql", "featurizer", query_name+'.gsql')
         self.local_gsql_path = query_path
@@ -95,10 +91,8 @@ class Featurizer:
         return resp.strip() 
 
     
-    def _add_attribute(self, schema_type: str, attr_type: str,attr_name: str=None):#, schema_name: str=None):
+    def _add_attribute(self, schema_type: str, attr_type: str,attr_name: str=None):
         #If the current attribute is not already added to the schema, it will create the schema job to do that.
-        #If there are multile schema types, the name of schemas can be chosen to add the attr_name to them. 
-
         # Check whether to add the attribute to vertex(vertices) or edge(s)
         v_type = False
         if schema_type.upper() == "VERTEX":
@@ -108,10 +102,6 @@ class Featurizer:
             target = self.conn.getEdgeTypes()
         else:
             raise Exception('schema_type has to be VERTEX or EDGE')
-        # If attribute should be added to a specific vertex/edge name
-        # if schema_name != None:
-        #     target.clear()
-        #     target.append(schema_name)
         # For every vertex or edge type
         tasks = []
         for t in target:
@@ -192,7 +182,6 @@ class Featurizer:
         '''
         if params == None:
             params = self._get_Params(name_of_query)
-            print(params)
             if params:
                 print("Default parameters are:",params)
                 if None in params.values():
