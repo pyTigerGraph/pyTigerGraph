@@ -1,7 +1,0 @@
-CREATE QUERY Amount(STRING attr) FOR GRAPH BankSim API("v2"){ 
-    all = {Payer.*};
-    S = SELECT s
-            FROM all:s -(Trans:e) -> Payer:t
-            WHERE t.onehop == 1
-            ACCUM e.setAttr(attr, TRUE); 
-}

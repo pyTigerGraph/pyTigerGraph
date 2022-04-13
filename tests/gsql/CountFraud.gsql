@@ -1,8 +1,0 @@
-CREATE QUERY CountFraud() FOR GRAPH BankSim { 
-  SumAccum<INT> @counFraud;
-  all = {Payer.*};
-  S = SELECT s
-            FROM all:s -(Trans:e) -> Payer:t
-            WHERE e.fraud == 1
-            ACCUM s.@counFraud += 1;
-}
