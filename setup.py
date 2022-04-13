@@ -3,9 +3,12 @@ from setuptools import setup
 with open("README.md", encoding='utf-8') as fh:
     long_description = fh.read()
 
+
 setup(
     name='pyTigerGraph',
-    packages=['pyTigerGraph'],
+    packages=['pyTigerGraph', 'pyTigerGraph.gds'],
+    package_data={'pyTigerGraph.gds': ['gsql/dataloaders/*.gsql']},
+    include_package_data=True,
     version='0.0.9.9.2',
     license='MIT',
     description='Library to connect to TigerGraph databases',
@@ -36,9 +39,9 @@ setup(
         'Programming Language :: Python :: 3.10',
     ],
     extras_require={
-        "gds-pyg": ["kafka-python", "python-dotenv", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric"],
-        "gds-dgl": ["kafka-python", "python-dotenv", "numpy", "torch", "dgl"],
-        "gds-lite": ["kafka-python", "python-dotenv", "numpy"],
-        "gds": ["kafka-python", "python-dotenv", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric", "dgl"]
+        "gds-pyg": ["kafka-python", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric"],
+        "gds-dgl": ["kafka-python", "numpy", "torch", "dgl"],
+        "gds-lite": ["kafka-python", "numpy"],
+        "gds": ["kafka-python", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric", "dgl"]
     },
 )
