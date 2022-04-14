@@ -1,25 +1,16 @@
-from asyncio import tasks
-from importlib_metadata import metadata
-from parso import split_lines
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..pyTigerGraph import TigerGraphConnection
-from ..pyTigerGraphVertex import pyTigerGraphVertex
-from ..pyTigerGraphEdge import pyTigerGraphEdge
-from ..pyTigerGraphSchema import pyTigerGraphSchema
-from ..pyTigerGraphQuery import pyTigerGraphQuery
-from ..pyTigerGraphUtils import pyTigerGraphUtils
+
 from .utilities import random_string
 import os
 from os.path import join as pjoin
-import re
-import random
-import string
+
 
 class Featurizer:
     def __init__(
     self, 
-    conn: "TigerGraphConnection"):
+    conn: TigerGraphConnection):
     
         """Class for Feature Extraction.
         The job of a feature extracter is to install and run the current algorithms in graph data science libarary.
@@ -79,9 +70,12 @@ class Featurizer:
         It can change 
         
         Args:
-            query_name (str): the name of query to be installed
-            schema_type (str): vertex or edge 
-            attr_name (str): An attribute name that needs to be added to the vertex/edge
+            query_name (str): 
+                the name of query to be installed
+            schema_type (str): 
+                vertex or edge 
+            attr_name (str): 
+                An attribute name that needs to be added to the vertex/edge
         '''
         query_path = pjoin(os.path.dirname(os.path.abspath(__file__)), "gsql", "featurizer", query_name+'.gsql')
         self.local_gsql_path = query_path
