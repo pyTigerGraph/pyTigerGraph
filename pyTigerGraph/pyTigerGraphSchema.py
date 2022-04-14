@@ -1,4 +1,4 @@
-"""Schema-specific pyTigerGraph functions."""
+"""Schema Functions."""
 
 import json
 import re
@@ -7,7 +7,7 @@ from pyTigerGraph.pyTigerGraphBase import pyTigerGraphBase
 
 
 class pyTigerGraphSchema(pyTigerGraphBase):
-    """Schema-specific pyTigerGraph functions."""
+    """Schema Functions."""
 
     def _getUDTs(self) -> dict:
         """Retrieves all User Defined Types (UDTs) of the graph.

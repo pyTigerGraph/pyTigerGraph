@@ -1,4 +1,4 @@
-"""Utility pyTigerGraph functions."""
+"""Utility Functions."""
 
 import json
 import re
@@ -13,7 +13,7 @@ from pyTigerGraph.pyTigerGraphException import TigerGraphException
 
 
 class pyTigerGraphUtils(pyTigerGraphBase):
-    """Utility pyTigerGraph functions."""
+    """Utility Functions."""
 
     def _safeChar(self, inputString: Any) -> str:
         """Replace special characters in string using the %xx escape.

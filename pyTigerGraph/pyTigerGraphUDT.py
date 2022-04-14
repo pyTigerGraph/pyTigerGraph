@@ -1,10 +1,10 @@
-"""User Defined Type (UDT) specific pyTigerGraph functions."""
+"""User Defined Type (UDT) Functions."""
 
 from pyTigerGraph.pyTigerGraphSchema import pyTigerGraphSchema
 
 
 class pyTigerGraphUDT(pyTigerGraphSchema):
-    """User Defined Type (UDT) specific pyTigerGraph functions."""
+    """User Defined Type (UDT) Functions."""
 
     def getUDTs(self) -> list:
         """Returns the list of User Defined Types (names only).

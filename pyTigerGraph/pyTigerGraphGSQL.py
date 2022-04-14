@@ -1,4 +1,4 @@
-"""pyTigerGraph GSQL interface."""
+"""GSQL Interface."""
 
 import os
 import sys
@@ -11,7 +11,7 @@ from pyTigerGraph.pyTigerGraphException import TigerGraphException
 
 
 class pyTigerGraphGSQL(pyTigerGraphBase):
-    """pyTigerGraph GSQL interface."""
+    """GSQL Interface."""
 
     def initGsql(self, certLocation: str = "~/.gsql/my-cert.txt") -> bool:
         """Initialises the GSQL support.

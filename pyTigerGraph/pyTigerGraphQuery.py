@@ -1,4 +1,4 @@
-"""Query-specific functions."""
+"""Query Functions."""
 
 import json
 import urllib
@@ -13,7 +13,7 @@ from pyTigerGraph.pyTigerGraphUtils import pyTigerGraphUtils
 
 
 class pyTigerGraphQuery(pyTigerGraphUtils, pyTigerGraphSchema):
-    """Query-specific functions."""
+    """Query Functions."""
 
     # TODO getQueries()  # List _all_ query names
 

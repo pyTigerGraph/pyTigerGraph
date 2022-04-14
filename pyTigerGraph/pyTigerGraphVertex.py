@@ -1,4 +1,4 @@
-"""Vertex-specific functions."""
+"""Vertex Functions."""
 
 import json
 
@@ -10,7 +10,7 @@ from pyTigerGraph.pyTigerGraphUtils import pyTigerGraphUtils
 
 
 class pyTigerGraphVertex(pyTigerGraphUtils, pyTigerGraphSchema):
-    """Vertex-specific functions."""
+    """Vertex Functions."""
 
     def getVertexTypes(self, force: bool = False) -> list:
         """Returns the list of vertex type names of the graph.

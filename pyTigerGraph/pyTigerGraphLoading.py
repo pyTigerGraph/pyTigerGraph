@@ -1,10 +1,10 @@
-"""Loading job-specific functions."""
+"""Loading Job Functions."""
 
 from pyTigerGraph.pyTigerGraphBase import pyTigerGraphBase
 
 
 class pyTigerGraphLoading(pyTigerGraphBase):
-    """Loading job-specific functions."""
+    """Loading Job Functions."""
 
     def runLoadingJobWithFile(self, filePath: str, fileTag: str, jobName: str, sep: str = None,
             eol: str = None, timeout: int = 16000, sizeLimit: int = 128000000) -> dict:

@@ -1,4 +1,4 @@
-"""Edge-specific functions."""
+"""Edge Functions"""
 
 import json
 
@@ -9,7 +9,7 @@ from pyTigerGraph.pyTigerGraphQuery import pyTigerGraphQuery
 
 
 class pyTigerGraphEdge(pyTigerGraphQuery):
-    """Edge-specific functions."""
+    """Edge Functions"""
 
     def getEdgeTypes(self, force: bool = False) -> list:
         """Returns the list of edge type names of the graph.

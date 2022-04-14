@@ -1,3 +1,4 @@
+"""Dataloaders."""
 import io
 import logging
 import math
@@ -7,7 +8,7 @@ from argparse import ArgumentError
 from queue import Empty, Queue
 from threading import Event, Thread
 from time import sleep
-from typing import TYPE_CHECKING, NoReturn, Union
+from typing import TYPE_CHECKING, NoReturn, Tuple, Union
 
 if TYPE_CHECKING:
     from ..pyTigerGraph import TigerGraphConnection
@@ -33,6 +34,7 @@ _udf_funcs = {
 
 
 class BaseLoader:
+    """Base Dataloader."""
     def __init__(
         self,
         graph: "TigerGraphConnection",
@@ -49,7 +51,7 @@ class BaseLoader:
         kafkaAddressForConsumer: str = None,
         kafkaAddressForProducer: str = None,
         timeout: int = 300000,
-    ):
+    ) -> None:
         """Base Class for data loaders.
 
         The job of a data loader is to stream data from the TigerGraph database to the client.
@@ -149,10 +151,10 @@ class BaseLoader:
         # Implement `_install_query()` that installs your query
         # self._install_query()
 
-    def __del__(self):
+    def __del__(self) -> None:
         self._reset()
 
-    def _get_schema(self):
+    def _get_schema(self) -> Tuple[dict, dict]:
         v_schema = {}
         e_schema = {}
         schema = self._graph.getSchema()
@@ -213,7 +215,7 @@ class BaseLoader:
             raise NotImplementedError
         return attributes
 
-    def _install_query(self):
+    def _install_query(self) -> None:
         # Install the right GSQL query for the loader.
         self.query_name = ""
         raise NotImplementedError
@@ -223,7 +225,7 @@ class BaseLoader:
         queries = self._graph.getInstalledQueries()
         return target in queries
 
-    def _install_query_file(self, file_path: str, replace: dict = None):
+    def _install_query_file(self, file_path: str, replace: dict = None) -> str:
         # Read the first line of the file to get query name. The first line should be
         # something like CREATE QUERY query_name (...
         with open(file_path) as infile:
@@ -716,6 +718,7 @@ class BaseLoader:
 
 
 class NeighborLoader(BaseLoader):
+    """Neighbor Dataloader."""
     def __init__(
         self,
         graph: "TigerGraphConnection",
@@ -979,6 +982,7 @@ class NeighborLoader(BaseLoader):
 
 
 class EdgeLoader(BaseLoader):
+    """Edge Dataloader."""
     def __init__(
         self,
         graph: "TigerGraphConnection",
@@ -1193,6 +1197,7 @@ class EdgeLoader(BaseLoader):
 
 
 class VertexLoader(BaseLoader):
+    """Vertex Dataloader."""
     def __init__(
         self,
         graph: "TigerGraphConnection",
@@ -1426,6 +1431,7 @@ class VertexLoader(BaseLoader):
 
 
 class GraphLoader(BaseLoader):
+    """Graph Dataloader."""
     def __init__(
         self,
         graph: "TigerGraphConnection",

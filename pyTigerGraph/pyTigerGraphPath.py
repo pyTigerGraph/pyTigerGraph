@@ -1,4 +1,4 @@
-"""Path finding algorithms."""
+"""Path Finding Functions."""
 
 import json
 
@@ -6,7 +6,7 @@ from pyTigerGraph.pyTigerGraphBase import pyTigerGraphBase
 
 
 class pyTigerGraphPath(pyTigerGraphBase):
-    """Path finding algorithms."""
+    """Path Finding Functions."""
 
     def _preparePathParams(self, sourceVertices: [dict, tuple, list],
             targetVertices: [dict, tuple, list], maxLength: int = None,

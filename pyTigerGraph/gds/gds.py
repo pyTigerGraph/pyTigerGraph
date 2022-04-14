@@ -1,3 +1,4 @@
+"""Graph Data Science Functions"""
 from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
@@ -7,7 +8,16 @@ from .dataloaders import EdgeLoader, GraphLoader, NeighborLoader, VertexLoader
 
 
 class GDS:
-    def __init__(self, conn: "TigerGraphConnection"):
+    """Graph Data Science Functions"""
+
+    def __init__(self, conn: TigerGraphConnection) -> None:
+        """Initiate a GDS object.
+            Args:
+                conn (TigerGraphConnection):
+                    Accept a TigerGraphConnection to run queries with
+            Returns:
+                None
+        """
         self.conn = conn
 
     def neighborLoader(
@@ -34,7 +44,7 @@ class GDS:
         kafka_address_consumer: str = None,
         kafka_address_producer: str = None,
         timeout: int = 300000,
-    ):
+    ) -> NeighborLoader:
         """Get a graph loader that performs neighbor sampling as introduced in the
         [Inductive Representation Learning on Large Graphs](https://arxiv.org/abs/1706.02216)
         paper.
@@ -67,53 +77,74 @@ class GDS:
           multiple batches of data to load, it will return the loader itself.
 
         Args:
-          What data to get:
-            v_in_feats (list, optional): Vertex attributes to be used as input features.
+            v_in_feats (list, optional):
+                Vertex attributes to be used as input features.
                 Only numeric and boolean attributes are allowed. The type of an attrbiute
                 is automatically determined from the database schema. Defaults to None.
-            v_out_labels (list, optional): Vertex attributes to be used as labels for
+            v_out_labels (list, optional):
+                Vertex attributes to be used as labels for
                 prediction. Only numeric and boolean attributes are allowed. Defaults to None.
-            v_extra_feats (list, optional): Other attributes to get such as indicators of
+            v_extra_feats (list, optional): 
+                Other attributes to get such as indicators of
                 train/test data. All types of attributes are allowed. Defaults to None.
-          How to get the data:
-            batch_size (int, optional):  Number of vertices as seeds in each batch.
+            batch_size (int, optional):
+                Number of vertices as seeds in each batch.
                 Defaults to None.
-            num_batches (int, optional): Number of batches to split the vertices into as seeds.
+            num_batches (int, optional):
+                Number of batches to split the vertices into as seeds.
                 If both `batch_size` and `num_batches` are provided, `batch_size` takes higher
                 priority. Defaults to 1.
-            num_neighbors (int, optional): Number of neighbors to sample for each vertex.
+            num_neighbors (int, optional): 
+                Number of neighbors to sample for each vertex.
                 Defaults to 10.
-            num_hops (int, optional): Number of hops to traverse when sampling neighbors.
+            num_hops (int, optional): 
+                Number of hops to traverse when sampling neighbors.
                 Defaults to 2.
-            shuffle (bool, optional): Whether to shuffle the vertices before loading data.
+            shuffle (bool, optional): 
+                Whether to shuffle the vertices before loading data.
                 Defaults to False.
-            filter_by (str, optional): A boolean attribute used to indicate which vertices
+            filter_by (str, optional): 
+                A boolean attribute used to indicate which vertices
                 can be included as seeds. Defaults to None.
-          What is the output:
-            output_format (str, optional): Format of the output data of the loader. Only
+            output_format (str, optional): 
+                Format of the output data of the loader. Only
                 "PyG", "DGL" and "dataframe" are supported. Defaults to "PyG".
-            add_self_loop (bool, optional): Whether to add self-loops to the graph. Defaults to False.
-          Low-level details of the loader:
-            loader_id (str, optional): An identifier of the loader which can be any string. It is
+            add_self_loop (bool, optional): 
+                Whether to add self-loops to the graph. Defaults to False.
+            loader_id (str, optional): 
+                An identifier of the loader which can be any string. It is
                 also used as the Kafka topic name. If `None`, a random string will be generated
                 for it. Defaults to None.
-            buffer_size (int, optional): Number of data batches to prefetch and store in memory. Defaults to 4.
-            kafka_address (str, optional): Address of the kafka broker. Defaults to None.
-            kafka_max_msg_size (int, optional): Maximum size of a Kafka message in bytes.
+            buffer_size (int, optional): 
+                Number of data batches to prefetch and store in memory. Defaults to 4.
+            kafka_address (str, optional): 
+                Address of the kafka broker. Defaults to None.
+            kafka_max_msg_size (int, optional):
+                Maximum size of a Kafka message in bytes.
                 Defaults to 104857600.
-            kafka_num_partitions (int, optional): Number of partitions for the topic created by this loader.
+            kafka_num_partitions (int, optional):
+                Number of partitions for the topic created by this loader.
                 Defaults to 1.
-            kafka_replica_factor (int, optional): Number of replications for the topic created by this
+            kafka_replica_factor (int, optional):
+                Number of replications for the topic created by this
                 loader. Defaults to 1.
-            kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
+            kafka_retention_ms (int, optional): 
+                Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
-            kafka_auto_del_topic (bool, optional): Whether to delete the Kafka topic once the
+            kafka_auto_del_topic (bool, optional): 
+                Whether to delete the Kafka topic once the
                 loader finishes pulling data. Defaults to True.
-            kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
+            kafka_address_consumer (str, optional):
+                Address of the kafka broker that a consumer
                 should use. Defaults to be the same as `kafkaAddress`.
-            kafka_address_producer (str, optional): Address of the kafka broker that a producer
+            kafka_address_producer (str, optional):
+                Address of the kafka broker that a producer
                 should use. Defaults to be the same as `kafkaAddress`.
-            timeout (int, optional): Timeout value for GSQL queries, in ms. Defaults to 300000.
+            timeout (int, optional): 
+                Timeout value for GSQL queries, in ms. Defaults to 300000.
+          
+        Returns:
+            NeighborLoader
         """
         return NeighborLoader(
             self.conn,
@@ -159,7 +190,7 @@ class GDS:
         kafka_address_consumer: str = None,
         kafka_address_producer: str = None,
         timeout: int = 300000,
-    ):
+    ) -> EdgeLoader:
         """Get a graph loader that pulls batches of edges from database.
         Edge attributes are not supported.
 
@@ -186,41 +217,55 @@ class GDS:
           multiple batches of data to load, it will return the loader again.
 
         Args:
-          What data to get:
-            graph (TigerGraphConnection): Connection to the TigerGraph database.
-          How to get the data:
-            batch_size (int, optional):  Number of edges in each batch.
+            batch_size (int, optional):
+                Number of edges in each batch.
                 Defaults to None.
-            num_batches (int, optional): Number of batches to split the edges.
+            num_batches (int, optional):
+                Number of batches to split the edges.
                 Defaults to 1.
-            shuffle (bool, optional): Whether to shuffle the edges before loading data.
+            shuffle (bool, optional):
+                Whether to shuffle the edges before loading data.
                 Defaults to False.
-            filter_by (str, optional): A boolean attribute used to indicate which edges
+            filter_by (str, optional):
+                A boolean attribute used to indicate which edges
                 are included. Defaults to None.
-          What is the output:
-            output_format (str, optional): Format of the output data of the loader. Only
+            output_format (str, optional):
+                Format of the output data of the loader. Only
                 "dataframe" is supported. Defaults to "dataframe".
-          Low-level details of the loader:
-            loader_id (str, optional): An identifier of the loader which can be any string. It is
+            loader_id (str, optional):
+                An identifier of the loader which can be any string. It is
                 also used as the Kafka topic name. If `None`, a random string will be generated
                 for it. Defaults to None.
-            buffer_size (int, optional): Number of data batches to prefetch and store in memory. Defaults to 4.
-            kafka_address (str, optional): Address of the kafka broker. Defaults to None.
-            kafka_max_msg_size (int, optional): Maximum size of a Kafka message in bytes.
+            buffer_size (int, optional):
+                Number of data batches to prefetch and store in memory. Defaults to 4.
+            kafka_address (str, optional):
+                Address of the kafka broker. Defaults to None.
+            kafka_max_msg_size (int, optional):
+                Maximum size of a Kafka message in bytes.
                 Defaults to 104857600.
-            kafka_num_partitions (int, optional): Number of partitions for the topic created by this loader.
+            kafka_num_partitions (int, optional):
+                Number of partitions for the topic created by this loader.
                 Defaults to 1.
-            kafka_replica_factor (int, optional): Number of replications for the topic created by this
+            kafka_replica_factor (int, optional):
+                Number of replications for the topic created by this
                 loader. Defaults to 1.
-            kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
+            kafka_retention_ms (int, optional):
+                Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
-            kafka_auto_del_topic (bool, optional): Whether to delete the Kafka topic once the
+            kafka_auto_del_topic (bool, optional):
+                Whether to delete the Kafka topic once the
                 loader finishes pulling data. Defaults to True.
-            kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
+            kafka_address_consumer (str, optional):
+                Address of the kafka broker that a consumer
                 should use. Defaults to be the same as `kafkaAddress`.
-            kafka_address_producer (str, optional): Address of the kafka broker that a producer
+            kafka_address_producer (str, optional):
+                Address of the kafka broker that a producer
                 should use. Defaults to be the same as `kafkaAddress`.
-            timeout (int, optional): Timeout value for GSQL queries, in ms. Defaults to 300000.
+            timeout (int, optional):
+                Timeout value for GSQL queries, in ms. Defaults to 300000.
+        
+        Returns:
+            EdgeLoader
         """
         return EdgeLoader(
             self.conn,
@@ -261,7 +306,7 @@ class GDS:
         kafka_address_consumer: str = None,
         kafka_address_producer: str = None,
         timeout: int = 300000,
-    ):
+    ) -> VertexLoader:
         """Get a data loader that pulls batches of vertices from database.
 
         Specifically, it divides vertices into `num_batches` and returns each batch separately.
@@ -287,42 +332,57 @@ class GDS:
           multiple batches of data to load, it will return the loader again.
 
         Args:
-          What data to get:
-            graph (TigerGraphConnection): Connection to the TigerGraph database.
-            attributes (list, optional): Vertex attributes to be included. Defaults to None.
-          How to get the data:
-            batch_size (int, optional):  Number of vertices in each batch.
+            attributes (list, optional):
+                Vertex attributes to be included. Defaults to None.
+            batch_size (int, optional): 
+                Number of vertices in each batch.
                 Defaults to None.
-            num_batches (int, optional): Number of batches to split the vertices.
+            num_batches (int, optional):
+                Number of batches to split the vertices.
                 Defaults to 1.
-            shuffle (bool, optional): Whether to shuffle the vertices before loading data.
+            shuffle (bool, optional):
+                Whether to shuffle the vertices before loading data.
                 Defaults to False.
-            filter_by (str, optional): A boolean attribute used to indicate which vertices
+            filter_by (str, optional):
+                A boolean attribute used to indicate which vertices
                 can be included. Defaults to None.
-          What is the output:
-            output_format (str, optional): Format of the output data of the loader. Only
+            output_format (str, optional):
+                Format of the output data of the loader. Only
                 "dataframe" is supported. Defaults to "dataframe".
-          Low-level details of the loader:
-            loader_id (str, optional): An identifier of the loader which can be any string. It is
+            loader_id (str, optional):
+                An identifier of the loader which can be any string. It is
                 also used as the Kafka topic name. If `None`, a random string will be generated
                 for it. Defaults to None.
-            buffer_size (int, optional): Number of data batches to prefetch and store in memory. Defaults to 4.
-            kafka_address (str, optional): Address of the kafka broker. Defaults to None.
-            kafka_max_msg_size (int, optional): Maximum size of a Kafka message in bytes.
+            buffer_size (int, optional):
+                Number of data batches to prefetch and store in memory. Defaults to 4.
+            kafka_address (str, optional):
+                Address of the kafka broker. Defaults to None.
+            kafka_max_msg_size (int, optional):
+                Maximum size of a Kafka message in bytes.
                 Defaults to 104857600.
-            kafka_num_partitions (int, optional): Number of partitions for the topic created by this loader.
+            kafka_num_partitions (int, optional):
+                Number of partitions for the topic created by this loader.
                 Defaults to 1.
-            kafka_replica_factor (int, optional): Number of replications for the topic created by this
+            kafka_replica_factor (int, optional):
+                Number of replications for the topic created by this
                 loader. Defaults to 1.
-            kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
+            kafka_retention_ms (int, optional):
+                Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
-            kafka_auto_del_topic (bool, optional): Whether to delete the Kafka topic once the
+            kafka_auto_del_topic (bool, optional):
+                Whether to delete the Kafka topic once the
                 loader finishes pulling data. Defaults to True.
-            kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
+            kafka_address_consumer (str, optional):
+                Address of the kafka broker that a consumer
                 should use. Defaults to be the same as `kafkaAddress`.
-            kafka_address_producer (str, optional): Address of the kafka broker that a producer
+            kafka_address_producer (str, optional):
+                Address of the kafka broker that a producer
                 should use. Defaults to be the same as `kafkaAddress`.
-            timeout (int, optional): Timeout value for GSQL queries, in ms. Defaults to 300000.
+            timeout (int, optional):
+                Timeout value for GSQL queries, in ms. Defaults to 300000.
+          
+        Returns:
+            VertexLoader
         """
         return VertexLoader(
             self.conn,
@@ -367,7 +427,7 @@ class GDS:
         kafka_address_consumer: str = None,
         kafka_address_producer: str = None,
         timeout: int = 300000,
-    ):
+    ) -> GraphLoader:
         """Get a data loader that pulls batches of vertices and edges from database.
 
         Different from NeighborLoader which produces connected subgraphs, this loader
@@ -391,49 +451,67 @@ class GDS:
           multiple batches of data to load, it will return the loader itself.
 
         Args:
-          What data to get:
-            graph (TigerGraphConnection): Connection to the TigerGraph database.
-            v_in_feats (list, optional): Vertex attributes to be used as input features.
+            v_in_feats (list, optional):
+                Vertex attributes to be used as input features.
                 Only numeric and boolean attributes are allowed. The type of an attrbiute
                 is automatically determined from the database schema. Defaults to None.
-            v_out_labels (list, optional): Vertex attributes to be used as labels for
+            v_out_labels (list, optional):
+                Vertex attributes to be used as labels for
                 prediction. Only numeric and boolean attributes are allowed. Defaults to None.
-            v_extra_feats (list, optional): Other attributes to get such as indicators of
+            v_extra_feats (list, optional):
+                Other attributes to get such as indicators of
                 train/test data. All types of attributes are allowed. Defaults to None.
-          How to get the data:
-            batch_size (int, optional):  Number of edges in each batch.
+            batch_size (int, optional):
+                Number of edges in each batch.
                 Defaults to None.
-            num_batches (int, optional): Number of batches to split the edges.
+            num_batches (int, optional):
+                Number of batches to split the edges.
                 Defaults to 1.
-            shuffle (bool, optional): Whether to shuffle the data before loading.
+            shuffle (bool, optional):
+                Whether to shuffle the data before loading.
                 Defaults to False.
-            filter_by (str, optional): A boolean attribute used to indicate which edges
+            filter_by (str, optional):
+                A boolean attribute used to indicate which edges
                 can be included. Defaults to None.
-          What is the output:
-            output_format (str, optional): Format of the output data of the loader. Only
+            output_format (str, optional):
+                Format of the output data of the loader. Only
                 "PyG", "DGL" and "dataframe" are supported. Defaults to "dataframe".
-            add_self_loop (bool, optional): Whether to add self-loops to the graph. Defaults to False.
-          Low-level details of the loader:
-            loader_id (str, optional): An identifier of the loader which can be any string. It is
+            add_self_loop (bool, optional):
+                Whether to add self-loops to the graph. Defaults to False.
+            loader_id (str, optional):
+                An identifier of the loader which can be any string. It is
                 also used as the Kafka topic name. If `None`, a random string will be generated
                 for it. Defaults to None.
-            buffer_size (int, optional): Number of data batches to prefetch and store in memory. Defaults to 4.
-            kafka_address (str, optional): Address of the kafka broker. Defaults to None.
-            kafka_max_msg_size (int, optional): Maximum size of a Kafka message in bytes.
+            buffer_size (int, optional):
+                Number of data batches to prefetch and store in memory. Defaults to 4.
+            kafka_address (str, optional):
+                Address of the kafka broker. Defaults to None.
+            kafka_max_msg_size (int, optional):
+                Maximum size of a Kafka message in bytes.
                 Defaults to 104857600.
-            kafka_num_partitions (int, optional): Number of partitions for the topic created by this loader.
+            kafka_num_partitions (int, optional):
+                Number of partitions for the topic created by this loader.
                 Defaults to 1.
-            kafka_replica_factor (int, optional): Number of replications for the topic created by this
+            kafka_replica_factor (int, optional):
+                Number of replications for the topic created by this
                 loader. Defaults to 1.
-            kafka_retention_ms (int, optional): Retention time for messages in the topic created by this
+            kafka_retention_ms (int, optional):
+                Retention time for messages in the topic created by this
                 loader in milliseconds. Defaults to 60000.
-            kafka_auto_del_topic (bool, optional): Whether to delete the Kafka topic once the
+            kafka_auto_del_topic (bool, optional):
+                Whether to delete the Kafka topic once the
                 loader finishes pulling data. Defaults to True.
-            kafka_address_consumer (str, optional): Address of the kafka broker that a consumer
+            kafka_address_consumer (str, optional):
+                Address of the kafka broker that a consumer
                 should use. Defaults to be the same as `kafkaAddress`.
-            kafka_address_producer (str, optional): Address of the kafka broker that a producer
+            kafka_address_producer (str, optional):
+                Address of the kafka broker that a producer
                 should use. Defaults to be the same as `kafkaAddress`.
-            timeout (int, optional): Timeout value for GSQL queries, in ms. Defaults to 300000.
+            timeout (int, optional):
+                Timeout value for GSQL queries, in ms. Defaults to 300000.
+        
+        Returns:
+          GraphLoader
         """
         return GraphLoader(
             self.conn,

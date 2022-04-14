@@ -1,4 +1,4 @@
-"""pyTigerGraph basic functionality.
+"""pyTigerGraph Base Connection
 
 Low(est) level HTTP(S) communication used by all other modules (directly or indirectly).
 """
