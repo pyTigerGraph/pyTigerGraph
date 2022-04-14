@@ -10,7 +10,7 @@ from os.path import join as pjoin
 class Featurizer:
     def __init__(
     self, 
-    conn: TigerGraphConnection):
+    conn: "TigerGraphConnection"):
     
         """Class for Feature Extraction.
         The job of a feature extracter is to install and run the current algorithms in graph data science libarary.
