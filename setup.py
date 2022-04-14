@@ -17,19 +17,29 @@ def get_version(version_path):
         else:
             raise RuntimeError("Unable to find version string.")
 
+# Get non-python files under a directory recursively.
+def get_data_files(directory):
+    files = [
+        str(p.relative_to(directory))
+        for p in directory.rglob("*")
+        if (not str(p).endswith(".py")) or (not str(p).endswith(".pyc"))
+    ]
+    return files
+
+
 #TODO: Update url and email, project_urls
 
 setup(
     name='pyTigerGraph',
     packages=find_packages(where="."),
-    package_data={'': ['*']},
+    package_data={"pyTigerGraph.gds": get_data_files(here / "pyTigerGraph" / "gds")},
     version=get_version(here/"pyTigerGraph"/"__init__.py"),
     license='MIT',
     description='Library to connect to TigerGraph databases',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='TigerGraph Inc.',
-    author_email='support@tigergraph.com', 
+    author_email='support@tigergraph.com',
     url='https://www.tigergraph.com/',
     download_url='',
     keywords=['TigerGraph', 'Graph Database', 'Data Science', 'Machine Learning'],
@@ -53,12 +63,27 @@ setup(
         'Programming Language :: Python :: 3.10',
     ],
     extras_require={
-        "gds-pyg": ["kafka-python", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric"],
+        "gds-pyg": [
+            "kafka-python",
+            "numpy",
+            "torch",
+            "torch-sparse",
+            "torch-scatter",
+            "torch-geometric",
+        ],
         "gds-dgl": ["kafka-python", "numpy", "torch", "dgl"],
         "gds-lite": ["kafka-python", "numpy"],
-        "gds": ["kafka-python", "numpy", "torch", "torch-sparse", "torch-scatter", "torch-geometric", "dgl"]
+        "gds": [
+            "kafka-python",
+            "numpy",
+            "torch",
+            "torch-sparse",
+            "torch-scatter",
+            "torch-geometric",
+            "dgl",
+        ],
     },
-    project_urls={  
+    project_urls={
         "Bug Reports": "https://github.com/pyTigerGraph/pyTigerGraph/issues",
         "Source": "https://github.com/pyTigerGraph/pyTigerGraph",
     },
