@@ -4,7 +4,7 @@ import re
 import string
 from os.path import join as pjoin
 from urllib.parse import urlparse
-
+'''
 import boto3
 from google.cloud import storage as gcs
 
@@ -65,7 +65,7 @@ def download_from_s3(
         print("Downloaded file {} to {}".format(s3_path, local_file))
 
     return local_file
-
+'''
 
 def random_string(length: int = 1, chars: str = string.ascii_letters) -> str:
     return "".join(random.choice(chars) for _ in range(length))
