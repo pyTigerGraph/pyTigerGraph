@@ -5,6 +5,7 @@ import string
 from os.path import join as pjoin
 from urllib.parse import urlparse
 
+'''
 import boto3
 from google.cloud import storage as gcs
 
@@ -41,6 +42,7 @@ def download_from_s3(
     silent: bool = True,
 ) -> str:
     """Download a file from S3 to local.
+
     Args:
         local_path (str): Path to the local folder.
         s3_path (str): Path to the file on S3. Format: s3://bucket/path
@@ -63,7 +65,7 @@ def download_from_s3(
         print("Downloaded file {} to {}".format(s3_path, local_file))
 
     return local_file
-
+'''
 
 def random_string(length: int = 1, chars: str = string.ascii_letters) -> str:
     return "".join(random.choice(chars) for _ in range(length))
@@ -78,3 +80,4 @@ def validate_attributes_input(attributes: str) -> str:
             )
         )
     return attributes
+

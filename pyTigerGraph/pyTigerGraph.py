@@ -12,6 +12,8 @@ from pyTigerGraph.pyTigerGraphUDT import pyTigerGraphUDT
 from pyTigerGraph.pyTigerGraphVertex import pyTigerGraphVertex
 from .gds import gds
 
+from .gds import gds
+
 # Added pyTigerDriver Client
 
 warnings.filterwarnings("default", category=DeprecationWarning)
