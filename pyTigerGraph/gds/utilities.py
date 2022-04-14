@@ -4,6 +4,7 @@ import re
 import string
 from os.path import join as pjoin
 from urllib.parse import urlparse
+
 '''
 import boto3
 from google.cloud import storage as gcs
@@ -11,7 +12,6 @@ from google.cloud import storage as gcs
 
 def download_from_gcs(gcs_path: str, local_path: str, silent: bool = False) -> str:
     """Download a file from Google cloud storage to local.
-
     Args:
         local_path (str): Path to the local folder.
         gcs_path (str): Path to the file on Google cloud storage. Format: gs://bucket/path
@@ -80,3 +80,4 @@ def validate_attributes_input(attributes: str) -> str:
             )
         )
     return attributes
+
