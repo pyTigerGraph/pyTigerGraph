@@ -11,7 +11,7 @@ from pyTigerGraph.pyTigerGraphPath import pyTigerGraphPath
 from pyTigerGraph.pyTigerGraphUDT import pyTigerGraphUDT
 from pyTigerGraph.pyTigerGraphVertex import pyTigerGraphVertex
 
-from pyTigerGraph.gds import gds
+from .gds import gds
 
 # Added pyTigerDriver Client
 
