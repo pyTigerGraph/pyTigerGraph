@@ -5,7 +5,7 @@ import string
 from os.path import join as pjoin
 from urllib.parse import urlparse
 
-import boto3
+# import boto3
 from google.cloud import storage as gcs
 
 
