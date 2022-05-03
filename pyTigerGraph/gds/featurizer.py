@@ -1,24 +1,28 @@
+<<<<<<< HEAD
 from asyncio import tasks
 from urllib import request
 from importlib_metadata import metadata
 from parso import split_lines
 from typing import TYPE_CHECKING, Union
+=======
+from typing import TYPE_CHECKING
+>>>>>>> b46b621e5058edfcb69cb9cfb42a33453d219a6c
 if TYPE_CHECKING:
     from ..pyTigerGraph import TigerGraphConnection
-from ..pyTigerGraphVertex import pyTigerGraphVertex
-from ..pyTigerGraphEdge import pyTigerGraphEdge
-from ..pyTigerGraphSchema import pyTigerGraphSchema
-from ..pyTigerGraphQuery import pyTigerGraphQuery
-from ..pyTigerGraphUtils import pyTigerGraphUtils
+
 from .utilities import random_string
 import os
 from os.path import join as pjoin
+<<<<<<< HEAD
 import re
 import random
 import string
 import requests
 import json
 import pandas as pd
+=======
+
+>>>>>>> b46b621e5058edfcb69cb9cfb42a33453d219a6c
 
 class Featurizer:
     def __init__(
@@ -200,9 +204,23 @@ class Featurizer:
         
         Args:
             query_name (str): 
+<<<<<<< HEAD
                 The name of query to be installed
         '''
         resp = self._install_query_file(query_name)
+=======
+                the name of query to be installed
+            schema_type (str): 
+                vertex or edge 
+            attr_name (str): 
+                An attribute name that needs to be added to the vertex/edge
+        '''
+        query_path = pjoin(os.path.dirname(os.path.abspath(__file__)), "gsql", "featurizer", query_name+'.gsql')
+        self.local_gsql_path = query_path
+        resp = self._install_query_file(query_path)
+        if attr_name:
+            _ = self._add_attribute(schema_type,self.queryResult_type_dict[query_name],attr_name)
+>>>>>>> b46b621e5058edfcb69cb9cfb42a33453d219a6c
         return resp.strip() 
 
     def _add_attribute(self, schema_type: str, attr_type: str,attr_name: str=None,schema_name: list[str]=None):

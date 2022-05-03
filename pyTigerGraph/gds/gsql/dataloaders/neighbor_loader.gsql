@@ -1,0 +1,127 @@
+CREATE QUERY neighbor_loader_{QUERYSUFFIX}(
+    SET<VERTEX> input_vertices,
+    INT num_batches=1, 
+    INT num_neighbors=10, 
+    INT num_hops=2, 
+    BOOL shuffle=FALSE,
+    STRING filter_by,
+    STRING kafka_address,
+    STRING kafka_topic
+){ 
+    /*
+    This query generates the neighborhood subgraphs of given seed vertices (i.e., `input_vertices`).
+    If seed vertices are not given, then it will divide all vertices into `num_batches`, and use each 
+    batch as seeds.
+
+    Parameters :
+      input_vertices : Seed vertices to gather neighborhood subgraphs.
+      num_batches    : Number of batches to divide all vertices into.
+      num_neighbors  : Number of neighbors to expand from seeds.
+      num_hops       : Number of hops to traverse to get neighbors.
+      shuffle        : Whether to shuffle vertices before collecting data.
+      filter_by      : A Boolean attribute to determine which vertices are eligible as seeds.
+                       Only effective when `input_vertices` is NULL.
+      kafka_address  : Address of the Kafka cluster to send data to.
+      kafka_topic    : The kafka topic to send data to.
+    */
+    INT num_vertices;
+    SumAccum<INT> @tmp_id;
+    SumAccum<STRING> @@kafka_error;
+
+    # Shuffle vertex ID if needed
+    start = {ANY};
+    IF shuffle THEN
+        num_vertices = start.size();
+        res = SELECT s 
+              FROM start:s
+              POST-ACCUM s.@tmp_id = floor(rand()*num_vertices);
+    ELSE
+        res = SELECT s 
+              FROM start:s
+              POST-ACCUM s.@tmp_id = getvid(s);
+    END;
+
+    # Generate subgraphs
+    FOREACH batch_id IN RANGE[0, num_batches-1] DO
+        IF kafka_address IS NOT NULL THEN
+            SumAccum<STRING> @@v_batch;
+            SumAccum<STRING> @@e_batch;
+            # Get seeds
+            IF input_vertices.size()==0 THEN
+                start = {ANY};
+                IF filter_by IS NOT NULL THEN
+                    seeds = SELECT s 
+                            FROM start:s 
+                            WHERE s.getAttr(filter_by, "BOOL") and s.@tmp_id % num_batches == batch_id
+                            POST-ACCUM @@v_batch += (int_to_string(getvid(s)) + "," + {VERTEXATTRS} + ",1\n");
+                ELSE
+                    seeds = SELECT s 
+                            FROM start:s 
+                            WHERE s.@tmp_id % num_batches == batch_id
+                            POST-ACCUM @@v_batch += (int_to_string(getvid(s)) + "," + {VERTEXATTRS} + ",1\n");
+                END;
+            ELSE
+                start = input_vertices;
+                seeds = SELECT s 
+                        FROM start:s 
+                        POST-ACCUM @@v_batch += (int_to_string(getvid(s)) + "," + {VERTEXATTRS} + ",1\n");
+            END;
+            # Get neighbors of seeeds
+            FOREACH i IN RANGE[1, num_hops] DO
+                seeds = SELECT t
+                        FROM seeds:s -(:e)-> :t 
+                        SAMPLE num_neighbors EDGE WHEN s.outdegree() >= 1
+                        ACCUM @@e_batch += (int_to_string(getvid(s)) + "," + int_to_string(getvid(t)) + "\n");
+                attr = SELECT s
+                        FROM seeds:s 
+                        POST-ACCUM @@v_batch += (int_to_string(getvid(s)) + "," + {VERTEXATTRS} + ",0\n");
+            END;
+            # Export batch
+            IF write_to_kafka(kafka_address, kafka_topic, "vertex_batch_" + int_to_string(batch_id), @@v_batch)!=0 THEN
+                @@kafka_error += ("Failed sending vertex batch " + int_to_string(batch_id) + "\n");
+            END;
+            IF write_to_kafka(kafka_address, kafka_topic, "edge_batch_" + int_to_string(batch_id), @@e_batch)!=0 THEN 
+                @@kafka_error += ("Failed sending edge batch " + int_to_string(batch_id) + "\n");
+            END;
+            PRINT @@kafka_error as kafkaError;
+        ELSE
+            MapAccum<VERTEX, STRING> @@v_batch;
+            SumAccum<STRING> @@e_batch;
+            # Get seeds
+            IF input_vertices.size()==0 THEN
+                start = {ANY};
+                IF filter_by IS NOT NULL THEN
+                    seeds = SELECT s 
+                            FROM start:s 
+                            WHERE s.getAttr(filter_by, "BOOL") and s.@tmp_id % num_batches == batch_id
+                            POST-ACCUM @@v_batch += (s -> (int_to_string(getvid(s)) + "," + {VERTEXATTRS} + ",1\n"));
+                ELSE
+                    seeds = SELECT s 
+                            FROM start:s 
+                            WHERE s.@tmp_id % num_batches == batch_id
+                            POST-ACCUM @@v_batch += (s -> (int_to_string(getvid(s)) + "," + {VERTEXATTRS} + ",1\n"));
+                END;
+            ELSE
+                start = input_vertices;
+                seeds = SELECT s 
+                        FROM start:s 
+                        POST-ACCUM @@v_batch += (s -> (int_to_string(getvid(s)) + "," + {VERTEXATTRS} + ",1\n"));
+            END;
+            # Get neighbors of seeeds
+            FOREACH i IN RANGE[1, num_hops] DO
+                seeds = SELECT t
+                        FROM seeds:s -(:e)-> :t 
+                        SAMPLE num_neighbors EDGE WHEN s.outdegree() >= 1
+                        ACCUM @@e_batch += (int_to_string(s.id) + "," + int_to_string(t.id) + "\n");
+                attr = SELECT s
+                        FROM seeds:s 
+                        POST-ACCUM 
+                            IF NOT @@v_batch.containsKey(s) THEN
+                                @@v_batch += (s -> (int_to_string(getvid(s)) + "," + {VERTEXATTRS} + ",0\n"))
+                            END;
+            END;
+            # Add to response
+            PRINT @@v_batch AS vertex_batch, @@e_batch AS edge_batch;                            
+        END;
+    END;
+}
