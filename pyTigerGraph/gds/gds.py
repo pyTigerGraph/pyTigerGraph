@@ -7,7 +7,6 @@ from .featurizer import Featurizer
 
 from .dataloaders import EdgeLoader, GraphLoader, NeighborLoader, VertexLoader
 
-
 class GDS:
     def __init__(self, conn: "TigerGraphConnection"):
         self.conn = conn
